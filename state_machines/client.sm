@@ -1,0 +1,103 @@
+%class Client
+%header Client
+%start S::Stopped
+
+%map S
+%%
+Stopped
+Entry {_forget_connection(); _reset_fail_count(); on_enter_stopped();}
+Exit {on_leave_stopped();}
+{
+    Start Connecting {_set_fail_count_to_critical();}
+    Dispose Disposed {}
+    Stop nil {}
+    Tick nil {}
+    ConnectionClosed nil {}
+    ConnectingFailed nil {}
+    ConnectingComplete nil {}
+    InternalError(payload) nil {_on_internal_error(payload);}
+}
+
+Connecting
+Entry {_connect(); on_enter_connecting();}
+Exit {on_leave_connecting();}
+{
+    Dispose Disposed {}
+    ConnectingComplete [ctxt._restore_auth_and_return_true_if_failed()] Awaiting {_increment_fail_count();}
+    ConnectingComplete Connected {_connect_subscriptions(); _reset_fail_count();}
+
+    ConnectingFailed
+        [ctxt._fail_count_is_small()]
+        Awaiting
+        {_increment_fail_count();}
+    InternalError(payload)
+        [ctxt._fail_count_is_small()]
+        Awaiting
+        {_on_internal_error(payload); _increment_fail_count();}
+    InternalError(payload) Stopped {_on_internal_error(payload);}
+    ConnectingFailed Stopped {}
+
+    Stop Stopped {}
+    Start nil {}
+    Tick nil {}
+    ConnectionClosed nil {}
+}
+
+Connected
+Entry {_drain_offline_queue(); on_enter_connected();}
+Exit {on_leave_connected();}
+{
+    Dispose Disposed {}
+    Stop Stopping {}
+    ConnectionClosed Awaiting {}
+    ConnectingFailed nil {}
+    ConnectingComplete nil {}
+    InternalError(payload) Awaiting {_on_internal_error(payload);}
+    Start nil {}
+    Tick nil {}
+
+    ChannelError(channel, payload) nil {_on_subscription_error(channel, payload);}
+}
+
+Stopping
+Entry {_start_disconnecting(); on_enter_stopping();}
+Exit {on_leave_stopping();}
+{
+    Dispose Disposed {}
+    ConnectionClosed Stopped {}
+    InternalError(payload) Stopped {_on_internal_error(payload);}
+    ConnectingFailed nil {}
+    ConnectingComplete nil {}
+    Start Connecting {_forget_connection();}
+    Stop nil {}
+    Tick nil {}
+}
+
+Awaiting
+Entry {_forget_connection(); _schedule_reconnect(); on_enter_awaiting();}
+Exit {_cancel_reconnect(); on_leave_awaiting();}
+{
+    Start Connecting {}
+    Tick [ctxt._is_time_to_reconnect()] Connecting {}
+    Tick nil {}
+    Stop Stopped {}
+    ConnectionClosed nil {}
+    ConnectingFailed nil {}
+    ConnectingComplete nil {}
+    InternalError(payload) nil {_on_internal_error(payload);}
+    Dispose Disposed {}
+}
+
+Disposed
+Entry {_forget_connection(); on_enter_disposed();}
+{
+    Tick nil {}
+    Stop nil {}
+    Start nil {}
+    ConnectionClosed nil {}
+    ConnectingFailed nil {}
+    ConnectingComplete nil {}
+    InternalError(payload) nil {_on_internal_error(payload);}
+    Dispose nil {}
+}
+%%

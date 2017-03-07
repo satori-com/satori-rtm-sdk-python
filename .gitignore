@@ -1,0 +1,7 @@
+*.pyc
+.tox
+.coverage
+__pycache__
+htmlcov
+venv*
+.test_appkey

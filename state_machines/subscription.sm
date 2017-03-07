@@ -1,0 +1,96 @@
+%class Subscription
+%header Subscription
+%start Subscription::Unsubscribed
+
+%map Subscription
+%%
+Unsubscribed
+Entry {on_enter_unsubscribed(); _change_mode_from_cycle_to_linked();}
+Exit {on_leave_unsubscribed();}
+{
+    Connect [ctxt._is_mode_not_unlinked()] Subscribing {}
+    Connect nil {}
+    ModeChange [ctxt._is_ready_to_subscribe()] Subscribing {}
+    ModeChange nil {}
+    Disconnect nil {}
+    ChannelError(error: JSON) nil {}
+    UnsubscribeAttempt nil {}
+    UnsubscribeOK nil {}
+    UnsubscribeError nil {}
+    SubscribeError nil {}
+    SubscribeOK nil {}
+}
+
+Subscribed
+Entry {on_enter_subscribed();}
+Exit {on_leave_subscribed();}
+{
+    Disconnect Unsubscribed {}
+    ModeChange [ctxt._is_mode_not_linked()] Unsubscribing {}
+    ModeChange nil {}
+
+    ChannelError(error: JSON) [ctxt._is_fatal_channel_error(error)] Failed {_set_last_error(error);}
+    ChannelError(error: JSON) [ctxt._retire_position_if_necessary(error)] Subscribing {_set_last_error(error);}
+    ChannelError(error: JSON) Subscribing {_set_last_error(error);}
+
+    UnsubscribeAttempt nil {}
+    UnsubscribeOK nil {}
+    UnsubscribeError nil {}
+    SubscribeError nil {}
+    SubscribeOK nil {}
+    Connect nil {}
+}
+
+Subscribing
+Entry {_send_subscribe_request(); on_enter_subscribing();}
+Exit {on_leave_subscribing();}
+{
+    ModeChange nil {}
+    Disconnect Unsubscribed {}
+    ChannelError(error: JSON) nil {}
+
+    SubscribeOK [ctxt._is_mode_linked()] Subscribed {}
+    SubscribeOK Unsubscribing {}
+
+    SubscribeError [ctxt._is_mode_linked()] Failed {_set_last_error('Subscribe error');}
+    SubscribeError [ctxt._is_mode_unlinked()] Unsubscribed {}
+    SubscribeError Subscribing {_change_mode_from_cycle_to_linked();}
+
+    UnsubscribeAttempt nil {}
+    UnsubscribeOK nil {}
+    UnsubscribeError nil {}
+    Connect nil {}
+}
+
+Unsubscribing
+Entry {_send_unsubscribe_request(); on_enter_unsubscribing();}
+Exit {on_leave_unsubscribing();}
+{
+    ModeChange nil {}
+    Disconnect Unsubscribed {}
+    ChannelError(error: JSON) Unsubscribed {}
+    UnsubscribeOK Unsubscribed {}
+    UnsubscribeError Subscribed {}
+    UnsubscribeAttempt nil {}
+    Connect nil {}
+    SubscribeError nil {}
+    SubscribeOK nil {}
+}
+
+Failed
+Entry {on_enter_failed(ctxt._last_error);}
+Exit {on_leave_failed();}
+{
+    UnsubscribeAttempt nil {}
+
+    SubscribeError nil {}
+    SubscribeOK nil {}
+    UnsubscribeError nil {}
+
+    UnsubscribeOK Unsubscribed {}
+    ChannelError(error: JSON) Unsubscribed {}
+    Disconnect Unsubscribed {}
+    ModeChange nil {}
+    Connect nil {}
+}
+%%
