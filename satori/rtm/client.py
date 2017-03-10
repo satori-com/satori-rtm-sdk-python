@@ -184,8 +184,8 @@ Description
     *Authentication and Authorization* in the online docs.
 
 Parameters
-    * auth_delegate {AuthDelegate | RoleKeyAuthDelegate} [required] - An
-      authentication delegate object. Use a satori.rtm.auth.RoleKeyAuthDelegate
+    * auth_delegate {AuthDelegate | RoleSecretAuthDelegate} [required] - An
+      authentication delegate object. Use a satori.rtm.auth.RoleSecretAuthDelegate
       class for the role-based authentication process.
     * callback {function} [required] - Function to execute after RTM
       returns a response.
@@ -195,7 +195,7 @@ Syntax
 
         secret_key = '<ROLE_SECRET_KEY>'
 
-        auth_delegate = auth.RoleKeyAuthDelegate('<ROLE>', secret_key)
+        auth_delegate = auth.RoleSecretAuthDelegate('<ROLE>', secret_key)
         auth_event = threading.Event()
 
         def auth_callback(auth_result):
