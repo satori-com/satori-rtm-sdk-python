@@ -185,8 +185,9 @@ Description
 
 Parameters
     * auth_delegate {AuthDelegate | RoleSecretAuthDelegate} [required] - An
-      authentication delegate object. Use a satori.rtm.auth.RoleSecretAuthDelegate
-      class for the role-based authentication process.
+      authentication delegate object. Use a
+      satori.rtm.auth.RoleSecretAuthDelegate class for the role-based
+      authentication process.
     * callback {function} [required] - Function to execute after RTM
       returns a response.
 
