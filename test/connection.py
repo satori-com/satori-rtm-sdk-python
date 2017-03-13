@@ -296,7 +296,7 @@ class TestConnection(unittest.TestCase):
         def fail(*args):
             return 1 / 0
 
-        conn.ws.sock.send = fail
+        conn.ws._write = fail
 
         with self.assertRaises(ZeroDivisionError):
             conn.publish('channel', 'message')
