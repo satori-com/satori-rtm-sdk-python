@@ -414,7 +414,3 @@ class InternalClient(object):
         if self._reconnect_timer:
             self._reconnect_timer.cancel()
             self._reconnect_timer = None
-
-    def _is_time_to_reconnect(self):
-        time_since_reconnect = time.time() - self._time_of_last_reconnect
-        return time_since_reconnect > self.reconnect_interval

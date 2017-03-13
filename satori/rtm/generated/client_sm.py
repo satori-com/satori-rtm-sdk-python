@@ -366,17 +366,9 @@ class S_Awaiting(S_Default):
         fsm.getState().Entry(fsm)
 
     def Tick(self, fsm):
-        ctxt = fsm.getOwner()
-        if ctxt._is_time_to_reconnect() :
-            fsm.getState().Exit(fsm)
-            # No actions.
-            pass
-            fsm.setState(S.Connecting)
-            fsm.getState().Entry(fsm)
-        else:
-            # No actions.
-            pass
-
+        fsm.getState().Exit(fsm)
+        fsm.setState(S.Connecting)
+        fsm.getState().Entry(fsm)
 
 class S_Disposed(S_Default):
 

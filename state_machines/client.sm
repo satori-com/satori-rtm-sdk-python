@@ -78,8 +78,7 @@ Entry {_forget_connection(); _schedule_reconnect(); on_enter_awaiting();}
 Exit {_cancel_reconnect(); on_leave_awaiting();}
 {
     Start Connecting {}
-    Tick [ctxt._is_time_to_reconnect()] Connecting {}
-    Tick nil {}
+    Tick Connecting {}
     Stop Stopped {}
     ConnectionClosed nil {}
     ConnectingFailed nil {}
