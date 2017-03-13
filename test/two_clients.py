@@ -38,13 +38,13 @@ class TestTwoClients(unittest.TestCase):
                     # send a message while subscriber is disconnected
                     sync_publish(publisher, channel, 'second-message')
 
-                    so.wait_subscribed('Second subscribe timout')
-                    so.wait_for_channel_data('Second receive timout')
+                    so.wait_subscribed('Second subscribe timeout')
+                    so.wait_for_channel_data('Second receive timeout')
 
                     # send a message after subscribed reconnected
                     publisher.publish(channel, 'third-message')
 
-                    so.wait_for_channel_data('Third receive timout')
+                    so.wait_for_channel_data('Third receive timeout')
                     expected_messages =\
                         ['first-message', 'second-message', 'third-message']
 
@@ -86,13 +86,13 @@ class TestTwoClients(unittest.TestCase):
                     # send a message while subscriber is disconnected
                     sync_publish(publisher, channel, 'second-message')
 
-                    so.wait_subscribed('Second subscribe timout')
-                    so.wait_for_channel_data('Second receive timout')
+                    so.wait_subscribed('Second subscribe timeout')
+                    so.wait_for_channel_data('Second receive timeout')
 
                     # send a message after subscribed reconnected
                     publisher.publish(channel, 'third-message')
 
-                    so.wait_for_channel_data('Third receive timout')
+                    so.wait_for_channel_data('Third receive timeout')
                     expected_messages =\
                         ['first-message', 'second-message', 'third-message']
 
@@ -134,12 +134,12 @@ class TestTwoClients(unittest.TestCase):
                     # send a message while subscriber is disconnected
                     sync_publish(publisher, channel, 'second-message')
 
-                    so.wait_subscribed('Second subscribe timout')
+                    so.wait_subscribed('Second subscribe timeout')
 
                     # send a message after subscribed reconnected
                     publisher.publish(channel, 'third-message')
 
-                    so.wait_for_channel_data('Third receive timout')
+                    so.wait_for_channel_data('Third receive timeout')
                     expected_messages = ['first-message', 'third-message']
 
                     got_messages = []
