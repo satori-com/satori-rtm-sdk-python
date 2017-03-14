@@ -16,8 +16,7 @@ class TestBadSSL(unittest.TestCase):
     def test_wrong_host(self):
         assert self._bad_ssl(
             'wrong.host',
-            "hostname 'wrong.host.badssl.com' doesn't match either of"
-            " '*.badssl.com', 'badssl.com'")
+            "wrong.host.badssl.com' doesn't match")
 
     def _bad_ssl(self, prefix, message):
         endpoint = 'wss://{0}.badssl.com'.format(prefix)

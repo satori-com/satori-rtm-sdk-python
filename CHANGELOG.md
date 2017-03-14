@@ -1,6 +1,7 @@
 Unreleased
 ----------
 
+* Added support for secure websockets with CPython 2.7.0 - 2.7.8
 * Fixed RoleSecretAuthDelegate name in docstrings about authentication
 * Fixed random failure to autoreconnect in satori.rtm.client
 
