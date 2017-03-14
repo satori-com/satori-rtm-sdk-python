@@ -9,23 +9,37 @@ that use the Satori to publish and subscribe.
 pip install satori-sdk-python
 ```
 
-Secure WebSocket communication (``wss://``) is supported 
+Secure WebSocket communication (``wss://``) is supported natively
 for Python 2.7.9+ and PyPy 2.6+ only.
 
 ## Optional dependencies
 
+### backports.ssl
+
+[backports.ssl][1] can be used to enable secure websocket communication
+with Python 2.7.* below 2.7.9 (For example CentOS 7 has Python 2.7.5).
+
+```
+pip install backports.ssl
+```
+
+Beware that backports.ssl requires PyOpenSSL >= 0.15, so if you have e.g.
+PyOpenSSL 0.13.1 that would result in strange errors.
+
+[1]: https://pypi.python.org/pypi/backports.ssl
+
 ### rapidjson
 
-The SDK will take advantage of [python-rapidjson][1] for faster json processing
+The SDK will take advantage of [python-rapidjson][2] for faster json processing
 if it's installed.
 
-[1]: https://pypi.python.org/pypi/python-rapidjson
+[2]: https://pypi.python.org/pypi/python-rapidjson
 
 ### wsaccel
 
 There are most two notable CPU intensive routines in websocket communication:
 UTF-8 validation and payload masking. Fortunately there exists the
-[wsaccel package][2] that provides optimized versions of said routines.
+[wsaccel package][3] that provides optimized versions of said routines.
 
 To enable the SDK to use wsaccel, use the following code:
 
@@ -34,7 +48,7 @@ import satori.rtm.connection
 satori.rtm.connection.enable_wsaccel()
 ```
 
-[2]: https://pypi.python.org/pypi/wsaccel
+[3]: https://pypi.python.org/pypi/wsaccel
 
 # Documentation
 
@@ -47,13 +61,13 @@ You can view the latest Python SDK documentation _here_.
 There more build-time dependencies than runtime dependencies.
 In order to work on satori-sdk-python development, you need:
 
- * [State Machine Compiler (SMC)][2]
+ * [State Machine Compiler (SMC)][4]
     to convert state machines description into Python source code
- * [tox][3]
+ * [tox][5]
     to run tests using all supported Python interpreters in separate sandboxes.
 
-[3]: http://smc.sourceforge.net/
-[4]: https://tox.readthedocs.org/en/latest/
+[4]: http://smc.sourceforge.net/
+[5]: https://tox.readthedocs.org/en/latest/
 
 ## Running Tests
 

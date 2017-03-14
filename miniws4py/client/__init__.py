@@ -5,7 +5,6 @@ from hashlib import sha1
 import logging
 import os
 import socket
-import ssl
 import sys
 
 from miniws4py import WS_KEY, WS_VERSION
@@ -155,14 +154,42 @@ class WebSocketBaseClient(WebSocket):
         if self.scheme == "wss":
 
             if sys.version_info < (2, 7, 9):
-                raise RuntimeError(
-                    "Secure websockets are only supported with "
-                    " Python 2.7.9+ and PyPy 2.6+ while this version is"
-                    " {0}".format(sys.version))
+                if sys.version_info >= (2, 7, 0):
+                    try:
+                        import backports.ssl
+                    except ImportError:
+                        raise RuntimeError(
+                            "In order to use secure websockets with "
+                            "Python 2.7.8 and earlier please install "
+                            " the backports.ssl package.")
+                    try:
+                        import OpenSSL
+                        assert OpenSSL
+                    except ImportError:
+                        raise RuntimeError(
+                            "Please make sure PyOpenSSL >= 0.15 is installed")
 
-            ctx = ssl.create_default_context(
-                purpose=ssl.Purpose.SERVER_AUTH,
-                cafile=certifi.where())
+                    try:
+                        openssl_version = OpenSSL.__version__
+                        from distutils.version import LooseVersion
+                        assert LooseVersion(openssl_version) >= LooseVersion('0.15.0')
+                    except Exception:
+                        raise RuntimeError(
+                            "Please make sure that PyOpenSSL version is"
+                            "at least 0.15, found only {0}".format(openssl_version))
+
+                    ctx = backports.ssl.SSLContext(backports.ssl.PROTOCOL_SSLv23)
+                    ctx.verify_mode = backports.ssl.CERT_REQUIRED
+                    ctx.check_hostname = True
+                    ctx.ca_file = certifi.where()
+
+                else:
+                    raise RuntimeError("Python 2.6 is not supported")
+            else:
+                import ssl
+                ctx = ssl.create_default_context(
+                    purpose=ssl.Purpose.SERVER_AUTH,
+                    cafile=certifi.where())
 
             self.sock = ctx.wrap_socket(self.sock, server_hostname=self.host)
         assert certifi
