@@ -9,7 +9,7 @@ py_modules =\
         'connection')]
 
 setup(name='satori-sdk-python',
-      version='1.0.0',
+      version='1.0.1',
       description='Satori SDK',
       author='Satori',
       author_email='sdk@satori.com',

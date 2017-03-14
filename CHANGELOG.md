@@ -1,4 +1,4 @@
-Unreleased
+v1.0.1 (2017-03-14)
 ----------
 
 * Added support for secure websockets with CPython 2.7.0 - 2.7.8
