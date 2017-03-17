@@ -225,7 +225,6 @@ class WebSocketBaseClient(WebSocket):
                 self.close_connection()
                 raise
 
-            self.handshake_ok()
             if body:
                 self.process(body)
         except Exception as e:
@@ -329,6 +328,3 @@ class WebSocketBaseClient(WebSocket):
                 extensions = ','.join(value)
 
         return protocols, extensions
-
-    def handshake_ok(self):
-        self.opened()
