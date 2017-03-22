@@ -16,15 +16,18 @@ for Python 2.7.9+ and PyPy 2.6+ only.
 
 ### backports.ssl
 
-[backports.ssl][1] can be used to enable secure websocket communication
-with Python 2.7.* below 2.7.9 (For example CentOS 7 has Python 2.7.5).
+If the SDK installation step detects Python older than 2.7.9 without secure
+TLS socket implementation (For example CentOS 7 has Python 2.7.5), it installs
+the secure replacement [backports.ssl][1]. Beware that it requires
+OpenSSL library, Python development headers and a C compiler to be available.
+
+This should work on CentOS 7:
 
 ```
-pip install backports.ssl
+yum install -y epel-release
+yum install -y python-pip gcc python-devel openssl-devel
+pip install satori-sdk-python
 ```
-
-Beware that backports.ssl requires PyOpenSSL >= 0.15, so if you have e.g.
-PyOpenSSL 0.13.1 that would result in strange errors.
 
 [1]: https://pypi.python.org/pypi/backports.ssl
 
