@@ -1,5 +1,10 @@
-v1.0.1 (2017-03-14)
+Unreleased
 ----------
+
+* Fixed double call of `opened()` that could lead to spurious reconnects
+
+v1.0.1 (2017-03-14)
+-------------------
 
 * Added support for secure websockets with CPython 2.7.0 - 2.7.8
 * Fixed RoleSecretAuthDelegate name in docstrings about authentication
