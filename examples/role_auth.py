@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import sys
 import threading
 
 import satori.rtm.auth as auth

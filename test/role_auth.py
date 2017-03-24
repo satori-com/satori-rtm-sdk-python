@@ -47,9 +47,19 @@ class TestRoleAuth(unittest.TestCase):
         with make_client(
                 endpoint=endpoint,
                 appkey=appkey,
-                auth_delegate=ad) as client:
+                auth_delegate=ad):
 
             pass
+
+    def test_shorter_fail_case(self):
+        ad = auth.RoleSecretAuthDelegate('superuser', 'bad_secret')
+        with self.assertRaises(RuntimeError):
+            with make_client(
+                    endpoint=endpoint,
+                    appkey=appkey,
+                    auth_delegate=ad):
+
+                pass
 
     def test_auth_before_start(self):
         client = Client(

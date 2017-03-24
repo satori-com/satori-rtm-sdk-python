@@ -748,6 +748,7 @@ callback function::
                 client.last_connecting_error()))
 
     auth_mailbox = []
+
     def auth_callback(auth_result):
         auth_mailbox.append(auth_result)
         ready_event.set()
