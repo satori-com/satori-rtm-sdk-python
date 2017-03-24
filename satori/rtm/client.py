@@ -18,6 +18,7 @@ state if the connection to RTM drops.
 from __future__ import print_function
 from contextlib import contextmanager
 import satori.rtm.internal_queue as queue
+import satori.rtm.auth as auth
 import threading
 
 import satori.rtm.internal_client_action as a
@@ -556,7 +557,8 @@ Description
     connection. The SDK stops and then closes the WebSocket connection when the
     statement completes or terminates due to an error.
 
-    This function takes the same parameters as the Client constructor.
+    This function takes the same parameters as the Client constructor plus
+    optional `auth_delegate`.
 
     To use this function, import it from the client module::
 
@@ -592,6 +594,8 @@ Parameters
       publish requests so fast that by the time it sends 11th one the reply
       for the first one has not yet arrived, this 11th call to `client.publish`
       will throw the `satori.rtm.client.Full` exception.
+    * auth_delegate {AuthDelegate} [optional] - if auth_delegate parameter is
+      present, the client yielded by make_client will be already authenticated.
 
 Syntax
     ::
@@ -710,6 +714,9 @@ callback function::
     """
 
     observer = kwargs.get('observer')
+    auth_delegate = kwargs.get('auth_delegate')
+    if auth_delegate:
+        del kwargs['auth_delegate']
 
     client = Client(*args, **kwargs)
     ready_event = threading.Event()
@@ -739,6 +746,26 @@ callback function::
         raise RuntimeError(
             "Client connection error: {0}".format(
                 client.last_connecting_error()))
+
+    auth_mailbox = []
+    def auth_callback(auth_result):
+        auth_mailbox.append(auth_result)
+        ready_event.set()
+
+    if auth_delegate:
+        client.authenticate(auth_delegate, callback=auth_callback)
+
+        if not ready_event.wait(20):
+            client.dispose()
+            raise RuntimeError('Authentication process has timed out')
+
+        auth_result = auth_mailbox[0]
+
+        if type(auth_result) == auth.Error:
+            raise RuntimeError(auth_result.message)
+
+        logger.debug('Auth success in make_client')
+
     try:
         client.observer = observer
         yield client

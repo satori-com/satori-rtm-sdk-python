@@ -4,6 +4,7 @@ Unreleased
 * Clearer error message for invalid endpoint
 * Preserve subscriptions over the course of `client.stop() >> client.start()` sequence.
   This change unifies behavior with other Satori RTM SDKs
+* Add optional parameter auth_delegate to make_client function for easier authentication
 
 v1.0.2 (2017-03-24)
 -------------------

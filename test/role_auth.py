@@ -42,6 +42,15 @@ class TestRoleAuth(unittest.TestCase):
 
             self.assertEqual(mailbox, ['Auth success'])
 
+    def test_shorter_ok_case(self):
+        ad = auth.RoleSecretAuthDelegate('superuser', secret_key)
+        with make_client(
+                endpoint=endpoint,
+                appkey=appkey,
+                auth_delegate=ad) as client:
+
+            pass
+
     def test_auth_before_start(self):
         client = Client(
             endpoint=endpoint,

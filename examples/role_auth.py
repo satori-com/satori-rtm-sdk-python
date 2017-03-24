@@ -17,28 +17,14 @@ endpoint, appkey = get_test_endpoint_and_appkey()
 
 
 def main():
+    ad = auth.RoleSecretAuthDelegate(role, secret)
     with make_client(
             endpoint=endpoint,
-            appkey=appkey) as client:
-
-        auth_finished_event = threading.Event()
-        auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
-
-        def auth_callback(auth_result):
-            if type(auth_result) == auth.Done:
-                print('Auth success')
-                auth_finished_event.set()
-            else:
-                print('Auth failure: {0}'.format(auth_result))
-                sys.exit(1)
-
-        client.authenticate(auth_delegate, auth_callback)
-
-        if not auth_finished_event.wait(60):
-            raise RuntimeError('Auth never finished')
+            appkey=appkey,
+            auth_delegate=ad) as client:
 
         #
-        # At this point we are authenticated and can publish
+        # At this point we are already authenticated and can publish
         #
 
         publish_finished_event = threading.Event()
