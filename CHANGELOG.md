@@ -1,5 +1,5 @@
-Unreleased
-----------
+v1.0.2 (2017-03-24)
+-------------------
 
 * Fixed double call of `opened()` that could lead to spurious reconnects
 * No longer require users to install backports.ssl and PyOpenSSL manually for
