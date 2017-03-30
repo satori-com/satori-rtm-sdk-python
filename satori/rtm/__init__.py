@@ -1,8 +1,8 @@
 
 '''
 
-Python SDK Reference
-~~~~~~~~~~~~~~~~~~~~
+|logo| Python SDK Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following table lists the Python SDK modules and classes:
 
@@ -17,4 +17,10 @@ The following table lists the Python SDK modules and classes:
 `satori.rtm.logger`_
     Logging module for the Python SDK.
 
+.. |logo| image:: https://www.satori.com/assets/images/logo-light@2x.png
+          :height: 30px
+          :width: 177px
+          :alt: Satori
+          :target: https://www.satori.com
+          :align: middle
 '''
