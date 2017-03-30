@@ -1,0 +1,1336 @@
+<div class="document" id="logo-python-sdk-reference">
+<h1 class="title"><a class="reference external" href="https://www.satori.com"><img alt="Satori" class="align-middle" src="https://www.satori.com/assets/images/logo-light&#64;2x.png" style="width: 177px; height: 30px;" /></a> Python SDK Reference</h1>
+<p>The following table lists the Python SDK modules and classes:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="#satori-rtm-client">satori.rtm.client</a></dt>
+<dd>Provides a higher-level API that automatically reconnects
+to RTM in the event of a disconnection.</dd>
+<dt><a class="reference internal" href="#satori-rtm-connection">satori.rtm.connection</a></dt>
+<dd>Provides a low-level API for managing a connection to RTM.</dd>
+<dt><a class="reference internal" href="#satori-rtm-auth">satori.rtm.auth</a></dt>
+<dd>Provides the delegate object to be used when authenticating
+clients with RTM.</dd>
+<dt><a class="reference internal" href="#satori-rtm-logger">satori.rtm.logger</a></dt>
+<dd>Logging module for the Python SDK.</dd>
+</dl>
+<div class="section" id="satori-rtm-connection">
+<h1>satori.rtm.connection</h1>
+<p>Provides a low-level API for managing a connection to RTM.</p>
+<div class="section" id="connection">
+<h2>Connection</h2>
+<p>You can use the Connection object as long as it stays connected to the RTM.
+If a disconnect occurs, you must create a new Connection object,
+resubscribe to all channels, and perform authentication again, if necessary.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <cite>satori.rtm.client</cite> module includes a default implementation to
+handle disconnects automatically and reconnect and resubscribes as
+necessary.</p>
+</div>
+<div class="section" id="init">
+<h3>__init__</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>__init__(self, endpoint, appkey, delegate=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Constructor for the Connection class. Creates and returns an instance of the
+Connection class. Use this function to create a instance from which you can
+subscribe and publish, authenticate an application user, and manage the
+WebSocket connection to RTM. The Connection class allows you to
+publish and subscribe synchronously and asynchronously.</p>
+<p class="last">The <cite>endpoint</cite> and <cite>appkey</cite> parameters are required. Optionally, you can
+choose to create a delegate to process received messages and handle
+connection and channel errors. To set the delegate property, specify it in
+the constructor or use <cite>connection.delegate = MyCustomDelegate()</cite>.</p>
+</dd>
+<dt>Returns</dt>
+<dd>Connection</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>endpoint {string} [required] - RTM endpoint as a string.</li>
+<li>appkey {string} [required] - Appkey used to access RTM. Available from the
+Dev Portal.</li>
+<li>delegate {object] [optional] - Delegate object to handle received
+messages, channel errors, internal errors, and closed connections.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+...
+connection = Connection(endpoint, appkey, delegate=None)
+after_receive = threading.Event()
+
+class ConnectionDelegate(object):
+    def on_connection_closed(self):
+        print('connection closed')
+
+    def on_internal_error(error):
+        print('internal error', error)
+
+    def on_subscription_data(data):
+        print('data:', data)
+        after_receive.set()
+
+connection.delegate = ConnectionDelegate()
+connection.start()
+</pre>
+</div>
+<div class="section" id="start">
+<h3>start</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>start(self)</dd>
+<dt>Description</dt>
+<dd>Starts a WebSocket connection to RTM for the Connection object.
+You must call the <cite>start()</cite> method before publish or subscribe requests
+using the Connection object methods will completed successfully.</dd>
+</dl>
+</div>
+<div class="section" id="stop">
+<h3>stop</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>stop(self)</dd>
+<dt>Description</dt>
+<dd><p class="first">Closes a WebSocket connection to RTM for the Connection object.</p>
+<p class="last">Use this method if you want to explicitly stop all interaction with RTM.
+After you use this method, you can no longer publish or subscribe
+to any channels for the Connection object. You must use <cite>start()</cite> to restart
+the WebSocket connection and then publish or subscribe.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="send">
+<h3>send</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>send(self, payload)</dd>
+<dt>Description</dt>
+<dd>Synchronously sends the specified message to RTM.
+This is a lower-level method suitable for manually performing
+PDU serialization.</dd>
+</dl>
+</div>
+<div class="section" id="action">
+<h3>action</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>action(self, name, body, callback=None)</dd>
+<dt>Description</dt>
+<dd>Synchronously sends a PDU created with the specified <cite>action</cite> and <cite>body</cite> to
+RTM. This is a lower-level method that can be used, for example, to take
+advantage of changes to PDU specifications by Satori without requiring an
+updated SDK.</dd>
+</dl>
+</div>
+<div class="section" id="publish">
+<h3>publish</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>publish(self, channel, message, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Publishes a message to the specified channel.</p>
+<p>The channel and message parameters are required. The <cite>message</cite> parameter can
+be any JSON-supported value. For more information, see www.json.org.</p>
+<p>By default, this method does not acknowledge the completion of the publish
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM
+returns an object that represents the PDU response to
+the publish request. For more information about PDUs, see <em>RTM API</em> in the
+online docs.</p>
+<p class="last">Because this is an asynchronous method, you can also use the Python
+<cite>threading</cite> module to create an event to track completion of the publish
+operation in the callback function.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>message {string} [required] - JSON value to publish as a message. It must
+be serializable using <cite>json.dumps</cite> from the Python standard <cite>JSON</cite> module.</li>
+<li>channel {string} [required] - Name of the channel to which you want to
+publish.</li>
+<li>callback {function} [optional] - Callback function to execute on the PDU
+returned by RTM as a response to the publish request.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+connection.publish(&quot;My Channel&quot;, &quot;Message text to publish&quot;)
+</pre>
+</div>
+<div class="section" id="read">
+<h3>read</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>read(self, channel, args=None, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Asynchronously reads a value from the specified channel. This function
+has no return value, but you can inspect
+the response PDU in the callback function.</p>
+<p>You can also use the <cite>args</cite> parameter to add additional JSON key-value pairs
+to the PDU in the read request that the SDK sends
+to RTM. For more information about PDUs, see <em>RTM API</em> in the online docs.</p>
+<p class="last">By default, this method does not acknowledge the completion of the subscribe
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM
+returns an object that represents the response to
+the publish request as a PDU.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel to read from.</li>
+<li>callback {function} [optional] - Callback function to execute on the
+response returned to the subscribe request as a PDU.</li>
+<li>args {object} [optional] - Any JSON key-value pairs to send in the
+subscribe request. See <em>Subscribe PDU</em> in the online docs.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe(channel, {'position': position})
+</pre>
+</div>
+<div class="section" id="read-sync">
+<h3>read_sync</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>read_sync(self, channel, args=None, timeout=60)</dd>
+<dt>Description</dt>
+<dd><p class="first">Synchronously reads a message from the specified channel.</p>
+<p class="last">This method generates a <cite>RuntimeError</cite> if the read operation does not
+complete within the timeout period.</p>
+</dd>
+<dt>Returns</dt>
+<dd>JSON value</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel to read from.</li>
+<li>timeout {int} [optional] - Amount of time, in seconds, to allow RTM
+to complete the read operation before it generates an error.
+Default is 60.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+
+message = 'hello'
+connection.publish_sync(channel, message)
+value = connection.read_sync(channel)
+# value should be &quot;hello&quot;
+...
+</pre>
+</div>
+<div class="section" id="write">
+<h3>write</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>write(self, channel, value, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Asynchronously writes a value into the specified channel.</p>
+<p>The <cite>channel</cite> and <cite>value</cite> parameters are required. The <cite>value</cite> parameter can
+be any JSON-supported value. For more information, see www.json.org.</p>
+<p>By default, this method does not acknowledge the completion of the publish
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM returns an object that
+represents the response to the publish request as a PDU. For more
+information about PDUs, see the RTM API Reference.</p>
+<p class="last">Because this is an asynchronous method, you can also use the Python
+<cite>threading</cite> module to create an event to track completion of the write
+operation in the callback function.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>message {string} [required] - JSON value to publish as message. It must be
+serializable using <cite>json.dumps</cite> from the Python standard <cite>JSON</cite> module.</li>
+<li>channel {string} [required] - Name of the channel.</li>
+<li>callback {function} [optional] - Callback function to execute on the
+response to the publish request, returned by RTM as a PDU.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+connection.write(&quot;my_dog&quot;, {&quot;latitude&quot;: 52.52, &quot;longitude&quot;:13.405})
+</pre>
+</div>
+<div class="section" id="delete">
+<h3>delete</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>delete(self, key, callback=None)</dd>
+<dt>Description</dt>
+<dd>Asynchronously deletes any value from the specified channel.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel.</li>
+<li>callback {function} [optional] -  Callback to execute on the response
+PDU from RTM. The response PDU is passed as a parameter to this function.
+RTM does not send a response PDU if a callback is not specified.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+connection.start()
+
+mailbox = []
+event = threading.Event()
+
+def delete_callback(reply):
+    mailbox.append(reply)
+    event.set()
+
+connection.delete(&quot;old_stuff&quot;, callback=delete_callback)
+if not event.wait(5):
+    print('Delete request timed out')
+else:
+    print('Delete request returned {0}'.format(mailbox[0]))
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="publish-sync">
+<h3>publish_sync</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>publish_sync(self, channel, message, timeout=60)</dd>
+<dt>Description</dt>
+<dd><p class="first">Synchronously publishes a message to the specified channel and returns the
+<cite>position</cite> property for the message stream position to which the message was
+published. For more information about the position value, see <em>RTM API</em>
+in the online docs.</p>
+<p>This method generates a <cite>RuntimeError</cite> if the publish operation does not
+complete within the timeout period.</p>
+<p>The message parameter can be any JSON-supported value. For more information,
+see www.json.org.</p>
+<div class="admonition note last">
+<p class="first admonition-title">Note</p>
+<p class="last">To send a publish request asynchronously for a Connection object,
+use publish(channel, message, callback).</p>
+</div>
+</dd>
+<dt>Returns</dt>
+<dd>position</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>message {string} [required] - JSON value to publish as message. It must be
+serializable using <cite>json.dumps</cite> from the Python standard <cite>JSON</cite> module.</li>
+<li>channel {string} [required] - Name of the channel.</li>
+<li>timeout {int} [optional] - Amount of time, in seconds, to allow RTM
+to complete the publish operation before it generates an error.
+Default is 60.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe_sync(channel, {'position': position})
+...
+</pre>
+</div>
+<div class="section" id="subscribe">
+<h3>subscribe</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>subscribe(self, channel_or_subscription_id, args=None, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Subscribes to the specified channel.</p>
+<p>You can use the <cite>args</cite> parameter to add additional JSON values to the
+Protocol Data Unit (PDU) in the subscribe request that the SDK sends to RTM.
+For more information about PDUs, see <em>RTM API</em> in the online docs.</p>
+<p>By default, this method does not acknowledge the completion of the subscribe
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM
+returns an object that represents the PDU response to
+the publish request.</p>
+<div class="admonition note last">
+<p class="first admonition-title">Note</p>
+<p class="last">To receive data published to a channel after you subscribe to it,
+use the <cite>on_subscription_data()</cite> callback function in a
+subscription observer class.</p>
+</div>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel.</li>
+<li>callback {function} [optional] - Callback function to execute on the
+response to the subscribe request, returned by RTM as a PDU.</li>
+<li>args {object} [optional] - Any JSON key-value pairs to send in the
+subscribe request. See <em>Subscribe PDU</em> in the online docs.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe(channel, {'position': position})
+</pre>
+</div>
+<div class="section" id="subscribe-sync">
+<h3>subscribe_sync</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>subscribe_sync(self, channel, args=None, timeout=60)</dd>
+<dt>Description</dt>
+<dd><p class="first">Subscribes to the specified channel and generates a <cite>RuntimeError</cite> if the
+request does not complete within the timeout period.</p>
+<p class="last">You can use the <cite>args</cite> parameter to add additional JSON values to the PDU
+in the subscribe request that the SDK sends to RTM.
+For more information about PDUs, see <em>RTM API</em> in the online docs.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel.</li>
+<li>args {object} [optional] - Any additional JSON values to send in the
+subscribe request.</li>
+<li>timeout {int} [optional] - Amount of time, in seconds, to allow RTM
+to complete the subscribe operation before it generates an error.
+Default is 60.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+...
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe_sync(channel, {'position': position})
+...
+</pre>
+</div>
+<div class="section" id="unsubscribe">
+<h3>unsubscribe</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>unsubscribe(self, channel, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Unsubscribes from the specified channel.</p>
+<p>After you unsubscribe, the application no longer receives messages for the
+channel until after RTM completes the unsubscribe operation.</p>
+<p class="last">By default, this method does not acknowledge the completion of the subscribe
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM
+returns an object that represents the PDU response to
+the publish request. For more information about PDUs, see <em>RTM API</em>
+in the online docs.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel.</li>
+<li>callback {function} [optional] - Callback function to execute on the
+response to the unsubscribe request, returned by RTM as a PDU.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+...
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe(channel, {'position': position})
+...
+connection.unsubscribe(channel)
+...
+</pre>
+</div>
+<div class="section" id="unsubscribe-sync">
+<h3>unsubscribe_sync</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>unsubscribe_sync(self, channel, timeout=60)</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="unsubscribe-sync-channel-timeout">
+<h2>unsubscribe_sync(channel, timeout)</h2>
+<dl class="docutils">
+<dt>Description</dt>
+<dd>Unsubscribes from all messages for a channel and generates a <cite>RuntimeError</cite>
+if the unsubscribe operation does not complete within the timeout period.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel.</li>
+<li>timeout {int} [optional] - Amount of time, in seconds, to allow RTM
+to complete the unsubscribe operation before it generates an
+error. Default is 60.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+...
+connection.start()
+
+position = connection.publish_sync(channel, message)
+connection.subscribe_sync(channel, {'position': position})
+...
+unsubscribe_sync(channel)
+...
+</pre>
+<div class="section" id="search">
+<h3>search</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>search(self, prefix, callback)</dd>
+<dt>Description</dt>
+<dd><p class="first">Asynchronously performs a channel search for a given user-defined prefix.
+This method passes RTM replies to the callback. RTM may send multiple
+responses to the same search request: zero or more search result PDUs with
+an action of <cite>rtm/search/data</cite> (depending on the results of the search).
+Each channel found is only sent once.</p>
+<p class="last">After the search result PDUs, RTM follows with a positive response PDU:
+<cite>rtm/search/ok</cite>. Callback must inspect the reply object passed to the
+callback for the reply['body']['channels'] list. The callback is called on
+each response.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="authenticate">
+<h3>authenticate</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>authenticate(self, auth_delegate, callback)</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="authenticate-auth-delegate-callback">
+<h2>authenticate(auth_delegate, callback)</h2>
+<dl class="docutils">
+<dt>Description</dt>
+<dd><p class="first">Validates the identity of a client after connecting to RTM
+with the Connection module. After the user authenticates with
+RTM, the operations that the client can perform depends on the role.</p>
+<p>Since the authentication process is an asynchronous operation, the callback
+function is required. The callback function processes the PDU response from
+RTM.</p>
+<p class="last">For more information about authentication, see <em>Authentication and
+Authorization</em> in the online docs.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>auth_delegate {AuthDelegate | RoleSecretAuthDelegate} [required] - An
+authentication delegate object created with
+the <cite>RoleSecretAuthDelegate(role, role_key)</cite> method for
+the role-based authentication process.</li>
+<li>callback {function} [required] - Function to execute after RTM
+returns a response.</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<pre class="literal-block">
+secret_key = '&lt;ROLE_SECRET_KEY&gt;'
+
+auth_delegate = auth.RoleSecretAuthDelegate('&lt;ROLE&gt;', secret_key)
+auth_event = threading.Event()
+
+def auth_callback(auth_result):
+    if type(auth_result) == auth.Done:
+        auth_event.set()
+</pre>
+</div>
+</div>
+<div class="section" id="satori-rtm-client">
+<h1>satori.rtm.client</h1>
+<p>The <cite>satori.rtm.client</cite> module is the main entry point to manage the WebSocket
+connection from the Python SDK to RTM. Use the Client class to create a client
+instance from which you can publish messages and subscribe to channels.</p>
+<p>This class routes messages to respective subscription observers
+and automatically reconnects and restores the authentication and subscription
+state if the connection to RTM drops.</p>
+<div class="section" id="client">
+<h2>Client</h2>
+<p>This is the documentation for Client class</p>
+<div class="section" id="id1">
+<h3>__init__</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>__init__(self, endpoint, appkey, fail_count_threshold=inf, reconnect_interval=1, max_reconnect_interval=300, observer=None, restore_auth_on_reconnect=False, max_queue_size=20000)</dd>
+<dt>Description</dt>
+<dd>Constructor for the Client.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last">
+<li><p class="first">endpoint {string} [required] - RTM endpoint as a string. Example:
+&quot;wss://rtm:8443/foo/bar&quot;. If port number is omitted, it defaults to 80 for
+ws:// and 443 for wss://. Available from the Dev Portal.</p>
+</li>
+<li><p class="first">appkey {string} [required] - Appkey used to access RTM.
+Available from the Dev Portal.</p>
+</li>
+<li><p class="first">reconnect_interval {int} [optional] - Time period, in seconds, between
+reconnection attempts. The timeout period between each successive
+connection attempt increases, but starts with this value. Use
+max_reconnect_interval to specify the maximum number of seconds between
+reconnection attempts. Default is 1.</p>
+</li>
+<li><p class="first">max_reconnect_interval {int} [optional] - Maximum period of time, in
+seconds, to wait between reconnection attempts. Default is 300.</p>
+</li>
+<li><p class="first">fail_count_threshold {int} [optional] - Number of times the SDK should
+attempt to reconnect if the connection disconnects. Specify any value
+that resolves to an integer. Default is inf (infinity).</p>
+</li>
+<li><p class="first">observer {client_observer} [optional] - Instance of a client observer
+class, used to define functionality based on the state changes of a
+Client.</p>
+<p>Set this property with client.observer or in the <cite>make_client(*args,
+**kwargs)</cite> or <cite>Client(*args, **kwargs)</cite> methods.</p>
+</li>
+<li><p class="first">restore_auth_on_reconnect {boolean} optional - Whether to restore
+authentication after reconnects. Default is False.</p>
+</li>
+<li><p class="first">max_queue_size {int} optional - this parameter limits the amount of
+concurrent requests in order to avoid 'out of memory' situation.
+For example is max_queue_size is 10 and the client code sends 11
+publish requests so fast that by the time it sends 11th one the reply
+for the first one has not yet arrived, this 11th call to <cite>client.publish</cite>
+will throw the <cite>satori.rtm.client.Full</cite> exception.</p>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Syntax</p>
+<blockquote>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">from satori.rtm.client import Client</p>
+<p class="last">client = Client(endpoint='&lt;ENDPOINT&gt;', appkey=&lt;APP_KEY&gt;)
+...</p>
+</dd>
+</dl>
+</blockquote>
+</div>
+<div class="section" id="last-connecting-error">
+<h3>last_connecting_error</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>last_connecting_error(self)</dd>
+<dt>Description</dt>
+<dd>If there were unsuccessful connection attempts, this function returns
+the exception for the last such attempt. Otherwise returns None.</dd>
+</dl>
+</div>
+<div class="section" id="id2">
+<h3>start</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>start(self)</dd>
+<dt>Description</dt>
+<dd><p class="first">Starts a WebSocket connection to RTM for the Client object. You
+must call the start() method before you subscribe to a channel using the
+Client object methods.</p>
+<p class="last">If you publish any messages before calling this method, the SDK queues the
+messages to publish after establishing the WebSocket connection.</p>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with sc.make_client(
+    endpoint=endpoint, appkey=appkey) as client:
+
+    client.stop()
+    ...
+    client.start()
+    ...
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id3">
+<h3>stop</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>stop(self)</dd>
+<dt>Description</dt>
+<dd><p class="first">Closes a WebSocket connection to RTM for the Client object.</p>
+<p class="last">Use this method if you want to explicitly stop all interaction with RTM.
+After you use this method, if you call publish or subscribe methods
+while the client is stopped, the SDK queues the requests and sends them when
+the client reconnects.</p>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(
+    endpoint=endpoint, appkey=appkey) as client:
+
+    ...
+    client.stop()
+    ...
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id4">
+<h3>authenticate</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>authenticate(self, auth_delegate, callback)</dd>
+<dt>Description</dt>
+<dd><p class="first">Validates the identity of an application user after connecting to RTM
+with the Client class. After the user authenticates with RTM, the operations
+that the client can perform depends on the role.</p>
+<p>Since the authentication process is an asynchronous operation, the callback
+function is required. The callback function processes the PDU response from
+RTM.</p>
+<p class="last">For more information about authentication, see
+<em>Authentication and Authorization</em> in the online docs.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>auth_delegate {AuthDelegate | RoleSecretAuthDelegate} [required] - An
+authentication delegate object. Use a
+satori.rtm.auth.RoleSecretAuthDelegate class for the role-based
+authentication process.</li>
+<li>callback {function} [required] - Function to execute after RTM
+returns a response.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+secret_key = '&lt;ROLE_SECRET_KEY&gt;'
+
+auth_delegate = auth.RoleSecretAuthDelegate('&lt;ROLE&gt;', secret_key)
+auth_event = threading.Event()
+
+def auth_callback(auth_result):
+    if type(auth_result) == auth.Done:
+        auth_event.set()
+
+client.authenticate(auth_delegate, auth_callback)
+
+auth_event.wait()
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id5">
+<h3>publish</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>publish(self, channel, message, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Publishes a message to the specified channel.</p>
+<p>The channel and message parameters are required. The <cite>message</cite> parameter can
+be any JSON-supported value. For more information, see www.json.org.</p>
+<p class="last">By default, this method does not acknowledge the completion of the publish
+operation. Optionally, you can specify a callback function to process the
+response from RTM. If you specify a callback, RTM
+returns an object that represents the Protocol Data Unit (PDU) response to
+the publish request. For more information about PDUs, see <em>RTM API</em> in the
+online docs.</p>
+</dd>
+<dt>Reference.</dt>
+<dd>Since this is an asynchronous method, you can also use the Python threading
+module to create an event to track completion of the publish operation in
+the callback function.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>message {string} [required] - JSON value to publish as message. It must be
+serializable using <cite>json.dumps</cite> from the Python standard <cite>JSON</cite> module.</li>
+<li>channel {string} [required] - Name of the channel to which you want to
+publish.</li>
+<li>callback {function} [optional] - Callback function to execute on the PDU
+response returned by RTM to the publish request.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with sc.make_client(
+    endpoint=endpoint, appkey=appkey) as client:
+
+    ...
+    print('Publishing a message')
+    client.publish(channel=channel, message=message)
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id6">
+<h3>read</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>read(self, channel, args=None, callback=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Asynchronously reads a value from the specified channel. This function
+has no return value, but you can inspect
+the reply PDU in the callback function.</p>
+<p class="last">You can also use the <cite>args</cite> parameter to add additional JSON key-value pairs
+to the PDU in the read request that the SDK sends
+to RTM. For more information about PDUs, see <em>RTM API</em> in the online docs.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel to read from.</li>
+<li>args {object} [optional] - Any JSON key-value pairs to send in the
+read request. To create a filter, use the desired fSQL query as a string
+value for <cite>filter</cite> key.</li>
+<li>callback {function} [optional] - Callback function to execute on the PDU
+response returned to the subscribe request by RTM.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(endpoint=endpoint, appkey=appkey) as client:
+
+    mailbox = []
+    event = threading.Event()
+
+    def read_callback(reply):
+        mailbox.append(reply)
+        event.set()
+
+    client.read(channel, callback=read_callback)
+    if not event.wait(5):
+        print('Read request timed out')
+    else:
+        print('Read request returned {0}'.format(mailbox[0]))
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id7">
+<h3>write</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>write(self, channel, value, callback=None)</dd>
+<dt>Description</dt>
+<dd>Asynchronously writes the given value to the specified channel.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Channel name.</li>
+<li>value {json value} [required] - JSON that represents the message payload
+to publish.</li>
+<li>callback {function} [optional] - Callback passed the response PDU from
+RTM.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(endpoint=endpoint, appkey=appkey) as client:
+
+    mailbox = []
+    event = threading.Event()
+
+    def write_callback(reply):
+        mailbox.append(reply)
+        event.set()
+
+    client.write(&quot;answer&quot;, 42, callback=write_callback)
+    if not event.wait(5):
+        print('Write request timed out')
+    else:
+        print('Write request returned {0}'.format(mailbox[0]))
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id8">
+<h3>delete</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>delete(self, channel, callback=None)</dd>
+<dt>Description</dt>
+<dd>Asynchronously deletes any value from the specified channel.</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Channel name.</li>
+<li>callback {function} [optional] - Callback passed the response PDU from
+RTM.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(endpoint=endpoint, appkey=appkey) as client:
+
+    mailbox = []
+    event = threading.Event()
+
+    def delete_callback(reply):
+        mailbox.append(reply)
+        event.set()
+
+    client.delete(&quot;old_stuff&quot;, callback=delete_callback)
+    if not event.wait(5):
+        print('Delete request timed out')
+    else:
+        print('Delete request returned {0}'.format(mailbox[0]))
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id9">
+<h3>subscribe</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>subscribe(self, channel_or_subscription_id, mode, subscription_observer, args=None)</dd>
+<dt>Description</dt>
+<dd><p class="first">Subscribes to the specified channel.</p>
+<p>Optionally, you can also use an observer that implements the subscription
+callback functions and pass the observer as the <cite>subscription_observer</cite>
+parameter. The callback functions represent each possible state for the
+channel subscription. See <em>Subscription Observer</em>.</p>
+<p>You can also use the <cite>args</cite> parameter to add additional JSON key-value pairs
+to the PDU in the subscribe request that the SDK sends
+to RTM. For more information about PDUs, see <em>RTM API</em> in the online docs.</p>
+<div class="admonition note last">
+<p class="first admonition-title">Note</p>
+<p class="last">To receive data published to a channel after you subscribe to it,
+use the <cite>on_subscription_data()</cite> callback function in a
+subscription observer.</p>
+</div>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel_or_subscription_id {string} [required] - String that identifies
+the channel. If you do not use the <cite>filter</cite> parameter, it is the channel
+name. Otherwise, it is a unique identifier for the channel (subscription
+id).</li>
+<li>subscription_mode {SubscriptionMode} [required] - this mode determines the
+behaviour of the Python SDK and RTM when resubscribing after a
+reconnection. Use SubscriptionMode.ADVANCED, SubscriptionMode.RELIABLE, or
+SubscriptionMode.SIMPLE.</li>
+<li>subscription_observer {object} [optional] - Instance of an observer class
+that implements the subscription observer callback functions.</li>
+<li>args {object} [optional] - Any JSON key-value pairs to send in the
+subscribe request. To include a filter, put the desired fSQL query
+as a string value for the <cite>filter</cite> key. See <em>Subscribe PDU</em> in the
+online docs.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(
+        endpoint=endpoint, appkey=appkey) as client:
+
+    class SubscriptionObserver(object):
+        def on_subscription_data(self, data):
+            for message in data['messages']:
+                print('Client got message {0}'.format(message))
+
+    subscription_observer = SubscriptionObserver()
+    client.subscribe(
+        channel,
+        SubscriptionMode.RELIABLE,
+        subscription_observer)
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id10">
+<h3>unsubscribe</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>unsubscribe(self, channel_or_subscription_id)</dd>
+<dt>Description</dt>
+<dd><p class="first">Unsubscribes from a channel.</p>
+<p class="last">After you unsubscribe, the application no longer receives messages for the
+channel. To identify when the unsubscribe operation has completed, use the
+<cite>on_leave_subscribed()</cite> callback function of a subscription observer class.</p>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last simple">
+<li>channel {string} [required] - Name of the channel from which you want to
+unsubscribe.</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with make_client(
+        endpoint=endpoint, appkey=appkey) as client:
+
+    ...
+    client.subscribe(
+        &quot;My Channel&quot;,
+        SubscriptionMode.RELIABLE,
+        subscription_observer)
+    ...
+    client.unsubscribe(&quot;My Channel&quot;)
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="id11">
+<h3>search</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>search(self, prefix, callback)</dd>
+<dt>Description</dt>
+<dd><p class="first">Asynchronously performs a channel search for a given user-defined prefix.
+This method passes RTM replies to the callback. RTM may send multiple
+responses to the same search request: zero or more search result PDUs with
+an action of <cite>rtm/search/data</cite> (depending on the results of the search).
+Each channel found is only sent once.</p>
+<p class="last">After the search result PDUs, RTM follows with a positive response PDU:
+<cite>rtm/search/ok</cite>. Callback must inspect the reply object passed to the
+callback for the reply['body']['channels'] list. The callback is called on
+each response.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="dispose">
+<h3>dispose</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>dispose(self)</dd>
+<dt>Description</dt>
+<dd>Client finishes all work, release all resources and becomes unusable.
+Upon completion, <cite>client.observer.on_enter_disposed()</cite> is called.</dd>
+</dl>
+</div>
+<div class="section" id="is-connected">
+<h3>is_connected</h3>
+<dl class="docutils">
+<dt>Signature:</dt>
+<dd>is_connected(self)</dd>
+<dt>Description</dt>
+<dd>Returns <cite>True</cite> if the Client object is connected via a
+WebSocket connection to RTM and <cite>False</cite> otherwise.</dd>
+<dt>Returns</dt>
+<dd>Boolean</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+with sc.make_client(
+    endpoint=platform_endpoint,
+    appkey=platform_appkey) as client:
+
+    ...
+    if client.is_connected()
+        # do something
+    else:
+        # do something else
+</pre>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="make-client">
+<h2>make_client</h2>
+</div>
+<div class="section" id="make-client-args-kwargs">
+<h2>make_client(*args, **kwargs)</h2>
+<dl class="docutils">
+<dt>Description</dt>
+<dd><p class="first">The <cite>make_client()</cite> function is a context manager. Call <cite>make_client()</cite>
+using a <cite>with</cite> statement and the SDK automatically starts the WebSocket
+connection. The SDK stops and then closes the WebSocket connection when the
+statement completes or terminates due to an error.</p>
+<p>This function takes the same parameters as the Client constructor.</p>
+<p>To use this function, import it from the client module:</p>
+<pre class="last literal-block">
+`from satori.rtm.client import make_client`
+</pre>
+</dd>
+<dt>Parameters</dt>
+<dd><ul class="first last">
+<li><p class="first">endpoint {string} [required] - RTM endpoint as a string. Example:
+&quot;wss://rtm:8443/foo/bar&quot;. If port number is omitted, it defaults to 80 for
+ws:// and 443 for wss://. Available from the Dev Portal.</p>
+</li>
+<li><p class="first">appkey {string} [required] - Appkey used to access RTM.
+Available from the Dev Portal.</p>
+</li>
+<li><p class="first">reconnect_interval {int} [optional] - Time period, in seconds, between
+reconnection attempts. The timeout period between each successive
+connection attempt increases, but starts with this value. Use
+max_reconnect_interval to specify the maximum number of seconds between
+reconnection attempts. Default is 1.</p>
+</li>
+<li><p class="first">max_reconnect_interval {int} [optional] - Maximum period of time, in
+seconds, to wait between reconnection attempts. Default is 300.</p>
+</li>
+<li><p class="first">fail_count_threshold {int} [optional] - Number of times the SDK should
+attempt to reconnect if the connection disconnects. Specify any value
+that resolves to an integer. Default is inf (infinity).</p>
+</li>
+<li><p class="first">observer {client_observer} [optional] - Instance of a client observer
+class, used to define functionality based on the state changes of a
+Client.</p>
+<p>Set this property with client.observer or in the <cite>make_client(*args,
+**kwargs)</cite> or <cite>Client(*args, **kwargs)</cite> methods.</p>
+</li>
+<li><p class="first">restore_auth_on_reconnect {boolean} optional - Whether to restore
+authentication after reconnects. Default is False.</p>
+</li>
+<li><p class="first">max_queue_size {int} optional - this parameter limits the amount of
+concurrent requests in order to avoid 'out of memory' situation.
+For example is max_queue_size is 10 and the client code sends 11
+publish requests so fast that by the time it sends 11th one the reply
+for the first one has not yet arrived, this 11th call to <cite>client.publish</cite>
+will throw the <cite>satori.rtm.client.Full</cite> exception.</p>
+</li>
+</ul>
+</dd>
+<dt>Syntax</dt>
+<dd><pre class="first last literal-block">
+import satori.rtm.client as sc
+
+endpoint = 'ENDPOINT'
+appkey = 'APPKEY'
+
+with sc.make_client(endpoint=endpoint, appkey=appkey) as client:
+</pre>
+</dd>
+</dl>
+</div>
+<div class="section" id="client-observer">
+<h2>Client Observer</h2>
+<p>Use the client observer callback functions in an observer to implement
+functionality based on the Client object state changes.</p>
+<p>Set this observer with the <cite>client.observer</cite> property on the Client.</p>
+<p>The following table lists the Client object states and the associated
+callback functions:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="40%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Client State</th>
+<th class="head">Enter Callback</th>
+<th class="head">Exit Callback</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Awaiting</td>
+<td>on_enter_awaiting()</td>
+<td>on_leave_awaiting()</td>
+</tr>
+<tr><td>Connecting</td>
+<td>on_enter_connecting()</td>
+<td>on_leave_connecting()</td>
+</tr>
+<tr><td>Connected</td>
+<td>on_enter_connected()</td>
+<td>on_leave_connected()</td>
+</tr>
+<tr><td>Stopped</td>
+<td>on_enter_stopped()</td>
+<td>on_leave_stopped()</td>
+</tr>
+<tr><td>Disposed</td>
+<td>on_enter_disposed()</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following figure shows an example client observer with implemented callback
+function:</p>
+<pre class="literal-block">
+class ClientObserver(object):
+    def __init__(self):
+        self.connection_attempt_count = 0
+
+    def on_enter_connecting(self):
+        self.connection_attempt_count += 1
+        print('Establishing connection #{0}'.format(
+            self.connection_attempt_count))
+
+client = Client(endpoint='&lt;ENDPOINT&gt;', appkey=None)
+client.observer = ClientObserver()
+client.start()
+client.stop()
+client.start()
+</pre>
+</div>
+<div class="section" id="subscription-observer">
+<h2>Subscription Observer</h2>
+<p>Use callback functions in a subscription observer to implement functionality
+based on the state changes for a channel subscription. The subscribe(channel,
+SubscriptionMode.RELIABLE, subscription_observer, args) method takes
+a subscription observer for the subscription_observer parameter.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Depending on your application, these callbacks are optional, except
+<cite>on_subscription_data</cite>. To process received messages, you must
+implement <cite>on_subscription_data(data)</cite> callback.</p>
+</div>
+<p>The following table lists a subscription observer subscription states and
+callback functions:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="39%" />
+<col width="39%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">State</th>
+<th class="head">Enter Callback</th>
+<th class="head">Exit Callback</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Subscribing</td>
+<td>on_enter_subscribing()</td>
+<td>on_leave_subscribing()</td>
+</tr>
+<tr><td>Subscribed</td>
+<td>on_enter_subscribed()</td>
+<td>on_leave_subscribed()</td>
+</tr>
+<tr><td>Unsubscribing</td>
+<td>on_enter_unsubscribing()</td>
+<td>on_leave_unsubscribing()</td>
+</tr>
+<tr><td>Unsubscribed</td>
+<td>on_enter_unsubscribed()</td>
+<td>on_leave_unsubscribed()</td>
+</tr>
+<tr><td>Failed</td>
+<td>on_enter_failed()</td>
+<td>on_leave_failed()</td>
+</tr>
+<tr><td>Deleted</td>
+<td>on_deleted()</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>Other Callbacks</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="46%" />
+<col width="54%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Event</th>
+<th class="head">Callback</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Created</td>
+<td>on_created()</td>
+</tr>
+<tr><td>Message(s) Received</td>
+<td>on_subscription_data()</td>
+</tr>
+</tbody>
+</table>
+<p>The following figure shows an example subscription observer with an implemented
+callback function:</p>
+<pre class="literal-block">
+class SubscriptionObserver(object):
+    def __init__(self, channel):
+            self.message_count = 0
+            self.channel = channel
+
+    def on_subscription_data(self, data):
+            for message in data['messages']:
+                    print('Got message {0}'.format(message))
+            self.message_count += len(data['messages'])
+
+    def on_enter_subscribed(self):
+            print('Subscription is now active')
+
+    def on_deleted(self):
+            print('Received {0} messages from channel &quot;&quot;{1}&quot;&quot;'.format(
+                    self.message_count, self.channel))
+
+subscription_observer = SubscriptionObserver()
+client.subscribe(
+    channel,
+    SubscriptionMode.RELIABLE,
+    subscription_observer(channel))
+
+# wait for some time
+
+client.unsubscribe(channel)
+</pre>
+</div>
+</div>
+<div class="section" id="satori-rtm-auth">
+<h1>satori.rtm.auth</h1>
+<p>You can perform role-based authentication with the Python SDK. This method
+uses a role and role secret key from the Dev Portal and authenticates a
+client session with that role.</p>
+<p>The operations that the client can perform depend
+on the permissions for the role.</p>
+<p>The role-based authentication method is a two-step authentication process
+based on the HMAC process, using the MD5 hashing routine:</p>
+<ul class="simple">
+<li>The client obtains a nonce from the server in a handshake request.</li>
+<li>The client then sends an authorization request with its role secret key
+hashed with the received nonce.</li>
+</ul>
+<p>Use the provided class <cite>satori.rtm.auth.RoleSecretAuthDelegate</cite> to
+create a delegate (that knows the authentication process) and use the
+delegate with the authenticate(role_auth_delegate, auth_callback) method of the
+<cite>satori.rtm.client.Client</cite> or <cite>satori.rtm.connection.Connection</cite> class. The SDK
+calls <cite>auth_callback</cite> on the response from RTM.</p>
+<ol class="arabic simple" start="2">
+<li><dl class="first docutils">
+<dt>Custom authentication.</dt>
+<dd>You must manually create the delegate to use with this method.</dd>
+</dl>
+</li>
+</ol>
+<p>For more information, see
+<em>Authentication and Authorization</em> in the online docs.</p>
+<blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If a disconnect occurs and the client reconnects, reauthentication
+happens automatically only if the Client object is constructed with
+'restore_auth_on_reconnect=True' option. Otherwise, The client must
+respond to the client state changes and authenticate again.</p>
+</div>
+</blockquote>
+<p>Use the client or connection authenticate method with the authentication
+delegate and a callback to process the RTM response to the authentication
+request:</p>
+<pre class="literal-block">
+secret_key = '&lt;ROLE_SECRET_KEY&gt;'
+
+with sc.make_client(
+        endpoint=endpoint,
+        appkey=platform_appkey,
+        restore_auth_on_reconnect=True) as client:
+
+    role_auth_delegate = auth.RoleSecretAuthDelegate(\
+        '&lt;USER_ROLE&gt;', secret_key)
+
+    auth_ack = threading.Event()
+
+    def auth_callback(auth_result):
+        if type(auth_result) == auth.Done:
+            print('Auth success')
+            auth_ack.set()
+        else:
+            print('Auth failure: {0}'.format(auth_result))
+            auth_ack.set()
+
+    client.authenticate(role_auth_delegate, auth_callback)
+    if not auth_ack.wait(10):
+        raise RuntimeError('No authentication reply in reasonable time')
+</pre>
+</div>
+<div class="section" id="satori-rtm-logger">
+<h1>satori.rtm.logger</h1>
+<p>The Python SDK includes a <cite>logging.Logger</cite> object in the <cite>satori.rtm.logger</cite>
+module. You can configure this logger to your specific needs. You can set the
+logging verbosity to <cite>Debug</cite> during debugging to find error sources faster.</p>
+<p>To enable stderr-based verbose logging on the command-line, set the
+DEBUG_SATORI_SDK environment variable to 1:</p>
+<pre class="literal-block">
+export DEBUG_SATORI_SDK=1
+./example.py # this now produces verbose logs
+unset DEBUG_SATORI_SDK
+./example.py # this does not
+</pre>
+</div>
+</div>
+
