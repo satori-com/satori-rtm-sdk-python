@@ -26,6 +26,10 @@ def main():
         print('Subscribing to a channel')
 
         class SubscriptionObserver(object):
+            def on_enter_subscribed(self):
+                print('Established subscription to {0}'.format(channel))
+            def on_leave_subscribed(self):
+                print('Lost subscription to {0}'.format(channel))
             def on_subscription_data(self, data):
                 for message in data['messages']:
                     print('Client got message {0}'.format(message))
@@ -33,11 +37,11 @@ def main():
         subscription_observer = SubscriptionObserver()
         client.subscribe(
             channel,
-            SubscriptionMode.ADVANCED,
+            SubscriptionMode.SIMPLE,
             subscription_observer)
 
         print('Sleeping')
-        time.sleep(11)
+        time.sleep(10)
         print('Enough sleep')
 
         print('Unsubscribing from a channel')
