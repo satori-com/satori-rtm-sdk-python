@@ -37,28 +37,19 @@ def main():
                 for message in data['messages']:
                     print('{0}: {1}'.format(self._sub_id, message))
 
-        # Assuming that channel messages are coordinates of
-        # form {'lon': 1.234, 'lat': 5.678}
-        subscription_observer_north = SubscriptionObserver('north')
-        subscription_observer_south = SubscriptionObserver('south')
+        subscription_observer = SubscriptionObserver(channel)
 
         client.subscribe(
-            'north_coords',
+            channel,
             SubscriptionMode.SIMPLE,
-            subscription_observer_north,
-            args={'filter': 'select * from {0} where lat > 0'.format(channel)})
-        client.subscribe(
-            'south_coords',
-            SubscriptionMode.SIMPLE,
-            subscription_observer_south,
-            args={'filter': 'select * from {0} where lat <= 0'.format(channel)})
+            subscription_observer,
+            args={'history': {'age': 60}})  # in seconds
 
         print('Sleeping')
         time.sleep(10)
         print('Enough sleep')
 
-        client.unsubscribe('north_coords')
-        client.unsubscribe('south_coords')
+        client.unsubscribe(channel)
 
 
 if __name__ == '__main__':
