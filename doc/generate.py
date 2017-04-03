@@ -71,7 +71,9 @@ def rst_sections(sdkroot):
 
 
 def rst_to_html(rst):
-    return docutils.core.publish_parts(rst, writer_name='html')['html_body']
+    html = '<link rel="stylesheet" type="text/css" href="python_sdk_reference.css"/>\n'
+    html += docutils.core.publish_parts(rst, writer_name='html')['html_body']
+    return html
 
 
 def main():
