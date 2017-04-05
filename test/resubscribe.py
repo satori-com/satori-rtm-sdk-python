@@ -153,6 +153,28 @@ class TestResubscribe(unittest.TestCase):
 
             client.stop()
 
+    def test_resubscribe_after_manual_reconnect(self):
+        with make_client(endpoint, appkey) as client:
+            channel = make_channel_name('manual_reconnect')
+
+            so = sync_subscribe(client, channel)
+
+            sync_publish(client, channel, 'first-message')
+            m = so.wait_for_channel_data()
+            self.assertEqual(m['messages'], ['first-message'])
+
+            client.observer = ClientObserver()
+            client.stop()
+            client.observer.wait_disconnected()
+
+            client.start()
+            client._queue.join()
+            client.observer.wait_connected()
+
+            sync_publish(client, channel, 'second-message')
+            m = so.wait_for_channel_data()
+            self.assertEqual(m['messages'], ['second-message'])
+
 
 if __name__ == '__main__':
     unittest.main()

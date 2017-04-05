@@ -291,16 +291,8 @@ class InternalClient(object):
     def _disconnect_subscriptions(self):
         logger.info('_disconnect_subscriptions')
         existing = list(self.subscriptions.items())
-        to_delete = []
-        for channel, subscription in existing:
+        for _, subscription in existing:
             subscription.disconnect()
-            if subscription.deleted():
-                to_delete.append(channel)
-        for channel in to_delete:
-            try:
-                del self.subscriptions[channel]
-            except KeyError:
-                pass
 
     def _subscribe(
             self, channel, mode, subscription_observer=None,
