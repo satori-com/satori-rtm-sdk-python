@@ -96,16 +96,16 @@ class ClientObserver(object):
         self.stopped.set()
 
     def on_leave_stopped(self):
-        self.stopped.clear()
+        self.stopped = threading.Event()
         self.log.append('on_leave_stopped')
 
     def on_enter_connected(self):
         self.log.append('on_enter_connected')
-        self.disconnected.clear()
+        self.disconnected = threading.Event()
         self.connected.set()
 
     def on_leave_connected(self):
-        self.connected.clear()
+        self.connected = threading.Event()
         self.disconnected.set()
         self.log.append('on_leave_connected')
 
