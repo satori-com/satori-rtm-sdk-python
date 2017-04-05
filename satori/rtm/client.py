@@ -712,7 +712,6 @@ callback function::
 
     client = Client(*args, **kwargs)
     ready_event = threading.Event()
-    disposed_event = threading.Event()
 
     class Observer(ClientStateObserver):
         def on_enter_connected(self):
@@ -722,10 +721,6 @@ callback function::
         def on_enter_stopped(self):
             ClientStateObserver.on_enter_stopped(self)
             ready_event.set()
-
-        def on_enter_disposed(self):
-            ClientStateObserver.on_enter_disposed(self)
-            disposed_event.set()
 
     client.observer = Observer()
     client.start()
