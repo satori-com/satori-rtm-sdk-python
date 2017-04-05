@@ -92,7 +92,8 @@ Syntax
 
         assert endpoint
         assert appkey
-        assert endpoint.startswith('ws://') or endpoint.startswith('wss://')
+        assert endpoint.startswith('ws://') or endpoint.startswith('wss://'),\
+            'Endpoint must start with "ws(s)://" but "%s" does not' % endpoint
 
         self.logger = satori.rtm.logger.logger
 
