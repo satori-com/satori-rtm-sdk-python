@@ -1,4 +1,8 @@
 
+.PHONY: test
+test:
+	PYTHONPATH=.:.. python test_cli.py
+
 .PHONY: sdist
 sdist: $(GENERATED_SOURCES)
 	python setup.py sdist

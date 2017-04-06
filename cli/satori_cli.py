@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 
-from contextlib import contextmanager
 import docopt
 try:
     import rapidjson as json
@@ -16,7 +15,7 @@ import time
 
 import satori.rtm.connection
 from satori.rtm.client import make_client, SubscriptionMode
-from satori.rtm.auth import RoleSecretAuthDelegate, Done
+from satori.rtm.auth import RoleSecretAuthDelegate
 
 try:
     satori.rtm.connection.enable_wsaccel()
@@ -55,6 +54,29 @@ logger = logging.getLogger('satori_cli')
 verbosity = 1
 
 
+class ClientObserver(object):
+    def on_leave_awaiting(self):
+        logger.warning('on_leave_awaiting')
+
+    def on_enter_awaiting(self):
+        logger.warning('on_enter_awaiting')
+
+    def on_leave_connecting(self):
+        logger.warning('on_leave_connecting')
+
+    def on_enter_connecting(self):
+        logger.warning('on_enter_connecting')
+
+    def on_leave_connected(self):
+        logger.warning('on_leave_connected')
+
+    def on_enter_connected(self):
+        logger.warning('on_enter_connected')
+
+    def on_enter_stopped(self):
+        logger.warning('on_enter_stopped')
+
+
 def main():
     args = docopt.docopt(__doc__)
 
@@ -75,6 +97,11 @@ def main():
         print('Invalid delivery mode ' + delivery)
         sys.exit(1)
 
+    if role_name and role_secret:
+        auth_delegate = RoleSecretAuthDelegate(role_name, role_secret)
+    else:
+        auth_delegate = None
+
     global verbosity
     if args['--verbosity'] in ('0', '1', '2', '3'):
         verbosity = int(args['--verbosity'])
@@ -91,65 +118,66 @@ def main():
         3: logging.DEBUG}
     configure_logger(int_to_loglevel[verbosity])
 
+    observer = ClientObserver()
     logger.info('Connecting to %s using appkey %s', endpoint, appkey)
 
-    if args['subscribe']:
-        return subscribe(
-            args['<channels>'], endpoint, appkey, prettify_json,
-            role_name=role_name, role_secret=role_secret, delivery=delivery)
-    if args['filter']:
-        return subscribe(
-            [args['<channel>']], endpoint, appkey, prettify_json,
-            role_name=role_name, role_secret=role_secret,
-            query=args['<query>'], delivery=delivery)
-    elif args['publish']:
-        return publish(
-            args['<channel>'], endpoint, appkey,
-            role_name=role_name, role_secret=role_secret)
-    elif args['record']:
-        size_limit = parse_size(args['--size_limit_in_bytes'])
-        if size_limit:
-            logger.info('Log size limit: %s bytes', size_limit)
-
-        count_limit = parse_size(args['--message_count_limit'])
-        if count_limit:
-            logger.info('Log size limit: %s messages', count_limit)
-
-        time_limit = parse_size(args['--time_limit_in_seconds'])
-        if time_limit:
-            logger.info('Time limit: %s seconds', time_limit)
-
-        return record(
-            args['<channels>'], endpoint, appkey,
-            role_name=role_name, role_secret=role_secret,
-            size_limit=size_limit, count_limit=count_limit,
-            time_limit=time_limit, output_file=args['--output_file'],
-            delivery=delivery)
-    elif args['replay']:
-        fast = args['--rate'] == 'unlimited'
-        return replay(
+    with make_client(
             endpoint, appkey,
-            role_name=role_name, role_secret=role_secret,
-            override_channel=args['--override_channel'], fast=fast,
-            input_file=args['--input_file'])
-    elif args['read']:
-        return kv_read(
-            endpoint, appkey,
-            role_name, role_secret,
-            args['<key>'], prettify_json=prettify_json)
-    elif args['write']:
-        value = args['<value>']
-        try:
-            value = json.loads(value)
-        except:
-            pass
+            auth_delegate=auth_delegate, observer=observer) as client:
+        logger.info('Connected to %s %s', endpoint, appkey)
+        if args['subscribe']:
+            return subscribe(
+                client,
+                args['<channels>'], prettify_json,
+                delivery=delivery)
+        if args['filter']:
+            return subscribe(
+                client,
+                [args['<channel>']], prettify_json,
+                query=args['<query>'], delivery=delivery)
+        elif args['publish']:
+            return publish(client, args['<channel>'])
+        elif args['record']:
+            size_limit = parse_size(args['--size_limit_in_bytes'])
+            if size_limit:
+                logger.info('Log size limit: %s bytes', size_limit)
 
-        return kv_write(
-            endpoint, appkey,
-            role_name, role_secret,
-            args['<key>'], value)
-    elif args['delete']:
-        return kv_delete(endpoint, appkey, role_name, role_secret, args['<key>'])
+            count_limit = parse_size(args['--message_count_limit'])
+            if count_limit:
+                logger.info('Log size limit: %s messages', count_limit)
+
+            time_limit = parse_size(args['--time_limit_in_seconds'])
+            if time_limit:
+                logger.info('Time limit: %s seconds', time_limit)
+
+            return record(
+                client,
+                args['<channels>'],
+                size_limit=size_limit, count_limit=count_limit,
+                time_limit=time_limit, output_file=args['--output_file'],
+                delivery=delivery)
+        elif args['replay']:
+            fast = args['--rate'] == 'unlimited'
+            return replay(
+                client,
+                override_channel=args['--override_channel'], fast=fast,
+                input_file=args['--input_file'])
+        elif args['read']:
+            return kv_read(
+                client,
+                args['<key>'], prettify_json=prettify_json)
+        elif args['write']:
+            value = args['<value>']
+            try:
+                value = json.loads(value)
+            except:
+                pass
+
+            return kv_write(
+                client,
+                args['<key>'], value)
+        elif args['delete']:
+            return kv_delete(client, args['<key>'])
 
 
 def configure_logger(level):
@@ -194,220 +222,143 @@ assert parse_size('1g') == 1000000000
 assert parse_size('24k') == 24000
 
 
-def authenticate(client, role_name, role_secret):
-    auth_event = threading.Event()
+def publish(client, channel):
+    print('Sending input to {0}, press C-d or C-c to stop'.format(channel))
 
-    logger.info('Authenticating as %s...', role_name)
+    try:
+        counter = Counter()
 
-    def callback(ack):
-        logger.info('Auth reply: %s', ack)
-
-        if type(ack) == Done:
-            auth_event.set()
+        while True:
+            line = sys.stdin.readline()
+            if not line:
+                break
+            line = line.rstrip()
+            try:
+                message = json.loads(line)
+            except:
+                message = line
+            counter.increment()
+            client.publish(
+                channel,
+                message,
+                callback=lambda *args: counter.decrement())
+    except KeyboardInterrupt:
+        pass
+    if counter.value() > 0:
+        sleep = 0.1
+        while sleep < 1.0:
+            time.sleep(sleep)
+            sleep += sleep
+            if not counter.value():
+                break
         else:
-            sys.exit(1)
-
-    auth_delegate = RoleSecretAuthDelegate(role_name, role_secret)
-    client.authenticate(auth_delegate, callback)
-
-    auth_success = auth_event.wait(10)
-
-    if auth_success:
-        logger.info('Authenticating complete')
-    else:
-        logger.error('Authenticating failed')
-        sys.exit(1)
-
-    return auth_success
+            logger.info('%s publishes remain unacked', counter.value())
 
 
-class ClientObserver(object):
-    def on_leave_awaiting(self):
-        logger.warning('on_leave_awaiting')
+def replay(client, override_channel=None, fast=False, input_file=None):
+    try:
+        counter = Counter()
 
-    def on_enter_awaiting(self):
-        logger.warning('on_enter_awaiting')
+        first_message_send_date = None
+        first_message_recv_date = None
 
-    def on_leave_connecting(self):
-        logger.warning('on_leave_connecting')
+        if input_file:
+            input_stream = open(input_file)
+        else:
+            input_stream = sys.stdin
 
-    def on_enter_connecting(self):
-        logger.warning('on_enter_connecting')
+        while True:
+            line = input_stream.readline()
+            if not line:
+                break
+            line = line.rstrip()
+            try:
+                data = json.loads(line)
+                current_message_recv_date = data['timestamp']
+                channel = override_channel or data['subscription_id']
+                messages = data['messages']
+                now = time.time()
 
-    def on_leave_connected(self):
-        logger.warning('on_leave_connected')
+                if first_message_send_date is not None and not fast:
+                    sleep_amount = (first_message_send_date
+                        + (current_message_recv_date - first_message_recv_date)
+                        - now)
+                else:
+                    sleep_amount = 0
 
-    def on_enter_connected(self):
-        logger.warning('on_enter_connected')
+                if sleep_amount > 0:
+                    time.sleep(sleep_amount)
 
-    def on_enter_stopped(self):
-        logger.warning('on_enter_stopped')
+                if first_message_send_date is None:
+                    first_message_send_date = time.time()
+                    first_message_recv_date = current_message_recv_date
 
+                for message in messages:
+                    try:
+                        client.publish(
+                            channel,
+                            message,
+                            callback=lambda *args: counter.decrement())
+                        counter.increment()
+                    except queue.Full as e:
+                        logger.error('Publish queue is full')
 
-@contextmanager
-def make_client_(endpoint, appkey, role_name=None, role_secret=None, **kwargs):
-    with make_client(
-            endpoint, appkey,
-            restore_auth_on_reconnect=True, **kwargs) as client:
+            except ValueError:
+                logger.error('Bad line: %s', line)
+            except Exception as e:
+                logger.error('Exception: %s', e)
+                sys.exit(2)
 
-        client.observer = ClientObserver()
-
-        if role_name and role_secret:
-            authenticate(client, role_name, role_secret)
-
-        yield client
-
-
-def publish(channel, endpoint, appkey, role_name=None, role_secret=None):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
-
-        print('Sending input to {0}, press C-d or C-c to stop'.format(channel))
-
-        try:
-            counter = Counter()
-
-            while True:
-                line = sys.stdin.readline()
-                if not line:
-                    break
-                line = line.rstrip()
-                try:
-                    message = json.loads(line)
-                except:
-                    message = line
-                counter.increment()
-                client.publish(
-                    channel,
-                    message,
-                    callback=lambda *args: counter.decrement())
-        except KeyboardInterrupt:
-            pass
-        if counter.value() > 0:
-            sleep = 0.1
-            while sleep < 1.0:
-                time.sleep(sleep)
-                sleep += sleep
-                if not counter.value():
-                    break
+    except KeyboardInterrupt:
+        pass
+    if counter.value() > 0:
+        sleep = 0.1
+        while sleep < 3.0:
+            time.sleep(sleep)
+            sleep += sleep
+            if not counter.value():
+                break
             else:
                 logger.info('%s publishes remain unacked', counter.value())
 
 
-def replay(endpoint, appkey, role_name=None, role_secret=None, override_channel=None, fast=False, input_file=None):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
+def generic_subscribe(client, handle_channel_data, channels,
+        query=None, delivery=None):
+    logger.info(
+        'Subscribing to %s, press C-c to stop',
+        channels[0] if len(channels) == 1 else '{0} channels'.format(
+            len(channels)))
 
-        try:
-            counter = Counter()
+    class SubscriptionObserver(object):
+        def on_enter_subscribed(self):
+            logger.info('Subscription became active')
 
-            first_message_send_date = None
-            first_message_recv_date = None
+        def on_enter_failed(self, reason):
+            logger.error('Subscription failed because:\n%s', reason)
+            sys.exit(1)
 
-            if input_file:
-                input_stream = open(input_file)
-            else:
-                input_stream = sys.stdin
+        def on_subscription_data(self, data):
+            handle_channel_data(data)
 
-            while True:
-                line = input_stream.readline()
-                if not line:
-                    break
-                line = line.rstrip()
-                try:
-                    data = json.loads(line)
-                    current_message_recv_date = data['timestamp']
-                    channel = override_channel or data['subscription_id']
-                    messages = data['messages']
-                    now = time.time()
+    so = SubscriptionObserver()
 
-                    if first_message_send_date is not None and not fast:
-                        sleep_amount = (first_message_send_date
-                            + (current_message_recv_date - first_message_recv_date)
-                            - now)
-                    else:
-                        sleep_amount = 0
+    delivery = delivery or SubscriptionMode.ADVANCED
 
-                    if sleep_amount > 0:
-                        time.sleep(sleep_amount)
+    for channel in channels:
+        args = {}
+        if query:
+            args.update({'filter': query})
+        client.subscribe(channel, delivery, so, args)
 
-                    if first_message_send_date is None:
-                        first_message_send_date = time.time()
-                        first_message_recv_date = current_message_recv_date
-
-                    for message in messages:
-                        try:
-                            client.publish(
-                                channel,
-                                message,
-                                callback=lambda *args: counter.decrement())
-                            counter.increment()
-                        except queue.Full as e:
-                            logger.error('Publish queue is full')
-
-                except ValueError:
-                    logger.error('Bad line: %s', line)
-                except Exception as e:
-                    logger.error('Exception: %s', e)
-                    sys.exit(2)
-
-        except KeyboardInterrupt:
-            pass
-        if counter.value() > 0:
-            sleep = 0.1
-            while sleep < 3.0:
-                time.sleep(sleep)
-                sleep += sleep
-                if not counter.value():
-                    break
-                else:
-                    logger.info('%s publishes remain unacked', counter.value())
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 
-def generic_subscribe(handle_channel_data, channels, endpoint, appkey,
-        role_name=None, role_secret=None, query=None, delivery=None):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
-
-        logger.info('Connected to %s %s', endpoint, appkey)
-        logger.info(
-            'Subscribing to %s, press C-c to stop',
-            channels[0] if len(channels) == 1 else '{0} channels'.format(
-                len(channels)))
-
-        class SubscriptionObserver(object):
-            def on_enter_subscribed(self):
-                logger.info('Subscription became active')
-
-            def on_enter_failed(self, reason):
-                logger.error('Subscription failed because:\n%s', reason)
-                sys.exit(1)
-
-            def on_subscription_data(self, data):
-                handle_channel_data(data)
-
-        so = SubscriptionObserver()
-
-        delivery = delivery or SubscriptionMode.ADVANCED
-
-        for channel in channels:
-            args = {}
-            if query:
-                args.update({'filter': query})
-            client.subscribe(channel, delivery, so, args)
-
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            sys.exit(0)
-
-
-def subscribe(channels, endpoint, appkey,
-        prettify_json=False, role_name=None, role_secret=None, query=None,
+def subscribe(client, channels,
+        prettify_json=False, query=None,
         delivery=None):
     def on_subscription_data(data):
         channel = data['subscription_id']
@@ -417,12 +368,10 @@ def subscribe(channels, endpoint, appkey,
             print('{0}: {1}'.format(channel, pretty_message))
         sys.stdout.flush()
 
-    generic_subscribe(
-        on_subscription_data, channels, endpoint, appkey,
-        role_name=role_name, role_secret=role_secret, query=query, delivery=delivery)
+    generic_subscribe(client,
+        on_subscription_data, channels, query=query, delivery=delivery)
 
-def record(*args, **kwargs):
-
+def record(client, *args, **kwargs):
     # one does not simply pass a mutable variable inside an inner function
     size_limit = {'size_limit': kwargs['size_limit']}
     count_limit = {'count_limit': kwargs['count_limit']}
@@ -466,82 +415,70 @@ def record(*args, **kwargs):
                 logger.info('Log size limit reached')
                 stop_main_thread()
 
-    generic_subscribe(on_subscription_data, *args, **kwargs)
+    generic_subscribe(client, on_subscription_data, *args, **kwargs)
 
-def kv_read(endpoint, appkey, role_name, role_secret, key, prettify_json=False):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
+def kv_read(client, key, prettify_json=False):
+    mailbox = []
+    event = threading.Event()
 
-        mailbox = []
-        event = threading.Event()
+    def callback(ack):
+        mailbox.append(ack)
+        event.set()
 
-        def callback(ack):
-            mailbox.append(ack)
-            event.set()
+    client.read(key, callback=callback)
 
-        client.read(key, callback=callback)
+    if not event.wait(10):
+        logger.error('rtm/read operation timed out')
+        sys.exit(1)
 
-        if not event.wait(10):
-            logger.error('rtm/read operation timed out')
-            sys.exit(1)
+    pdu = mailbox[0]
+    if pdu['action'] != 'rtm/read/ok':
+        logger.error('rtm/read operation failed:\n%s', pdu)
+        sys.exit(1)
 
-        pdu = mailbox[0]
-        if pdu['action'] != 'rtm/read/ok':
-            logger.error('rtm/read operation failed:\n%s', pdu)
-            sys.exit(1)
-
-        indent = 2 if prettify_json else None
-        json_value = json.dumps(pdu['body']['message'], indent=indent)
-        print(json_value)
+    indent = 2 if prettify_json else None
+    json_value = json.dumps(pdu['body']['message'], indent=indent)
+    print(json_value)
 
 
-def kv_write(endpoint, appkey, role_name, role_secret, key, value):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
+def kv_write(client, key, value):
+    mailbox = []
+    event = threading.Event()
 
-        mailbox = []
-        event = threading.Event()
+    def callback(ack):
+        mailbox.append(ack)
+        event.set()
 
-        def callback(ack):
-            mailbox.append(ack)
-            event.set()
+    client.write(key, value, callback=callback)
 
-        client.write(key, value, callback=callback)
+    if not event.wait(10):
+        logger.error('rtm/write operation timed out')
+        sys.exit(1)
 
-        if not event.wait(10):
-            logger.error('rtm/write operation timed out')
-            sys.exit(1)
-
-        pdu = mailbox[0]
-        if pdu['action'] != 'rtm/write/ok':
-            logger.error('rtm/write operation failed:\n%s', pdu)
-            sys.exit(1)
+    pdu = mailbox[0]
+    if pdu['action'] != 'rtm/write/ok':
+        logger.error('rtm/write operation failed:\n%s', pdu)
+        sys.exit(1)
 
 
-def kv_delete(endpoint, appkey, role_name, role_secret, key):
-    with make_client_(
-            endpoint=endpoint, appkey=appkey,
-            role_name=role_name, role_secret=role_secret) as client:
+def kv_delete(client, key):
+    mailbox = []
+    event = threading.Event()
 
-        mailbox = []
-        event = threading.Event()
+    def callback(ack):
+        mailbox.append(ack)
+        event.set()
 
-        def callback(ack):
-            mailbox.append(ack)
-            event.set()
+    client.delete(key, callback=callback)
 
-        client.delete(key, callback=callback)
+    if not event.wait(10):
+        logger.error('rtm/delete operation timed out')
+        sys.exit(1)
 
-        if not event.wait(10):
-            logger.error('rtm/delete operation timed out')
-            sys.exit(1)
-
-        pdu = mailbox[0]
-        if pdu['action'] != 'rtm/delete/ok':
-            logger.error('rtm/delete operation failed:\n%s', pdu)
-            sys.exit(1)
+    pdu = mailbox[0]
+    if pdu['action'] != 'rtm/delete/ok':
+        logger.error('rtm/delete operation failed:\n%s', pdu)
+        sys.exit(1)
 
 
 def stop_main_thread():

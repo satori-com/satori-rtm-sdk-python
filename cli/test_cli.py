@@ -27,7 +27,7 @@ class TestCLI(unittest.TestCase):
 
     def test_reconnect(self):
         def start_tcpkali():
-            return subprocess.Popen(['tcpkali', '--ws', '-l', '8999'])
+            return subprocess.Popen(['tcpkali', '-T5s', '--ws', '-l', '8999'])
         tcpkali1 = start_tcpkali()
 
         satori_cli = subprocess.Popen(
@@ -35,7 +35,7 @@ class TestCLI(unittest.TestCase):
                 '--appkey', 'bogus',
                 '--endpoint', 'ws://localhost:8999/',
 
-                '--time_limit_in_seconds=15',
+                '--time_limit_in_seconds=8',
                 'record', 'bogus'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)

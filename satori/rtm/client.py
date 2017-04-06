@@ -716,7 +716,7 @@ callback function::
 
     observer = kwargs.get('observer')
     auth_delegate = kwargs.get('auth_delegate')
-    if auth_delegate:
+    if 'auth_delegate' in kwargs:
         del kwargs['auth_delegate']
 
     client = Client(*args, **kwargs)

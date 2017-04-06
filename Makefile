@@ -38,7 +38,11 @@ run-examples: $(GENERATED_SOURCES)
 .PHONY: test
 test: $(GENERATED_SOURCES)
 	PYTHONPATH=. python test/run_all_tests.py
-	cd cli && PYTHONPATH=.:.. python test_cli.py
+	$(MAKE) -C cli test
+
+.PHONY: test-cli
+test-cli:
+	$(MAKE) -C cli test
 
 .PHONY: test-coverage
 test-coverage: $(GENERATED_SOURCES)
