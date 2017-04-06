@@ -54,3 +54,5 @@ if 'DEBUG_SATORI_SDK' in os.environ:
     configure(loglevel)
 else:
     logger.addHandler(logging.NullHandler())
+    miniws4py_logger = logging.getLogger('miniws4py')
+    miniws4py_logger.addHandler(logging.NullHandler())
