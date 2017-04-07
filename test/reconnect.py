@@ -184,8 +184,7 @@ class TestReconnect(unittest.TestCase):
 
     @unittest.skip('Need a channel that only a superuser has access to')
     def test_reauth(self):
-        client = Client(
-            endpoint=endpoint, appkey=appkey, restore_auth_on_reconnect=True)
+        client = Client(endpoint=endpoint, appkey=appkey)
         auth_delegate = auth.RoleSecretAuthDelegate('superuser', secret_key)
         auth_event = threading.Event()
         mailbox = []
@@ -231,8 +230,7 @@ class TestReconnect(unittest.TestCase):
 
     def test_missing_pong(self):
         satori.rtm.connection.ping_interval_in_seconds = 1
-        client = Client(
-            endpoint=endpoint, appkey=appkey, restore_auth_on_reconnect=True)
+        client = Client(endpoint=endpoint, appkey=appkey)
         co = ClientObserver()
         client.observer = co
 

@@ -31,11 +31,9 @@ For more information, see
 *Authentication and Authorization* in the online docs.
 
 
-
- .. note:: If a disconnect occurs and the client reconnects, reauthentication
-           happens automatically only if the Client object is constructed with
-           'restore_auth_on_reconnect=True' option. Otherwise, The client must
-           respond to the client state changes and authenticate again.
+ .. note:: Automatic reauthentication can be disable by passing
+           'restore_auth_on_reconnect=False' to Client constructor or
+           to make_client.
 
 
 Use the client or connection authenticate method with the authentication
@@ -46,8 +44,7 @@ request::
 
   with sc.make_client(
           endpoint=endpoint,
-          appkey=platform_appkey,
-          restore_auth_on_reconnect=True) as client:
+          appkey=platform_appkey) as client:
 
       role_auth_delegate = auth.RoleSecretAuthDelegate(\
           '<USER_ROLE>', secret_key)

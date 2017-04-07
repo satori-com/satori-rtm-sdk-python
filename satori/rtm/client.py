@@ -40,7 +40,7 @@ class Client(object):
             self, endpoint, appkey,
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
-            observer=None, restore_auth_on_reconnect=False,
+            observer=None, restore_auth_on_reconnect=True,
             max_queue_size=20000):
         r"""
 
@@ -70,7 +70,7 @@ Parameters
       Set this property with client.observer or in the `make_client(*args,
       **kwargs)` or `Client(*args, **kwargs)` methods.
     * restore_auth_on_reconnect {boolean} optional - Whether to restore
-      authentication after reconnects. Default is False.
+      authentication after reconnects. Default is True.
     * max_queue_size {int} optional - this parameter limits the amount of
       concurrent requests in order to avoid 'out of memory' situation.
       For example is max_queue_size is 10 and the client code sends 11
@@ -584,7 +584,7 @@ Parameters
       Set this property with client.observer or in the `make_client(*args,
       **kwargs)` or `Client(*args, **kwargs)` methods.
     * restore_auth_on_reconnect {boolean} optional - Whether to restore
-      authentication after reconnects. Default is False.
+      authentication after reconnects. Default is True.
     * max_queue_size {int} optional - this parameter limits the amount of
       concurrent requests in order to avoid 'out of memory' situation.
       For example is max_queue_size is 10 and the client code sends 11
