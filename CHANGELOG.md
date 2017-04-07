@@ -2,6 +2,8 @@ Unreleased
 ----------
 
 * Clearer error message for invalid endpoint
+* Preserve subscriptions over the course of `client.stop() >> client.start()` sequence.
+  This change unifies behavior with other Satori RTM SDKs
 
 v1.0.2 (2017-03-24)
 -------------------
