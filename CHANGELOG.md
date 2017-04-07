@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+* Clearer error message for invalid endpoint
+
 v1.0.2 (2017-03-24)
 -------------------
 
