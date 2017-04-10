@@ -22,22 +22,23 @@ try:
 except Exception:
     pass
 
-__doc__ = '''Satori CLI
+__doc__ = '''Satori RTM CLI
 
 Usage:
-  satori_cli.py [options] [--prettify_json] subscribe <channels>...
-  satori_cli.py [options] [--prettify_json] filter <channel> <query>
-  satori_cli.py [options] publish <channel>
-  satori_cli.py [options] [--prettify_json] read <key>
-  satori_cli.py [options] write <key> <value>
-  satori_cli.py [options] delete <key>
-  satori_cli.py [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
-  satori_cli.py [options] replay [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
+  satori_rtm_cli.py --help
+  satori_rtm_cli.py [options] [--prettify_json] subscribe <channels>...
+  satori_rtm_cli.py [options] [--prettify_json] filter <query>
+  satori_rtm_cli.py [options] publish <channel>
+  satori_rtm_cli.py [options] [--prettify_json] read <key>
+  satori_rtm_cli.py [options] write <key> <value>
+  satori_rtm_cli.py [options] delete <key>
+  satori_rtm_cli.py [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
+  satori_rtm_cli.py [options] replay [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
     --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 2
     --endpoint=<endpoint>  # default is Open Data Platform endpoint
-    --appkey=<appkey>      # default is Open Data Platform key
+    --appkey=<appkey>
     -i <input_file> --input_file=<input_file>
     -o <input_file> --output_file=<input_file>
     --role_name=<role-name>
@@ -46,11 +47,10 @@ Options:
 '''
 
 
-default_endpoint = 'wss://localhost'
-default_appkey = 'to_be_provided'
+default_endpoint = 'wss://open-data.api.satori.com'
 
 
-logger = logging.getLogger('satori_cli')
+logger = logging.getLogger('satori_rtm_cli')
 verbosity = 1
 
 
@@ -80,8 +80,13 @@ class ClientObserver(object):
 def main():
     args = docopt.docopt(__doc__)
 
+    appkey = args['--appkey']
+
+    if not appkey:
+        print('Missing --appkey parameter', file=sys.stderr)
+        sys.exit(1)
+
     endpoint = args['--endpoint'] or default_endpoint
-    appkey = args['--appkey'] or default_appkey
     role_name=args['--role_name']
     role_secret=args['--role_secret']
     prettify_json = args['--prettify_json']
@@ -185,7 +190,7 @@ def configure_logger(level):
     satori.rtm.logger.configure(level)
 
     formatter = logging.Formatter(
-        'satori_cli:%(asctime)s: %(message)s')
+        'satori_rtm_cli:%(asctime)s: %(message)s')
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
