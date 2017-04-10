@@ -8,7 +8,7 @@ import sys
 import threading
 import time
 
-from satori.rtm.client import make_client
+from satori.rtm.client import make_client, SubscriptionMode
 from threading import Event
 from test.utils import get_test_endpoint_and_appkey
 
@@ -105,8 +105,14 @@ def main():
                             user, channel))
                     del chat_state.users[user]
 
-        client.subscribe(channel, MessageChannelObserver())
-        client.subscribe(channel + '.presence', PresenceChannelObserver())
+        client.subscribe(
+            channel,
+            SubscriptionMode.SIMPLE,
+            MessageChannelObserver())
+        client.subscribe(
+            channel + '.presence',
+            SubscriptionMode.SIMPLE,
+            PresenceChannelObserver())
 
         try:
             screen = curses.initscr()
