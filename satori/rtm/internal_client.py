@@ -23,7 +23,7 @@ class InternalClient(object):
             endpoint, appkey,
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
-            observer=None, restore_auth_on_reconnect=False):
+            observer=None, restore_auth_on_reconnect=True):
 
         self._endpoint = endpoint
         self._appkey = appkey
