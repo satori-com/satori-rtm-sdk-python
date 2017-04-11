@@ -17,8 +17,9 @@ state if the connection to RTM drops.
 
 from __future__ import print_function
 from contextlib import contextmanager
-import satori.rtm.internal_queue as queue
 import satori.rtm.auth as auth
+from satori.rtm.exceptions import AuthError
+import satori.rtm.internal_queue as queue
 import threading
 
 import satori.rtm.internal_client_action as a
@@ -758,12 +759,12 @@ callback function::
 
         if not ready_event.wait(20):
             client.dispose()
-            raise RuntimeError('Authentication process has timed out')
+            raise AuthError('Authentication process has timed out')
 
         auth_result = auth_mailbox[0]
 
         if type(auth_result) == auth.Error:
-            raise RuntimeError(auth_result.message)
+            raise AuthError(auth_result.message)
 
         logger.debug('Auth success in make_client')
 

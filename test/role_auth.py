@@ -6,6 +6,7 @@ import unittest
 
 import satori.rtm.auth as auth
 from satori.rtm.client import make_client, Client
+from satori.rtm.exceptions import AuthError
 
 from test.utils import make_channel_name, sync_publish
 from test.utils import get_test_endpoint_and_appkey, get_test_secret_key
@@ -53,7 +54,7 @@ class TestRoleAuth(unittest.TestCase):
 
     def test_shorter_fail_case(self):
         ad = auth.RoleSecretAuthDelegate('superuser', 'bad_secret')
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AuthError):
             with make_client(
                     endpoint=endpoint,
                     appkey=appkey,
