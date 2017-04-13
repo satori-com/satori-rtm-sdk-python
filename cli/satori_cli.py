@@ -27,12 +27,12 @@ __doc__ = '''Satori CLI
 Usage:
   satori_cli.py [options] [--prettify_json] subscribe <channels>...
   satori_cli.py [options] [--prettify_json] filter <channel> <query>
-  satori_cli.py [options] publish <channel>
+  satori_cli.py [options] publish [--enable_acks=<enable_acks>] <channel>
   satori_cli.py [options] [--prettify_json] read <key>
-  satori_cli.py [options] write <key> <value>
-  satori_cli.py [options] delete <key>
+  satori_cli.py [options] write [--enable_acks=<enable_acks>] <key> <value>
+  satori_cli.py [options] delete [--enable_acks=<enable_acks>] <key>
   satori_cli.py [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
-  satori_cli.py [options] replay [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
+  satori_cli.py [options] replay [--enable_acks=<enable_acks>] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
     --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 2
@@ -118,6 +118,10 @@ def main():
         3: logging.DEBUG}
     configure_logger(int_to_loglevel[verbosity])
 
+    enable_acks = args['--enable_acks']
+    if enable_acks is None:
+        enable_acks = True
+
     observer = ClientObserver()
     logger.info('Connecting to %s using appkey %s', endpoint, appkey)
 
@@ -136,7 +140,7 @@ def main():
                 [args['<channel>']], prettify_json,
                 query=args['<query>'], delivery=delivery)
         elif args['publish']:
-            return publish(client, args['<channel>'])
+            return publish(client, args['<channel>'], enable_acks)
         elif args['record']:
             size_limit = parse_size(args['--size_limit_in_bytes'])
             if size_limit:
@@ -161,7 +165,7 @@ def main():
             return replay(
                 client,
                 override_channel=args['--override_channel'], fast=fast,
-                input_file=args['--input_file'])
+                input_file=args['--input_file'], enable_acks=enable_acks)
         elif args['read']:
             return kv_read(
                 client,
@@ -173,11 +177,9 @@ def main():
             except:
                 pass
 
-            return kv_write(
-                client,
-                args['<key>'], value)
+            return kv_write(client, args['<key>'], value, enable_acks)
         elif args['delete']:
-            return kv_delete(client, args['<key>'])
+            return kv_delete(client, args['<key>'], enable_acks)
 
 
 def configure_logger(level):
@@ -221,12 +223,20 @@ assert parse_size('1M') == 1000000
 assert parse_size('1g') == 1000000000
 assert parse_size('24k') == 24000
 
-
-def publish(client, channel):
+def publish(client, channel, enable_acks):
     print('Sending input to {0}, press C-d or C-c to stop'.format(channel))
 
     try:
         counter = Counter()
+
+        if enable_acks:
+            def callback(reply):
+                if reply['action'] != 'rtm/publish/ok':
+                    print('Publish failed: ', file=sys.stderr)
+                    sys.exit(1)
+                counter.decrement()
+        else:
+            callback = None
 
         while True:
             line = sys.stdin.readline()
@@ -237,13 +247,16 @@ def publish(client, channel):
                 message = json.loads(line)
             except:
                 message = line
-            counter.increment()
-            client.publish(
-                channel,
-                message,
-                callback=lambda *args: counter.decrement())
+
+            if enable_acks:
+                counter.increment()
+            client.publish(channel, message, callback=callback)
     except KeyboardInterrupt:
         pass
+
+    if not enable_acks:
+        return
+
     if counter.value() > 0:
         sleep = 0.1
         while sleep < 1.0:
@@ -255,9 +268,18 @@ def publish(client, channel):
             logger.info('%s publishes remain unacked', counter.value())
 
 
-def replay(client, override_channel=None, fast=False, input_file=None):
+def replay(client, override_channel=None, fast=False, input_file=None, enable_acks=True):
     try:
         counter = Counter()
+
+        if enable_acks:
+            def callback(reply):
+                if reply['action'] != 'rtm/publish/ok':
+                    print('Publish failed: ', file=sys.stderr)
+                    sys.exit(1)
+                counter.decrement()
+        else:
+            callback = None
 
         first_message_send_date = None
         first_message_recv_date = None
@@ -295,11 +317,9 @@ def replay(client, override_channel=None, fast=False, input_file=None):
 
                 for message in messages:
                     try:
-                        client.publish(
-                            channel,
-                            message,
-                            callback=lambda *args: counter.decrement())
-                        counter.increment()
+                        if enable_acks:
+                            counter.increment()
+                        client.publish(channel, message, callback=callback)
                     except queue.Full as e:
                         logger.error('Publish queue is full')
 
@@ -311,6 +331,8 @@ def replay(client, override_channel=None, fast=False, input_file=None):
 
     except KeyboardInterrupt:
         pass
+    if not enable_acks:
+        return
     if counter.value() > 0:
         sleep = 0.1
         while sleep < 3.0:
@@ -417,6 +439,7 @@ def record(client, *args, **kwargs):
 
     generic_subscribe(client, on_subscription_data, *args, **kwargs)
 
+
 def kv_read(client, key, prettify_json=False):
     mailbox = []
     event = threading.Event()
@@ -441,15 +464,21 @@ def kv_read(client, key, prettify_json=False):
     print(json_value)
 
 
-def kv_write(client, key, value):
-    mailbox = []
-    event = threading.Event()
+def kv_write(client, key, value, enable_acks):
+    if enable_acks:
+        mailbox = []
+        event = threading.Event()
 
-    def callback(ack):
-        mailbox.append(ack)
-        event.set()
+        def callback(ack):
+            mailbox.append(ack)
+            event.set()
+    else:
+        callback=None
 
     client.write(key, value, callback=callback)
+
+    if not enable_acks:
+        return
 
     if not event.wait(10):
         logger.error('rtm/write operation timed out')
@@ -461,15 +490,21 @@ def kv_write(client, key, value):
         sys.exit(1)
 
 
-def kv_delete(client, key):
-    mailbox = []
-    event = threading.Event()
+def kv_delete(client, key, enable_acks):
+    if enable_acks:
+        mailbox = []
+        event = threading.Event()
 
-    def callback(ack):
-        mailbox.append(ack)
-        event.set()
+        def callback(ack):
+            mailbox.append(ack)
+            event.set()
+    else:
+        callback = None
 
     client.delete(key, callback=callback)
+
+    if not enable_acks:
+        return
 
     if not event.wait(10):
         logger.error('rtm/delete operation timed out')
