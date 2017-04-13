@@ -1,7 +1,7 @@
 # Python SDK for Satori Platform
 
 Use the Python SDK for the Satori platform to create server-based applications 
-that use the Satori to publish and subscribe.
+that use RTM to publish and subscribe.
 
 # Installation
 
