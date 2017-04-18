@@ -22,10 +22,10 @@ class RtmWsClient(WebSocketBaseClient):
         if self.delegate:
             self.delegate.on_ws_ponged()
 
-    def close(self, *args, **kwargs):
+    def close(self, code=1000, reason=''):
         if self.terminated:
             raise RuntimeError('Connection is already closed')
-        WebSocketBaseClient.close(self, *args, **kwargs)
+        WebSocketBaseClient.close(self, code, reason)
 
     def closed(self, code, reason=None):
         if reason != 'Going away' and code != 1000:
@@ -33,6 +33,6 @@ class RtmWsClient(WebSocketBaseClient):
         if self.delegate:
             self.delegate.on_ws_closed()
 
-    def received_message(self, incoming_text):
+    def received_message(self, message):
         if self.delegate:
-            self.delegate.on_incoming_text_frame(str(incoming_text))
+            self.delegate.on_incoming_text_frame(str(message))
