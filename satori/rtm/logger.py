@@ -9,9 +9,9 @@ module. You can configure this logger to your specific needs. You can set the
 logging verbosity to `Debug` during debugging to find error sources faster.
 
 To enable stderr-based verbose logging on the command-line, set the
-DEBUG_SATORI_SDK environment variable to 1::
+DEBUG_SATORI_SDK environment variable to debug::
 
-  export DEBUG_SATORI_SDK=1
+  export DEBUG_SATORI_SDK=debug
   ./example.py # this now produces verbose logs
   unset DEBUG_SATORI_SDK
   ./example.py # this does not
