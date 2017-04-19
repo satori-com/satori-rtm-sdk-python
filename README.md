@@ -99,5 +99,5 @@ export SMC_JAR=/path/to/Smc.jar
 tox -e py27-test
 ```
 
-Substitute `py27` with one of `py26`, `pypy`, `py34` or `py35` to choose a
+Substitute `py27` with one of `pypy`, `py34` or `py35` to choose a
 desired Python implementation.
