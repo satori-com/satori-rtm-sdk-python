@@ -20,7 +20,6 @@ from contextlib import contextmanager
 import satori.rtm.auth as auth
 from satori.rtm.exceptions import AuthError
 import satori.rtm.internal_queue as queue
-import satori.rtm.auth as auth
 import threading
 
 import satori.rtm.internal_client_action as a

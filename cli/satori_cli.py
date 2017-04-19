@@ -27,12 +27,12 @@ __doc__ = '''Satori CLI
 Usage:
   satori_cli.py [options] [--prettify_json] subscribe <channels>...
   satori_cli.py [options] [--prettify_json] filter <channel> <query>
-  satori_cli.py [options] publish [--enable_acks=<enable_acks>] <channel>
+  satori_cli.py [options] publish [--disable_acks] <channel>
   satori_cli.py [options] [--prettify_json] read <key>
-  satori_cli.py [options] write [--enable_acks=<enable_acks>] <key> <value>
-  satori_cli.py [options] delete [--enable_acks=<enable_acks>] <key>
-  satori_cli.py [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
-  satori_cli.py [options] replay [--enable_acks=<enable_acks>] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
+  satori_cli.py [options] write [--disable_acks] <key> <value>
+  satori_cli.py [options] delete [--disable_acks] <key>
+  satori_cli.py [options] record [--disable_acks] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
+  satori_cli.py [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
     --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 2
@@ -118,9 +118,7 @@ def main():
         3: logging.DEBUG}
     configure_logger(int_to_loglevel[verbosity])
 
-    enable_acks = args['--enable_acks']
-    if enable_acks is None:
-        enable_acks = True
+    enable_acks = not args['--disable_acks']
 
     observer = ClientObserver()
     logger.info('Connecting to %s using appkey %s', endpoint, appkey)
