@@ -4,6 +4,28 @@ satori_rtm_cli.py
 
 This is a debugging and exploration tool for [Satori](https://www.satori.com) RTM.
 
+Installation
+------------
+
+It's available from PyPI:
+
+```
+pip install satori-rtm-cli
+```
+
+Depending on exactly how Python is set up on your machine you might have to
+instead use one of
+
+```
+pip install --user satori-rtm-cli
+```
+
+or
+
+```
+sudo pip install satori-rtm-cli
+```
+
 Common flags
 ------------
 
