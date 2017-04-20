@@ -1,12 +1,12 @@
-# Python SDK for Satori Platform
+# Satori RTM SDK for Python
 
-Use the Python SDK for the Satori platform to create server-based applications 
+Use the Satori RTM SDK for Python to create server-based applications
 that use RTM to publish and subscribe.
 
 # Installation
 
 ```
-pip install satori-sdk-python
+pip install satori-rtm-sdk
 ```
 
 Secure WebSocket communication (``wss://``) is supported natively
@@ -26,7 +26,7 @@ This should work on CentOS 7:
 ```
 yum install -y epel-release
 yum install -y python-pip gcc python-devel openssl-devel
-pip install satori-sdk-python
+pip install satori-rtm-sdk
 ```
 
 [1]: https://pypi.python.org/pypi/backports.ssl
@@ -63,7 +63,7 @@ You can view the latest Python SDK documentation
 ## Development dependencies
 
 There more build-time dependencies than runtime dependencies.
-In order to work on satori-sdk-python development, you need:
+In order to work on satori-rtm-sdk development, you need:
 
  * [State Machine Compiler (SMC)][4]
     to convert state machines description into Python source code
