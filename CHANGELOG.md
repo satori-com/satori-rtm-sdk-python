@@ -1,10 +1,18 @@
-Unreleased
-----------
+v1.0.3 (2017-04-21)
+-------------------
 
-* Clearer error message for invalid endpoint
-* Preserve subscriptions over the course of `client.stop() >> client.start()` sequence.
+* Made error message for invalid endpoint clearer
+* Added optional parameter auth_delegate to make_client function for easier
+  authentication
+* Fixed docstring in logger module
+* Subscriptions are now preserved over the course of
+  `client.stop() >> client.start()` sequence.
   This change unifies behavior with other Satori RTM SDKs
-* Add optional parameter auth_delegate to make_client function for easier authentication
+* Introduced AuthError exception class (this class is a subclass of
+  RuntimeException so it's a backward compatible change)
+* Fixed curses_chat example
+* Authentication is now repeated on reconnects by default (was opt-in earlier,
+  now opt-out)
 
 v1.0.2 (2017-03-24)
 -------------------

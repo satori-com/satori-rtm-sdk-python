@@ -28,9 +28,9 @@ classifiers = [
     ]
 
 setup(name='satori-sdk-python',
-      version='1.0.2',
+      version='1.0.3',
       description='Satori SDK',
-      author='Satori',
+      author='Satori Worldwide, Inc.',
       author_email='sdk@satori.com',
       url='https://www.satori.com/',
       packages=find_packages(exclude='ez_setup'),
