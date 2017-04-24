@@ -9,12 +9,12 @@ import satori.rtm.auth as auth
 import satori.rtm.connection
 
 from test.utils import ClientObserver, emulate_websocket_disconnect
-from test.utils import get_test_endpoint_and_appkey, get_test_secret_key
+from test.utils import get_test_endpoint_and_appkey
+from test.utils import get_test_role_name_secret_and_channel
 from test.utils import make_channel_name, sync_publish, sync_subscribe
 
 endpoint, appkey = get_test_endpoint_and_appkey()
-secret_key = get_test_secret_key()
-restricted_channel = make_channel_name('$python.sdk')
+role, secret, restricted_channel = get_test_role_name_secret_and_channel()
 
 
 class TestReconnect(unittest.TestCase):
@@ -182,10 +182,9 @@ class TestReconnect(unittest.TestCase):
 
         self.assertEqual(so.log, expected_log)
 
-    @unittest.skip('Need a channel that only a superuser has access to')
     def test_reauth(self):
         client = Client(endpoint=endpoint, appkey=appkey)
-        auth_delegate = auth.RoleSecretAuthDelegate('superuser', secret_key)
+        auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
         auth_event = threading.Event()
         mailbox = []
 

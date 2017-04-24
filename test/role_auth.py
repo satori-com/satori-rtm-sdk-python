@@ -8,13 +8,13 @@ import satori.rtm.auth as auth
 from satori.rtm.client import make_client, Client
 from satori.rtm.exceptions import AuthError
 
-from test.utils import make_channel_name, sync_publish
-from test.utils import get_test_endpoint_and_appkey, get_test_secret_key
+from test.utils import sync_publish
+from test.utils import get_test_endpoint_and_appkey
+from test.utils import get_test_role_name_secret_and_channel
 
 message = 'hello'
-channel = make_channel_name('$python.sdk')
 endpoint, appkey = get_test_endpoint_and_appkey()
-secret_key = get_test_secret_key()
+role, secret, channel = get_test_role_name_secret_and_channel()
 
 
 class TestRoleAuth(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestRoleAuth(unittest.TestCase):
                 appkey=appkey) as client:
 
             auth_event = threading.Event()
-            auth_delegate = auth.RoleSecretAuthDelegate('superuser', secret_key)
+            auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
             mailbox = []
 
             def auth_callback(auth_result):
@@ -44,7 +44,7 @@ class TestRoleAuth(unittest.TestCase):
             self.assertEqual(mailbox, ['Auth success'])
 
     def test_shorter_ok_case(self):
-        ad = auth.RoleSecretAuthDelegate('superuser', secret_key)
+        ad = auth.RoleSecretAuthDelegate(role, secret)
         with make_client(
                 endpoint=endpoint,
                 appkey=appkey,
@@ -68,7 +68,7 @@ class TestRoleAuth(unittest.TestCase):
             appkey=appkey)
 
         auth_event = threading.Event()
-        auth_delegate = auth.RoleSecretAuthDelegate('superuser', secret_key)
+        auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
         mailbox = []
 
         def auth_callback(auth_result):
@@ -117,7 +117,6 @@ class TestRoleAuth(unittest.TestCase):
 
             self.assertEqual(mailbox, ['Auth failure: Unauthenticated'])
 
-    @unittest.skip('Need a channel that only a superuser has access to')
     def test_publish_to_restricted_channel(self):
 
         with make_client(
@@ -125,7 +124,7 @@ class TestRoleAuth(unittest.TestCase):
                 appkey=appkey) as client:
 
             auth_event = threading.Event()
-            auth_delegate = auth.RoleSecretAuthDelegate('superuser', secret_key)
+            auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
             mailbox = []
 
             def auth_callback(auth_result):
@@ -178,7 +177,7 @@ class TestRoleAuth(unittest.TestCase):
                 appkey=appkey) as client:
 
             auth_event = threading.Event()
-            auth_delegate = auth.RoleSecretAuthDelegate('waldo', secret_key)
+            auth_delegate = auth.RoleSecretAuthDelegate('waldo', secret)
             mailbox = []
 
             def auth_callback(auth_result):

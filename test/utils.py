@@ -269,6 +269,9 @@ def get_test_endpoint_and_appkey(config_path='credentials.json'):
     return creds['endpoint'], creds['appkey']
 
 
-def get_test_secret_key(config_path='credentials.json'):
+def get_test_role_name_secret_and_channel(config_path='credentials.json'):
     creds = get_test_credentials(config_path)
-    return creds['superuser_role_secret']
+    return (
+        creds['auth_role_name'],
+        creds['auth_role_secret_key'], 
+        creds['auth_restricted_channel'])

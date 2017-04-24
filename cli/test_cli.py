@@ -9,10 +9,13 @@ import subprocess
 import time
 import unittest
 
-from test.utils import get_test_endpoint_and_appkey, get_test_secret_key
+from test.utils import get_test_endpoint_and_appkey
+from test.utils import get_test_role_name_secret_and_channel
 from test.utils import make_channel_name
 
 endpoint, appkey = get_test_endpoint_and_appkey('../credentials.json')
+role, secret, restricted_channel =\
+    get_test_role_name_secret_and_channel('../credentials.json')
 channel = b'test_cli.' + binascii.hexlify(os.urandom(5))
 string_message = b'string message'
 json_message = b'{"text": ["json", "message"]}'
@@ -181,14 +184,14 @@ def generic_test(self, should_authenticate=False):
     auth_args = []
     if should_authenticate:
         auth_args = [
-            '--role_name', 'superuser',
-            '--role_secret', get_test_secret_key('../credentials.json')]
+            '--role_name', role,
+            '--role_secret', secret]
 
     publisher = subprocess.Popen(
         ['python', 'satori_rtm_cli.py',
             '--appkey', appkey,
             '--endpoint', endpoint,
-            'publish', channel] + auth_args,
+            'publish', restricted_channel] + auth_args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE)

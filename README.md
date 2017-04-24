@@ -84,13 +84,19 @@ The `credentials.json` file must include the following key-value pairs:
 { 
   "endpoint": "ws://<SATORI_HOST>/",
   "appkey": "my_appkey",
-  "superuser_role_secret": "ROLE SECRET KEY"
+  "auth_role_name": "ROLE NAME"
+  "auth_role_secret_key": "ROLE SECRET"
+  "auth_restricted_channel": "RESTRICTED CHANNEL"
 }
 ```
-* `endpoint` is your customer-specific DNS name for Satori access.
+
+* `endpoint` is your customer-specific DNS name for RTM access.
 * `appkey` is your application key.
-* `superuser_role_secret` is a role secret key for a role named `superuser` that has access to the 
-reserved channels. If this role does not exist, you must create it.
+* `auth_role_name` is a role name that permits publishing / subscribing to `auth_restricted_channel`. Must be not `default`.
+* `auth_role_secret_key` is a secret key for `auth_role_name`.
+* `auth_restricted_channel` is a channel with subscribe and publish access for `auth_role_name` role only.
+
+You must use [DevPortal](https://developer.satori.com/) to create role and set channel permissions.
 
 After setting up `credentials.json`, run SDK tests with the following commands:
 

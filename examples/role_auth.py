@@ -6,12 +6,12 @@ import threading
 
 import satori.rtm.auth as auth
 from satori.rtm.client import make_client
-from test.utils import get_test_endpoint_and_appkey, get_test_secret_key
+from test.utils import get_test_endpoint_and_appkey
+from test.utils import get_test_role_name_secret_and_channel
 
 message = 'hello'
-channel = 'whatever'
-role = 'superuser'
-secret = get_test_secret_key()
+role, secret, restricted_channel =\
+    get_test_role_name_secret_and_channel()
 endpoint, appkey = get_test_endpoint_and_appkey()
 
 
@@ -33,7 +33,7 @@ def main():
             publish_finished_event.set()
 
         client.publish(
-            channel, message=message, callback=publish_callback)
+            restricted_channel, message=message, callback=publish_callback)
 
         if not publish_finished_event.wait(60):
             raise RuntimeError('Publish never finished')
