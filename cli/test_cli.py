@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import binascii
 import json
-import os
 import re
 import signal
 import subprocess
