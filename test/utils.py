@@ -273,5 +273,5 @@ def get_test_role_name_secret_and_channel(config_path='credentials.json'):
     creds = get_test_credentials(config_path)
     return (
         creds['auth_role_name'],
-        creds['auth_role_secret_key'], 
+        creds['auth_role_secret_key'],
         creds['auth_restricted_channel'])
