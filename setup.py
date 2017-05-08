@@ -27,7 +27,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     ]
 
-setup(name='satori-sdk-python',
+setup(name='satori-rtm-sdk',
       version='1.0.3',
       description='Satori SDK',
       author='Satori Worldwide, Inc.',
