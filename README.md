@@ -81,12 +81,12 @@ to be populated with the Satori properties.
 The `credentials.json` file must include the following key-value pairs:
 
 ```
-{ 
-  "endpoint": "ws://<SATORI_HOST>/",
-  "appkey": "my_appkey",
-  "auth_role_name": "ROLE NAME"
-  "auth_role_secret_key": "ROLE SECRET"
-  "auth_restricted_channel": "RESTRICTED CHANNEL"
+{
+  "endpoint": "wss://<SATORI_HOST>/",
+  "appkey": "<APP_KEY>",
+  "auth_role_name": "<ROLE_NAME>",
+  "auth_role_secret_key": "<ROLE_SECRET_KEY>",
+  "auth_restricted_channel": "<CHANNEL_NAME>"
 }
 ```
 
