@@ -26,6 +26,20 @@ or
 sudo pip install satori-rtm-cli
 ```
 
+This will result in an executable `satori_rtm_cli.py` being available in your
+shell. If the installation command succeeded, but the executable is not
+available, it probably means that it was installed in a directory that's
+not in your PATH. For a comprehensive guide see
+[Python packaging manual](https://packaging.python.org/installing/).
+
+If you want to control where the executable ends up, you can do this:
+
+```
+pip install --user --install-option="--install-scripts=$HOME/bin" satori-cli
+```
+
+As a result `satori_rtm_cli.py` will be in `$HOME/bin` directory.
+
 Common flags
 ------------
 
