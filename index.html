@@ -1,3 +1,4 @@
+<link rel="stylesheet" type="text/css" href="python_sdk_reference.css"/>
 <div class="document" id="logo-python-sdk-reference">
 <h1 class="title"><a class="reference external" href="https://www.satori.com"><img alt="Satori" class="align-middle" src="https://www.satori.com/assets/images/logo-light&#64;2x.png" style="width: 177px; height: 30px;" /></a> Python SDK Reference</h1>
 <p>The following table lists the Python SDK modules and classes:</p>
@@ -560,7 +561,7 @@ state if the connection to RTM drops.</p>
 <h3>__init__</h3>
 <dl class="docutils">
 <dt>Signature:</dt>
-<dd>__init__(self, endpoint, appkey, fail_count_threshold=inf, reconnect_interval=1, max_reconnect_interval=300, observer=None, restore_auth_on_reconnect=False, max_queue_size=20000)</dd>
+<dd>__init__(self, endpoint, appkey, fail_count_threshold=inf, reconnect_interval=1, max_reconnect_interval=300, observer=None, restore_auth_on_reconnect=True, max_queue_size=20000)</dd>
 <dt>Description</dt>
 <dd>Constructor for the Client.</dd>
 <dt>Parameters</dt>
@@ -592,7 +593,7 @@ Client.</p>
 **kwargs)</cite> or <cite>Client(*args, **kwargs)</cite> methods.</p>
 </li>
 <li><p class="first">restore_auth_on_reconnect {boolean} optional - Whether to restore
-authentication after reconnects. Default is False.</p>
+authentication after reconnects. Default is True.</p>
 </li>
 <li><p class="first">max_queue_size {int} optional - this parameter limits the amount of
 concurrent requests in order to avoid 'out of memory' situation.
@@ -1028,7 +1029,8 @@ with sc.make_client(
 using a <cite>with</cite> statement and the SDK automatically starts the WebSocket
 connection. The SDK stops and then closes the WebSocket connection when the
 statement completes or terminates due to an error.</p>
-<p>This function takes the same parameters as the Client constructor.</p>
+<p>This function takes the same parameters as the Client constructor plus
+optional <cite>auth_delegate</cite>.</p>
 <p>To use this function, import it from the client module:</p>
 <pre class="last literal-block">
 `from satori.rtm.client import make_client`
@@ -1063,7 +1065,7 @@ Client.</p>
 **kwargs)</cite> or <cite>Client(*args, **kwargs)</cite> methods.</p>
 </li>
 <li><p class="first">restore_auth_on_reconnect {boolean} optional - Whether to restore
-authentication after reconnects. Default is False.</p>
+authentication after reconnects. Default is True.</p>
 </li>
 <li><p class="first">max_queue_size {int} optional - this parameter limits the amount of
 concurrent requests in order to avoid 'out of memory' situation.
@@ -1071,6 +1073,9 @@ For example is max_queue_size is 10 and the client code sends 11
 publish requests so fast that by the time it sends 11th one the reply
 for the first one has not yet arrived, this 11th call to <cite>client.publish</cite>
 will throw the <cite>satori.rtm.client.Full</cite> exception.</p>
+</li>
+<li><p class="first">auth_delegate {AuthDelegate} [optional] - if auth_delegate parameter is
+present, the client yielded by make_client will be already authenticated.</p>
 </li>
 </ul>
 </dd>
@@ -1283,10 +1288,9 @@ calls <cite>auth_callback</cite> on the response from RTM.</p>
 <blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If a disconnect occurs and the client reconnects, reauthentication
-happens automatically only if the Client object is constructed with
-'restore_auth_on_reconnect=True' option. Otherwise, The client must
-respond to the client state changes and authenticate again.</p>
+<p class="last">Automatic reauthentication can be disable by passing
+'restore_auth_on_reconnect=False' to Client constructor or
+to make_client.</p>
 </div>
 </blockquote>
 <p>Use the client or connection authenticate method with the authentication
@@ -1297,8 +1301,7 @@ secret_key = '&lt;ROLE_SECRET_KEY&gt;'
 
 with sc.make_client(
         endpoint=endpoint,
-        appkey=platform_appkey,
-        restore_auth_on_reconnect=True) as client:
+        appkey=platform_appkey) as client:
 
     role_auth_delegate = auth.RoleSecretAuthDelegate(\
         '&lt;USER_ROLE&gt;', secret_key)
@@ -1324,9 +1327,9 @@ with sc.make_client(
 module. You can configure this logger to your specific needs. You can set the
 logging verbosity to <cite>Debug</cite> during debugging to find error sources faster.</p>
 <p>To enable stderr-based verbose logging on the command-line, set the
-DEBUG_SATORI_SDK environment variable to 1:</p>
+DEBUG_SATORI_SDK environment variable to debug:</p>
 <pre class="literal-block">
-export DEBUG_SATORI_SDK=1
+export DEBUG_SATORI_SDK=debug
 ./example.py # this now produces verbose logs
 unset DEBUG_SATORI_SDK
 ./example.py # this does not
