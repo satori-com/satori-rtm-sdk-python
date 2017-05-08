@@ -1,3 +1,9 @@
+v1.0.4 (2017-05-08)
+-------------------
+
+* Rename to satori-rtm-sdk
+* Unhardcode role name for tests
+
 v1.0.3 (2017-04-21)
 -------------------
 
