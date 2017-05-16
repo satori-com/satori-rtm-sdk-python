@@ -6,6 +6,10 @@ from threading import Event
 from satori.rtm.client import make_client, SubscriptionMode
 import satori.rtm.auth as auth
 
+# For tutorial purposes, we subscribe to the same channel that we publish a
+# message to. So we receive our own published message. This allows end-to-end
+# illustration of data flow with just a single client.
+
 # Replace these values with your project's credentials
 # from DevPortal (https://developer.satori.com/#/projects).
 endpoint = 'ENDPOINT'
@@ -25,31 +29,34 @@ def main():
             endpoint=endpoint, appkey=appkey,
             auth_delegate=auth_delegate) as client:
 
-        # Here the 'with make_client' inner scope begins
-        # it means that 'client' is already connected and
-        # since we have passed auth_delegate to make_client
-        # 'client' is also already authenticated.
+        # Entering here means that 'client' has already connected and
+        # also authenticated (because we have passed auth_delegate to
+        # make_client)
 
         print('Subscribing to a channel')
 
-        # client.subscribe(...) method is asynchronous so we need
-        # to perform synchronization ourself in order not to begin
-        # publishing until the subscription is established.
-        # Here we use an 'Event' object from the standard 'threading' module
-        # See https://docs.python.org/2/library/threading.html#event-objects
-        # for reference if you're not familiar with the concept.
+        # At this point we need to be aware of two facts:
+        # 1. client.subscribe(...) method is asynchronous
+        # 2. We want to receive the message we are publishing ourselves
+        #
+        # That means that we must publish the message *only after* we get
+        # a confirmation that subscription is established (this is not a
+        # general principle: some applications may not care to receive the
+        # messages they publish).
+
+        # We use an `Event` object from the standard 'threading' module, which
+        # is a mechanism for communication between threads: one thread
+        # signals an event and other threads wait for it.
 
         subscribed_event = Event()
         got_message_event = Event()
 
-        # In order to observe a subscription, that is to see the incoming
-        # data, state changes and errors, we must have a subscription observer
-        # object.
+        # We create a subscription observer object in order to receive callbacks
+        # for incoming data, state changes and errors.
 
         class SubscriptionObserver(object):
 
-            # This callback allows us to know when the subscription
-            # is established.
+            # Called when the subscription is established.
             def on_enter_subscribed(self):
                 subscribed_event.set()
 
@@ -61,7 +68,10 @@ def main():
 
         subscription_observer = SubscriptionObserver()
 
-        # Send subscribe request (remember, it's asyncronous)
+        # Send subscribe request. This call is asynchronous:
+        # client implementation internally queues the request and lets the
+        # function exit. Request is then processed from a background thread,
+        # while our main thread goes on.
         client.subscribe(
             channel,
             SubscriptionMode.SIMPLE,
@@ -88,13 +98,10 @@ def main():
             if ack['action'] == 'rtm/publish/ok':
                 print('Publish OK')
                 publish_finished_event.set()
-            elif ack['action'] == 'rtm/publish/ok':
+            elif ack['action'] == 'rtm/publish/error':
                 print(
                     'Publish request failed, error {0}, reason {1}'.format(
                         ack['body']['error'], ack['body']['reason']))
-                sys.exit(1)
-            else:
-                print('Unrecognized publish ack: {0}'.format(ack))
                 sys.exit(1)
 
         client.publish(
