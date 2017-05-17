@@ -13,6 +13,7 @@ from __future__ import print_function
 import itertools
 import posixpath
 import satori.rtm.internal_json as json
+import cbor
 import re
 import sys
 import threading
@@ -80,6 +81,7 @@ Parameters
             print(warning, file=sys.stderr)
             endpoint = re_version.sub('', endpoint)
 
+        self.url = endpoint
         self.url = posixpath.join(endpoint, 'v2')
         self.url += '?appkey={0}'.format(appkey)
         self.delegate = delegate
@@ -179,7 +181,8 @@ Description
     advantage of changes to PDU specifications by Satori without requiring an
     updated SDK.
         """
-        self.action_with_preserialized_body(name, json.dumps(body), callback)
+        # TODO: make cbor-compatible
+        self.action_with_preserialized_body(name, cbor.dumps(body), callback)
 
     def action_with_preserialized_body(self, name, body, callback=None):
         if callback:
@@ -188,11 +191,24 @@ Description
                 time.sleep(0.001)
 
             action_id = next(self.action_id_iterator)
-            payload = '{{"action":"{0}","id":{1},"body":{2}}}'.format(
-                name, action_id, body)
+            payload =\
+                b''.join([
+                    b'\xa3',
+                    cbor.dumps('action'),
+                    cbor.dumps(name),
+                    cbor.dumps('id'),
+                    cbor.dumps(action_id),
+                    cbor.dumps('body'),
+                    body])
             self.ack_callbacks_by_id[action_id] = callback
         else:
-            payload = '{{"action":"{0}","body":{1}}}'.format(name, body)
+            payload =\
+                b''.join([
+                    b'\xa3',
+                    cbor.dumps('action'),
+                    cbor.dumps(name),
+                    cbor.dumps('body'),
+                    body])
         self.send(payload)
 
     def publish(self, channel, message, callback=None):
@@ -553,7 +569,7 @@ Parameters
 
             if type(self._next_auth_action) == auth.Handshake:
                 action_id = next(self.action_id_iterator)
-                payload = json.dumps({
+                payload = cbor.dumps({
                     'action': 'auth/handshake',
                     'body': {
                         'method': self._next_auth_action.method,
@@ -563,7 +579,7 @@ Parameters
                 return self.send(payload)
             elif type(self._next_auth_action) == auth.Authenticate:
                 action_id = next(self.action_id_iterator)
-                payload = json.dumps({
+                payload = cbor.dumps({
                     'action': 'auth/authenticate',
                     'body': {
                         'method': self._next_auth_action.method,
@@ -665,14 +681,27 @@ Parameters
         if self.delegate:
             self.delegate.on_internal_error(message)
 
+    def on_incoming_binary_frame(self, incoming_binary):
+        try:
+            incoming_pdu = cbor.loads(incoming_binary)
+            # FIXME: remove workaround
+            try:
+                incoming_pdu['id'] = int(incoming_pdu['id'])
+            except KeyError:
+                pass
+            incoming_json = json.dumps(incoming_pdu)
+        except ValueError as e:
+            self.logger.exception(e)
+            message = '"{0}" is not valid CBOR'.format(incoming_binary)
+            return self.on_internal_error(message)
+        self.on_incoming_text_frame(incoming_json)
+
     def on_incoming_text_frame(self, incoming_text):
         self.logger.debug('incoming text: %s', incoming_text)
 
         self.on_ws_ponged()
 
         try:
-            if isinstance(incoming_text, bytes):
-                incoming_text = incoming_text.decode('utf-8')
             incoming_json = json.loads(incoming_text)
         except ValueError as e:
             self.logger.exception(e)

@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import sys
 
-install_requires = ['certifi', 'enum34', 'six']
+install_requires = ['cbor2', 'certifi', 'enum34', 'six']
 
 if sys.version_info < (2, 7, 9):
     install_requires.append('PyOpenSSL>=0.15')

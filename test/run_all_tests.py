@@ -6,6 +6,7 @@ import time
 import unittest
 from test.utils import print_resource_usage
 
+
 class TimedResult(unittest.TextTestResult):
     def startTest(self, test):
         self._origin = time.time()

@@ -14,6 +14,7 @@ channel = make_channel_name('two_clients')
 
 
 class TestFilter(unittest.TestCase):
+    @unittest.skip('filter')
     def test_filter(self):
         with make_client(endpoint=endpoint, appkey=appkey) as client:
             ch = make_channel_name('filter')

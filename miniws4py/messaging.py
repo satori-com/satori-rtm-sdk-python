@@ -96,7 +96,10 @@ class Message(object):
 
     def __str__(self):
         if py3k:
-            return self.data.decode(self.encoding)
+            if self.encoding:
+                return self.data.decode(self.encoding)
+            else:
+                return '{0}'.format(self.data)
         return self.data
 
     def __unicode__(self):

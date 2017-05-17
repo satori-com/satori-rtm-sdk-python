@@ -49,22 +49,22 @@ class TestConnection(unittest.TestCase):
         channel = make_channel_name('subscribe_before_start')
         self.assertRaises(
             RuntimeError,
-            lambda: conn.subscribe_sync(channel))
+            lambda: conn.subscribe_sync(channel, timeout=5))
 
     def test_publish_before_start(self):
         conn = sc.Connection(endpoint, appkey)
         channel = make_channel_name('publish_before_start')
         self.assertRaises(
             RuntimeError,
-            lambda: conn.publish_sync(channel, 'test'))
+            lambda: conn.publish_sync(channel, 'test', 5))
 
     def test_sync_operations(self):
         conn = sc.Connection(endpoint, appkey)
         conn.start()
         channel = make_channel_name('sync_connection_operations')
-        conn.subscribe_sync(channel)
-        conn.publish_sync(channel, 'test')
-        conn.unsubscribe_sync(channel)
+        conn.subscribe_sync(channel, timeout=5)
+        conn.publish_sync(channel, 'test', 5)
+        conn.unsubscribe_sync(channel, 5)
         conn.stop()
 
     def test_subscribe_sync_fail(self):
@@ -73,7 +73,7 @@ class TestConnection(unittest.TestCase):
         channel = make_channel_name('invalid_position')
         self.assertRaises(
             RuntimeError,
-            lambda: conn.subscribe_sync(channel, {'position': 'invalid'}))
+            lambda: conn.subscribe_sync(channel, {'position': 'invalid'}, 5))
         conn.stop()
 
     def test_publish_sync_fail(self):
@@ -81,7 +81,7 @@ class TestConnection(unittest.TestCase):
         conn.start()
         self.assertRaises(
             RuntimeError,
-            lambda: conn.publish_sync(restricted_channel, 'test'))
+            lambda: conn.publish_sync(restricted_channel, 'test', 5))
         conn.stop()
 
     def test_unsubscribe_sync_fail(self):
@@ -89,7 +89,7 @@ class TestConnection(unittest.TestCase):
         conn.start()
         self.assertRaises(
             RuntimeError,
-            lambda: conn.unsubscribe_sync('any'))
+            lambda: conn.unsubscribe_sync('any', 5))
         conn.stop()
 
     def test_write_read(self):
@@ -101,6 +101,7 @@ class TestConnection(unittest.TestCase):
         event = threading.Event()
 
         def callback(pdu):
+            print('callback', pdu)
             mailbox.append(pdu)
             event.set()
 
@@ -240,6 +241,7 @@ class TestConnection(unittest.TestCase):
             conn.read_sync(channel, timeout=0)
         conn.stop()
 
+    @unittest.skip('filter')
     def test_filter(self):
         mailbox = []
 
