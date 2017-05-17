@@ -77,6 +77,13 @@ def main():
             SubscriptionMode.SIMPLE,
             subscription_observer)
 
+        # Wait on a subscribed_event is going to put our main thread to sleep
+        # (block).  As soon as SDK invokes our on_enter_subscribed callback
+        # (from a background thread),  the callback notifies this event (`set`),
+        # which wakes up the main thread.  To avoid indefinite hang in case of a
+        # failure, the wait is limited to 10 second timeout.
+        # The result value of `wait` indicates notification (True)
+        # or timeout (False).
         if not subscribed_event.wait(10):
             print("Couldn't establish the subscription in time")
             sys.exit(1)
@@ -85,7 +92,7 @@ def main():
 
         # client.publish(...) method is also asynchronous, again we
         # use an 'Event' to wait until we have a reply for publish
-        # request.
+        # request or timeout.
         publish_finished_event = Event()
 
         # In case of publishing, there's no observer object involved because
@@ -112,22 +119,22 @@ def main():
             sys.exit(1)
 
         # At this point we have successfully published the message
-        # (we know this because we just received a PDU with 'rtm/publish/ok'
-        # and even may have already gotten that message back via the
-        # subscription. Either can come first or second.
+        # (we know this because we just received a PDU with 'rtm/publish/ok')
+        # and we even may have already received that message back via the
+        # subscription. Publish confirmation could come after or before the
+        # subscription data.
 
         if not got_message_event.wait(10):
             print("Couldn't receive the message in time")
             sys.exit(1)
 
-        # At this point we have definitely received the message
-        # and printed it to stdout (via code in on_subscription_data callback)
+        # At this point we have received the message
+        # and printed it to stdout (in on_subscription_data callback code)
 
         print('Unsubscribing from a channel')
         client.unsubscribe(channel)
 
-        # here the 'with make_client' inner scope ends
-        # this triggers the disconnect from RTM
+        # Exiting 'with make_client' triggers the disconnect from RTM
         # and destruction of the 'client' object
 
 if __name__ == '__main__':
