@@ -203,7 +203,7 @@ class WebSocketBaseClient(WebSocket):
             response = b''
             doubleCLRF = b'\r\n\r\n'
             while True:
-                bytes_ = self.sock.recv(128)
+                bytes_ = self.sock.recv(128, 0)
                 if not bytes_:
                     break
                 response += bytes_
@@ -230,7 +230,8 @@ class WebSocketBaseClient(WebSocket):
         except Exception as e:
             logger.exception(e)
             try:
-                self.sock.close()
+                if self.sock:
+                    self.sock.close()
             except Exception:
                 pass
             self.sock = None

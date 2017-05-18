@@ -185,7 +185,7 @@ class WebSocket(object):
         if self.terminated or self.sock is None:
             raise RuntimeError("Cannot send on a terminated websocket")
 
-        self.sock.sendall(b)
+        self.sock.sendall(b, 0)
 
     def send(self, payload, binary=False, masked=False):
         """
@@ -262,7 +262,7 @@ class WebSocket(object):
         data = b""
         pending = self.sock.pending()
         while pending:
-            data += self.sock.recv(pending)
+            data += self.sock.recv(pending, 0)
             pending = self.sock.pending()
         return data
 
@@ -286,7 +286,7 @@ class WebSocket(object):
             return False
 
         try:
-            b = self.sock.recv(self.reading_buffer_size)
+            b = self.sock.recv(self.reading_buffer_size, 0)
             # This will only make sense with secure sockets.
             if self._is_secure:
                 b += self._get_from_pending()
