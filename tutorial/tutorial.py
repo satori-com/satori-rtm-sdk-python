@@ -19,8 +19,8 @@ appkey = 'YOUR_APPKEY'
 role = 'YOUR_ROLE'
 secret = 'YOUR_SECRET'
 
-channel = 'my_channel'
-message = {'Hello': 'world'}
+channel = 'animal_sightings'
+animal = {'who': 'zebra', 'where': [34.134358,-118.321506]}
 
 def main():
 
@@ -118,7 +118,7 @@ def main():
                 sys.exit(1)
 
         client.publish(
-            channel, message=message, callback=publish_callback)
+            channel, message=animal, callback=publish_callback)
 
         if not publish_finished_event.wait(10):
             print("Couldn't publish the message in time")
