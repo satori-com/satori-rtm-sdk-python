@@ -12,10 +12,12 @@ import satori.rtm.auth as auth
 
 # Replace these values with your project's credentials
 # from DevPortal (https://developer.satori.com/#/projects).
-endpoint = 'ENDPOINT'
-appkey = 'APPKEY'
-role = 'ROLE'
-secret = 'SECRET'
+endpoint = 'YOUR_ENDPOINT'
+appkey = 'YOUR_APPKEY'
+
+# role and secret are optional. Setting these to None means no authentication.
+role = 'YOUR_ROLE'
+secret = 'YOUR_SECRET'
 
 channel = 'my_channel'
 message = {'Hello': 'world'}
@@ -23,7 +25,11 @@ message = {'Hello': 'world'}
 def main():
 
     print('Creating RTM client instance')
-    auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
+
+    if role and secret:
+        auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
+    else:
+        auth_delegate = None
 
     with make_client(
             endpoint=endpoint, appkey=appkey,
