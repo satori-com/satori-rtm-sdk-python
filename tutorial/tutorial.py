@@ -11,7 +11,7 @@ import satori.rtm.auth as auth
 # illustration of data flow with just a single client.
 
 # Replace these values with your project's credentials
-# from DevPortal (https://developer.satori.com/#/projects).
+# from Dev Portal (https://developer.satori.com/#/projects).
 endpoint = 'YOUR_ENDPOINT'
 appkey = 'YOUR_APPKEY'
 
