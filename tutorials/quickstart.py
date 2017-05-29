@@ -26,7 +26,7 @@ def main():
 
     print('Creating RTM client instance')
 
-    if role and secret:
+    if role and secret and secret != 'YOUR_SECRET':
         auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
     else:
         auth_delegate = None
