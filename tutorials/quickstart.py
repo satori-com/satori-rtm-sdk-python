@@ -1,6 +1,8 @@
 from __future__ import print_function
 
+import math
 import sys
+import time
 from threading import Event
 
 from satori.rtm.client import make_client, SubscriptionMode
@@ -20,7 +22,7 @@ role = 'YOUR_ROLE'
 secret = 'YOUR_SECRET'
 
 channel = 'animal_sightings'
-animal = {'who': 'zebra', 'where': [34.134358,-118.321506]}
+
 
 def main():
 
@@ -55,7 +57,6 @@ def main():
         # signals an event and other threads wait for it.
 
         subscribed_event = Event()
-        got_message_event = Event()
 
         # We create a subscription observer object in order to receive callbacks
         # for incoming data, state changes and errors.
@@ -70,7 +71,6 @@ def main():
             def on_subscription_data(self, data):
                 for message in data['messages']:
                     print('Client got message {0}'.format(message))
-                got_message_event.set()
 
         subscription_observer = SubscriptionObserver()
 
@@ -117,31 +117,35 @@ def main():
                         ack['body']['error'], ack['body']['reason']))
                 sys.exit(1)
 
-        client.publish(
-            channel, message=animal, callback=publish_callback)
+        print('\nPress CTRL-C to exit\n')
 
-        if not publish_finished_event.wait(10):
-            print("Couldn't publish the message in time")
-            sys.exit(1)
+        try:
+            while True:
+                now = time.time()
+                coords = [
+                    34.134358 + math.cos(now),
+                    -118.321506 + math.sin(now)]
+                animal = {'who': 'zebra', 'where': coords}
+                client.publish(
+                    channel, message=animal, callback=publish_callback)
 
-        # At this point we have successfully published the message
-        # (we know this because we just received a PDU with 'rtm/publish/ok')
-        # and we even may have already received that message back via the
-        # subscription. Publish confirmation could come after or before the
-        # subscription data.
+                if not publish_finished_event.wait(10):
+                    print("Couldn't publish the message in time")
+                    sys.exit(1)
 
-        if not got_message_event.wait(10):
-            print("Couldn't receive the message in time")
-            sys.exit(1)
-
-        # At this point we have received the message
-        # and printed it to stdout (in on_subscription_data callback code)
-
-        print('Unsubscribing from a channel')
-        client.unsubscribe(channel)
+                # At this point we have successfully published the message
+                # (we know this because we just received a PDU with
+                # 'rtm/publish/ok') # and we even may have already received
+                # that message back via the # subscription. Publish
+                # confirmation could come after or before the subscription data.
+                publish_finished_event.clear()
+                time.sleep(2)
+        except KeyboardInterrupt:
+            pass
 
         # Exiting 'with make_client' triggers the disconnect from RTM
         # and destruction of the 'client' object
+
 
 if __name__ == '__main__':
     main()
