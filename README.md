@@ -1,7 +1,11 @@
-# Satori RTM SDK for Python
+Python SDK for Satori RTM
+-------------------------
 
-Use the Satori RTM SDK for Python to create server-based applications
-that use RTM to publish and subscribe.
+RTM is the realtime messaging service at the core of the
+[Satori platform](https://www.satori.com).
+
+Python SDK makes it more convenient to use Satori RTM
+from [Python programming language](https://www.python.org).
 
 # Installation
 
@@ -75,18 +79,17 @@ In order to work on satori-rtm-sdk development, you need:
 
 ## Running Tests
 
-Tests require an active Satori to be available. The tests require `credentials.json` 
-to be populated with the Satori properties.
-
-The `credentials.json` file must include the following key-value pairs:
+Almost all tests are run against real Satori RTM service. The tests require
+`credentials.json` file to be populated with RTM credentials. It must include
+the following key-value pairs:
 
 ```
 {
-  "endpoint": "wss://<SATORI_HOST>/",
-  "appkey": "<APP_KEY>",
-  "auth_role_name": "<ROLE_NAME>",
-  "auth_role_secret_key": "<ROLE_SECRET_KEY>",
-  "auth_restricted_channel": "<CHANNEL_NAME>"
+  "endpoint": "YOUR_ENDPOINT",
+  "appkey": "YOUR_APPKEY",
+  "auth_role_name": "YOUR_ROLE",
+  "auth_role_secret_key": "YOUR_SECRET",
+  "auth_restricted_channel": "YOUR_RESTRICTED_CHANNEL"
 }
 ```
 
@@ -96,7 +99,7 @@ The `credentials.json` file must include the following key-value pairs:
 * `auth_role_secret_key` is a secret key for `auth_role_name`.
 * `auth_restricted_channel` is a channel with subscribe and publish access for `auth_role_name` role only.
 
-You must use [DevPortal](https://developer.satori.com/) to create role and set channel permissions.
+You must use [Dev Portal](https://developer.satori.com/) to create the role and set channel permissions.
 
 After setting up `credentials.json`, run SDK tests with the following commands:
 
