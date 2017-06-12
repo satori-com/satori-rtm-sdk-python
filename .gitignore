@@ -5,3 +5,4 @@ __pycache__
 htmlcov
 venv*
 .test_appkey
+credentials.json
