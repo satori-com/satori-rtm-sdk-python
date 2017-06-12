@@ -139,6 +139,8 @@ def main():
                 # that message back via the # subscription. Publish
                 # confirmation could come after or before the subscription data.
                 publish_finished_event.clear()
+
+                sys.stdout.flush()
                 time.sleep(2)
         except KeyboardInterrupt:
             pass

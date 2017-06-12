@@ -302,6 +302,8 @@ class InternalClient(object):
         old_subscription = self.subscriptions.get(channel)
         if old_subscription:
             logger.debug('Old subscription found')
+            # TODO: distinguish errors and legitimate resubscriptions
+            #       and call an error callback on former
             old_subscription.subscribe(args, observer=subscription_observer)
             return
 
