@@ -21,7 +21,7 @@ appkey = 'YOUR_APPKEY'
 role = 'YOUR_ROLE'
 secret = 'YOUR_SECRET'
 
-channel = 'animal_sightings'
+channel = 'animals'
 
 
 def main():
