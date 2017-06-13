@@ -42,8 +42,6 @@ def main():
         # also authenticated (because we have passed auth_delegate to
         # make_client)
 
-        print('Subscribing to a channel')
-
         # At this point we need to be aware of two facts:
         # 1. client.subscribe(...) method is asynchronous
         # 2. We want to receive the message we are publishing ourselves
@@ -66,6 +64,7 @@ def main():
 
             # Called when the subscription is established.
             def on_enter_subscribed(self):
+                print('Subscribed to the channel: ' + channel)
                 subscribed_event.set()
 
             # This callback allows us to observe incoming messages
