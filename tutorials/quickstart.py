@@ -37,6 +37,7 @@ def main():
             endpoint=endpoint, appkey=appkey,
             auth_delegate=auth_delegate) as client:
 
+        print('Connected to Satori!')
         # Entering here means that 'client' has already connected and
         # also authenticated (because we have passed auth_delegate to
         # make_client)
