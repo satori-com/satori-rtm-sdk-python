@@ -1,5 +1,5 @@
-Unreleased
-----------
+v1.2
+----
 
 * Added https proxy support (no authentication)
 

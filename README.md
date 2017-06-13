@@ -59,8 +59,8 @@ satori.rtm.connection.enable_wsaccel()
 
 # Documentation
 
-You can view the latest Python SDK documentation
-[here](https://www.satori.com/docs/client-libraries/python).
+You can view the latest SDK documentation
+[here](https://www.satori.com/docs/rtm-sdks/overview).
 
 # Development
 
