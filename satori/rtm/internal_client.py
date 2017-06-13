@@ -23,7 +23,8 @@ class InternalClient(object):
             endpoint, appkey,
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
-            observer=None, restore_auth_on_reconnect=True):
+            observer=None, restore_auth_on_reconnect=True,
+            proxy=None):
 
         self._endpoint = endpoint
         self._appkey = appkey
@@ -32,6 +33,7 @@ class InternalClient(object):
         self.observer = observer
         self.fail_count_threshold = fail_count_threshold
         self.subscriptions = {}
+        self.proxy = proxy
 
         self._reconnect_timer = None
         self._queue = message_queue
@@ -194,7 +196,8 @@ class InternalClient(object):
     def _connect(self):
         logger.info('_connect')
         self._time_of_last_reconnect = time.time()
-        self.connection = Connection(self._endpoint, self._appkey, self)
+        self.connection = Connection(
+            self._endpoint, self._appkey, self, self.proxy)
         try:
             self.connection.start()
             self._queue.put(a.ConnectingComplete())

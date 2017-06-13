@@ -14,11 +14,12 @@ from miniws4py.compat import urlsplit
 
 __all__ = ['WebSocketBaseClient']
 
+doubleCRLF = b'\r\n\r\n'
 logger = logging.getLogger('miniws4py')
 
 class WebSocketBaseClient(WebSocket):
     def __init__(self, url, protocols=None, extensions=None,
-                 ssl_options=None, headers=None):
+                 ssl_options=None, headers=None, proxy=None):
         """
         A websocket client that implements :rfc:`6455` and provides a simple
         interface to communicate with a websocket server.
@@ -63,16 +64,22 @@ class WebSocketBaseClient(WebSocket):
         self.resource = None
         self.ssl_options = ssl_options or {}
         self.extra_headers = headers or []
+        self.proxy = proxy
 
         self._parse_url()
 
         # Let's handle IPv4 and IPv6 addresses
         # Simplified from CherryPy's code
         try:
-            family, socktype, proto, canonname, sa = socket.getaddrinfo(self.host, self.port,
-                                                                        socket.AF_UNSPEC,
-                                                                        socket.SOCK_STREAM,
-                                                                        0, socket.AI_PASSIVE)[0]
+            if self.proxy:
+                host, port = self.proxy
+            else:
+                host, port = (self.host, self.port)
+            family, socktype, proto, canonname, sa = socket.getaddrinfo(
+                host, port,
+                socket.AF_UNSPEC,
+                socket.SOCK_STREAM,
+                0, socket.AI_PASSIVE)[0]
         except socket.gaierror:
             family = socket.AF_INET
             if self.host.startswith('::'):
@@ -151,74 +158,27 @@ class WebSocketBaseClient(WebSocket):
         Connects this websocket and starts the upgrade handshake
         with the remote endpoint.
         """
-        if self.scheme == "wss":
-
-            if sys.version_info < (2, 7, 9):
-                if sys.version_info >= (2, 7, 0):
-                    try:
-                        import backports.ssl
-                    except ImportError:
-                        raise RuntimeError(
-                            "In order to use secure websockets with "
-                            "Python 2.7.8 and earlier please install "
-                            " the backports.ssl package.")
-                    try:
-                        import OpenSSL
-                        assert OpenSSL
-                    except ImportError:
-                        raise RuntimeError(
-                            "Please make sure PyOpenSSL >= 0.15 is installed")
-
-                    try:
-                        openssl_version = OpenSSL.__version__
-                        from distutils.version import LooseVersion
-                        assert LooseVersion(openssl_version) >= LooseVersion('0.15.0')
-                    except Exception:
-                        raise RuntimeError(
-                            "Please make sure that PyOpenSSL version is"
-                            "at least 0.15, found only {0}".format(openssl_version))
-
-                    ctx = backports.ssl.SSLContext(backports.ssl.PROTOCOL_SSLv23)
-                    ctx.verify_mode = backports.ssl.CERT_REQUIRED
-                    ctx.check_hostname = True
-                    ctx.ca_file = certifi.where()
-
-                else:
-                    raise RuntimeError("Python 2.6 is not supported")
-            else:
-                import ssl
-                ctx = ssl.create_default_context(
-                    purpose=ssl.Purpose.SERVER_AUTH,
-                    cafile=certifi.where())
-
-            self.sock = ctx.wrap_socket(self.sock, server_hostname=self.host)
-        assert certifi
-
         try:
             self.sock.settimeout(300)
-            self.sock.connect(self.bind_addr)
+
+            if self.scheme == "wss" and not self.proxy:
+                self.sock = _ssl_wrap_socket(self.sock, self.host)
+                self.sock.connect(self.bind_addr)
+            elif self.scheme == "wss" and self.proxy:
+                self.sock.connect(self.proxy)
+                _send_http_connect(self.sock, self.host, self.port)
+                self.sock = _ssl_wrap_socket(self.sock, self.host)
+            else:
+                self.sock.connect(self.bind_addr)
 
             self._write(self.handshake_request)
 
-            response = b''
-            doubleCLRF = b'\r\n\r\n'
-            while True:
-                bytes_ = self.sock.recv(128, 0)
-                if not bytes_:
-                    break
-                response += bytes_
-                if doubleCLRF in response:
-                    break
-
-            if not response:
-                self.close_connection()
-                raise HandshakeError("No response")
-
-            headers, _, body = response.partition(doubleCLRF)
-            response_line, _, headers = headers.partition(b'\r\n')
-
             try:
-                self.process_response_line(response_line)
+                code, status, headers, body = _read_http_response(self.sock)
+                if code != b'101':
+                    raise HandshakeError(
+                        "Invalid response status for %s: %s %s" %
+                            (self.url, code, status))
                 self.protocols, self.extensions =\
                     self.process_handshake_header(headers)
             except HandshakeError:
@@ -285,17 +245,6 @@ class WebSocketBaseClient(WebSocket):
 
         return b'\r\n'.join(request)
 
-    def process_response_line(self, response_line):
-        """
-        Ensure that we received a HTTP `101` status code in
-        response to our request and if not raises :exc:`HandshakeError`.
-        """
-        protocol, code, status = response_line.split(b' ', 2)
-        if code != b'101':
-            raise HandshakeError(
-                "Invalid response status for %s: %s %s" %
-                    (self.url, code, status))
-
     def process_handshake_header(self, headers):
         """
         Read the upgrade handshake's response headers and
@@ -329,3 +278,77 @@ class WebSocketBaseClient(WebSocket):
                 extensions = ','.join(value)
 
         return protocols, extensions
+
+def _send_http_connect(sock, host, port):
+    connect_header = "CONNECT {0}:{1} HTTP/1.0{2}".format(
+        host, port, doubleCRLF)
+
+    sock.send(connect_header)
+
+    code, status, headers, body = _read_http_response(sock)
+
+    if code != b'200':
+        raise HandshakeError(
+            "HTTP CONNECT to proxy failed: {0} {1}".format(code, status))
+
+    return sock
+
+def _read_http_response(sock):
+    response = b''
+    while True:
+        bytes_ = sock.recv(128, 0)
+        if not bytes_:
+            break
+        response += bytes_
+        if doubleCRLF in response:
+            break
+
+    if not response:
+        raise HandshakeError("No response")
+
+    headers, _, body = response.partition(doubleCRLF)
+    response_line, _, headers = headers.partition(b'\r\n')
+    _protocol, code, status = response_line.split(b' ', 2)
+
+    return code, status, headers, body
+
+def _ssl_wrap_socket(sock, host):
+    if sys.version_info < (2, 7, 9):
+        if sys.version_info >= (2, 7, 0):
+            try:
+                import backports.ssl
+            except ImportError:
+                raise RuntimeError(
+                    "In order to use secure websockets with "
+                    "Python 2.7.8 and earlier please install "
+                    " the backports.ssl package.")
+            try:
+                import OpenSSL
+                assert OpenSSL
+            except ImportError:
+                raise RuntimeError(
+                    "Please make sure PyOpenSSL >= 0.15 is installed")
+
+            try:
+                openssl_version = OpenSSL.__version__
+                from distutils.version import LooseVersion
+                assert LooseVersion(openssl_version) >= LooseVersion('0.15.0')
+            except Exception:
+                raise RuntimeError(
+                    "Please make sure that PyOpenSSL version is"
+                    "at least 0.15, found only {0}".format(openssl_version))
+
+            ctx = backports.ssl.SSLContext(backports.ssl.PROTOCOL_SSLv23)
+            ctx.verify_mode = backports.ssl.CERT_REQUIRED
+            ctx.check_hostname = True
+            ctx.ca_file = certifi.where()
+
+        else:
+            raise RuntimeError("Python 2.6 is not supported")
+    else:
+        import ssl
+        ctx = ssl.create_default_context(
+            purpose=ssl.Purpose.SERVER_AUTH,
+            cafile=certifi.where())
+
+    return ctx.wrap_socket(sock, server_hostname=host)

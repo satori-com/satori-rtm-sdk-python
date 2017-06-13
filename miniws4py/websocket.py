@@ -22,15 +22,12 @@ __all__ = ['WebSocket']
 class WebSocket(object):
     """ Represents a websocket endpoint and provides a high level interface to drive the endpoint. """
 
-    def __init__(self, sock, protocols=None, extensions=None, environ=None):
+    def __init__(self, sock, protocols=None, extensions=None, proxy=None):
         """ The ``sock`` is an opened connection
         resulting from the websocket handshake.
 
         If ``protocols`` is provided, it is a list of protocols
         negotiated during the handshake as is ``extensions``.
-
-        If ``environ`` is provided, it is a copy of the WSGI environ
-        dictionnary from the underlying WSGI server.
         """
 
         self.stream = Stream()
@@ -74,11 +71,6 @@ class WebSocket(object):
         self.reading_buffer_size = DEFAULT_READING_SIZE
         """
         Current connection reading buffer size.
-        """
-
-        self.environ = environ
-        """
-        WSGI environ dictionary.
         """
 
     def opened(self):
@@ -308,7 +300,7 @@ class WebSocket(object):
 
         Finally close the underlying connection for
         good and cleanup resources by unsetting
-        the `environ` and `stream` attributes.
+        the `stream` attribute.
         """
         s = self.stream       
 
@@ -324,7 +316,6 @@ class WebSocket(object):
             # Cleaning up resources
             s._cleanup()
             self.stream = None
-            self.environ = None
 
     def process(self, bytes):
         """ Takes some bytes and process them through the

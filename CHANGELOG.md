@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+* Added https proxy support (no authentication)
+
 v1.0.4 (2017-05-08)
 -------------------
 
