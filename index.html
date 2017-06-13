@@ -32,7 +32,7 @@ necessary.</p>
 <h3>__init__</h3>
 <dl class="docutils">
 <dt>Signature:</dt>
-<dd>__init__(self, endpoint, appkey, delegate=None)</dd>
+<dd>__init__(self, endpoint, appkey, delegate=None, https_proxy=None)</dd>
 <dt>Description</dt>
 <dd><p class="first">Constructor for the Connection class. Creates and returns an instance of the
 Connection class. Use this function to create a instance from which you can
@@ -51,8 +51,9 @@ the constructor or use <cite>connection.delegate = MyCustomDelegate()</cite>.</p
 <li>endpoint {string} [required] - RTM endpoint as a string.</li>
 <li>appkey {string} [required] - Appkey used to access RTM. Available from the
 Dev Portal.</li>
-<li>delegate {object] [optional] - Delegate object to handle received
+<li>delegate {object} [optional] - Delegate object to handle received
 messages, channel errors, internal errors, and closed connections.</li>
+<li>https_proxy (string, int) [optional] - (host, port) tuple for https proxy</li>
 </ul>
 </dd>
 </dl>
@@ -561,7 +562,7 @@ state if the connection to RTM drops.</p>
 <h3>__init__</h3>
 <dl class="docutils">
 <dt>Signature:</dt>
-<dd>__init__(self, endpoint, appkey, fail_count_threshold=inf, reconnect_interval=1, max_reconnect_interval=300, observer=None, restore_auth_on_reconnect=True, max_queue_size=20000)</dd>
+<dd>__init__(self, endpoint, appkey, fail_count_threshold=inf, reconnect_interval=1, max_reconnect_interval=300, observer=None, restore_auth_on_reconnect=True, max_queue_size=20000, https_proxy=None)</dd>
 <dt>Description</dt>
 <dd>Constructor for the Client.</dd>
 <dt>Parameters</dt>
@@ -601,6 +602,8 @@ For example is max_queue_size is 10 and the client code sends 11
 publish requests so fast that by the time it sends 11th one the reply
 for the first one has not yet arrived, this 11th call to <cite>client.publish</cite>
 will throw the <cite>satori.rtm.client.Full</cite> exception.</p>
+</li>
+<li><p class="first">https_proxy (string, int) [optional] - (host, port) tuple for https proxy</p>
 </li>
 </ul>
 </dd>
