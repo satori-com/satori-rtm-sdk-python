@@ -42,7 +42,7 @@ resubscribe to all channels, and perform authentication again, if necessary.
           necessary.
     """
 
-    def __init__(self, endpoint, appkey, delegate=None, proxy=None):
+    def __init__(self, endpoint, appkey, delegate=None, https_proxy=None):
         """
 Description
     Constructor for the Connection class. Creates and returns an instance of the
@@ -65,7 +65,7 @@ Parameters
       Dev Portal.
     * delegate {object} [optional] - Delegate object to handle received
       messages, channel errors, internal errors, and closed connections.
-    * proxy (string, int) [optional] - (host, port) tuple for https proxy
+    * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
 
 Syntax
 
@@ -113,7 +113,7 @@ Syntax
         self.delegate = delegate
         self.ack_callbacks_by_id = {}
         self.action_id_iterator = itertools.count()
-        self.proxy = proxy
+        self.https_proxy = https_proxy
         self._auth_lock = threading.RLock()
         self._next_auth_action = None
         self.ws = None
@@ -142,7 +142,7 @@ Description
             raise RuntimeError('Connection is already open')
 
         self.logger.debug('connection.start %s', self.url)
-        self.ws = RtmWsClient(self.url, proxy=self.proxy)
+        self.ws = RtmWsClient(self.url, proxy=self.https_proxy)
         self.ws.delegate = self
 
         try:

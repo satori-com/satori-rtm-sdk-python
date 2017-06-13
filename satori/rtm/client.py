@@ -43,7 +43,7 @@ class Client(object):
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
             observer=None, restore_auth_on_reconnect=True,
-            max_queue_size=20000, proxy=None):
+            max_queue_size=20000, https_proxy=None):
         r"""
 
 Description
@@ -79,7 +79,7 @@ Parameters
       publish requests so fast that by the time it sends 11th one the reply
       for the first one has not yet arrived, this 11th call to `client.publish`
       will throw the `satori.rtm.client.Full` exception.
-    * proxy (string, int) [optional] - (host, port) tuple for https proxy
+    * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
 
 Syntax
 
@@ -102,7 +102,7 @@ Syntax
             endpoint, appkey,
             fail_count_threshold,
             reconnect_interval, max_reconnect_interval,
-            observer, restore_auth_on_reconnect, proxy)
+            observer, restore_auth_on_reconnect, https_proxy)
 
         self._disposed = False
         self._thread = threading.Thread(
