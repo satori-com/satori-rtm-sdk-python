@@ -28,7 +28,7 @@ classifiers = [
     ]
 
 setup(name='satori-rtm-sdk',
-      version='1.0.4',
+      version='1.1.0',
       description='Satori SDK',
       author='Satori Worldwide, Inc.',
       author_email='sdk@satori.com',
