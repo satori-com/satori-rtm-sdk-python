@@ -17,9 +17,9 @@ import satori.rtm.auth as auth
 endpoint = 'YOUR_ENDPOINT'
 appkey = 'YOUR_APPKEY'
 
-# role and secret are optional. Setting these to None means no authentication.
+# role and role_secret_key are optional. Setting these to None means no authentication.
 role = 'YOUR_ROLE'
-secret = 'YOUR_SECRET'
+role_secret_key = 'YOUR_SECRET'
 
 channel = 'animals'
 
@@ -28,8 +28,8 @@ def main():
 
     print('Creating RTM client instance')
 
-    if role and secret and secret != 'YOUR_SECRET':
-        auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
+    if role and role_secret_key and role_secret_key != 'YOUR_SECRET':
+        auth_delegate = auth.RoleSecretAuthDelegate(role, role_secret_key)
     else:
         auth_delegate = None
 
