@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import math
+import random
 import sys
 import time
 from threading import Event
@@ -25,13 +25,16 @@ channel = 'animals'
 
 
 def main():
-
-    print('Creating RTM client instance')
-
-    if role and role_secret_key and role_secret_key != 'YOUR_SECRET':
+    should_authenticate = role and role_secret_key and role_secret_key != 'YOUR_SECRET'
+    if should_authenticate:
         auth_delegate = auth.RoleSecretAuthDelegate(role, role_secret_key)
     else:
         auth_delegate = None
+
+    print("RTM connection config:\n",
+          "\tendpoint='{}'\n".format(endpoint),
+          "\tappkey='{}'\n".format(appkey),
+          "\tauthenticate?={}\n".format(should_authenticate))
 
     with make_client(
             endpoint=endpoint, appkey=appkey,
@@ -109,7 +112,7 @@ def main():
         # https://www.satori.com/docs/references/rtm-api for reference.
         def publish_callback(ack):
             if ack['action'] == 'rtm/publish/ok':
-                print('Publish OK')
+                print('Animal was published')
                 publish_finished_event.set()
             elif ack['action'] == 'rtm/publish/error':
                 print(
@@ -121,10 +124,9 @@ def main():
 
         try:
             while True:
-                now = time.time()
                 coords = [
-                    34.134358 + math.cos(now),
-                    -118.321506 + math.sin(now)]
+                    34.134358 + random.random(),
+                    -118.321506 + random.random()]
                 animal = {'who': 'zebra', 'where': coords}
                 client.publish(
                     channel, message=animal, callback=publish_callback)
