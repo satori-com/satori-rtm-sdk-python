@@ -73,7 +73,7 @@ def main():
             # This callback allows us to observe incoming messages
             def on_subscription_data(self, data):
                 for message in data['messages']:
-                    print('Client got message {0}'.format(message))
+                    print('Animal is received {0}'.format(message))
 
         subscription_observer = SubscriptionObserver()
 
@@ -112,7 +112,7 @@ def main():
         # https://www.satori.com/docs/references/rtm-api for reference.
         def publish_callback(ack):
             if ack['action'] == 'rtm/publish/ok':
-                print('Animal was published')
+                print('Animal is published')
                 publish_finished_event.set()
             elif ack['action'] == 'rtm/publish/error':
                 print(
