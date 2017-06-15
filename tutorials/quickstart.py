@@ -3,7 +3,6 @@ from __future__ import print_function
 import random
 import sys
 import time
-from threading import Event
 
 from satori.rtm.client import make_client, SubscriptionMode
 import satori.rtm.auth as auth
@@ -44,26 +43,11 @@ def main():
     with make_client(
             endpoint=endpoint, appkey=appkey,
             auth_delegate=auth_delegate) as client:
-
-        print('Connected to Satori!')
         # Entering here means that 'client' has already connected and
         # also authenticated (because we have passed auth_delegate to
         # make_client)
 
-        # At this point we need to be aware of two facts:
-        # 1. client.subscribe(...) method is asynchronous
-        # 2. We want to receive the message we are publishing ourselves
-        #
-        # That means that we must publish the message *only after* we get
-        # a confirmation that subscription is established (this is not a
-        # general principle: some applications may not care to receive the
-        # messages they publish).
-
-        # We use an `Event` object from the standard 'threading' module, which
-        # is a mechanism for communication between threads: one thread
-        # signals an event and other threads wait for it.
-
-        subscribed_event = Event()
+        print('Connected to Satori!')
 
         # We create a subscription observer object in order to receive callbacks
         # for incoming data, state changes and errors.
@@ -73,7 +57,6 @@ def main():
             # Called when the subscription is established.
             def on_enter_subscribed(self):
                 print('Subscribed to the channel: ' + channel)
-                subscribed_event.set()
 
             # This callback allows us to observe incoming messages
             def on_subscription_data(self, data):
@@ -90,24 +73,6 @@ def main():
             channel,
             SubscriptionMode.SIMPLE,
             subscription_observer)
-
-        # Wait on a subscribed_event is going to put our main thread to sleep
-        # (block).  As soon as SDK invokes our on_enter_subscribed callback
-        # (from a background thread),  the callback notifies this event (`set`),
-        # which wakes up the main thread.  To avoid indefinite hang in case of a
-        # failure, the wait is limited to 10 second timeout.
-        # The result value of `wait` indicates notification (True)
-        # or timeout (False).
-        if not subscribed_event.wait(10):
-            print("Couldn't establish the subscription in time")
-            sys.exit(1)
-
-        # At this point we're subscribed
-
-        # client.publish(...) method is also asynchronous, again we
-        # use an 'Event' to wait until we have a reply for publish
-        # request or timeout.
-        publish_finished_event = Event()
 
         print('\nPress CTRL-C to exit\n')
 
@@ -126,7 +91,6 @@ def main():
                 def publish_callback(ack):
                     if ack['action'] == 'rtm/publish/ok':
                         print('Animal is published:', animal)
-                        publish_finished_event.set()
                     elif ack['action'] == 'rtm/publish/error':
                         print(
                             'Publish failed, error {0}, reason {1}'.format(
@@ -135,17 +99,6 @@ def main():
 
                 client.publish(
                     channel, message=animal, callback=publish_callback)
-
-                if not publish_finished_event.wait(10):
-                    print("Couldn't publish the message in time")
-                    sys.exit(1)
-
-                # At this point we have successfully published the message
-                # (we know this because we just received a PDU with
-                # 'rtm/publish/ok') # and we even may have already received
-                # that message back via the # subscription. Publish
-                # confirmation could come after or before the subscription data.
-                publish_finished_event.clear()
 
                 sys.stdout.flush()
                 time.sleep(2)
