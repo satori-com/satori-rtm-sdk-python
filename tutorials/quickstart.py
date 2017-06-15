@@ -95,7 +95,6 @@ def main():
                         print(
                             'Publish failed, error {0}, reason {1}'.format(
                                 ack['body']['error'], ack['body']['reason']))
-                        sys.exit(1)
 
                 client.publish(
                     channel, message=animal, callback=publish_callback)
