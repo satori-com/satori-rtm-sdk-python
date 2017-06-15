@@ -73,7 +73,7 @@ def main():
             # This callback allows us to observe incoming messages
             def on_subscription_data(self, data):
                 for message in data['messages']:
-                    print('Animal is received {0}'.format(message))
+                    print('Animal is received:', message)
 
         subscription_observer = SubscriptionObserver()
 
@@ -104,21 +104,6 @@ def main():
         # request or timeout.
         publish_finished_event = Event()
 
-        # In case of publishing, there's no observer object involved because
-        # the process is simpler: we're guaranteed to receive exactly one
-        # reply callback and need only to inspect it to see if it's an OK or
-        # an error.
-        # See 'Publish PDU' section at
-        # https://www.satori.com/docs/references/rtm-api for reference.
-        def publish_callback(ack):
-            if ack['action'] == 'rtm/publish/ok':
-                print('Animal is published')
-                publish_finished_event.set()
-            elif ack['action'] == 'rtm/publish/error':
-                print(
-                    'Publish request failed, error {0}, reason {1}'.format(
-                        ack['body']['error'], ack['body']['reason']))
-                sys.exit(1)
 
         print('\nPress CTRL-C to exit\n')
 
@@ -128,6 +113,23 @@ def main():
                     34.134358 + random.random(),
                     -118.321506 + random.random()]
                 animal = {'who': 'zebra', 'where': coords}
+
+                # In case of publishing, there's no observer object involved because
+                # the process is simpler: we're guaranteed to receive exactly one
+                # reply callback and need only to inspect it to see if it's an OK or
+                # an error.
+                # See 'Publish PDU' section at
+                # https://www.satori.com/docs/references/rtm-api for reference.
+                def publish_callback(ack):
+                    if ack['action'] == 'rtm/publish/ok':
+                        print('Animal is published:', animal)
+                        publish_finished_event.set()
+                    elif ack['action'] == 'rtm/publish/error':
+                        print(
+                            'Publish request failed, error {0}, reason {1}'.format(
+                                ack['body']['error'], ack['body']['reason']))
+                        sys.exit(1)
+
                 client.publish(
                     channel, message=animal, callback=publish_callback)
 
