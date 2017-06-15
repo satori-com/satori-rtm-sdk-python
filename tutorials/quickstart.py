@@ -17,7 +17,8 @@ import satori.rtm.auth as auth
 endpoint = 'YOUR_ENDPOINT'
 appkey = 'YOUR_APPKEY'
 
-# role and role_secret_key are optional. Setting these to None means no authentication.
+# role and role_secret_key are optional.
+# Setting these to None means no authentication.
 role = 'YOUR_ROLE'
 role_secret_key = 'YOUR_SECRET'
 
@@ -25,7 +26,8 @@ channel = 'animals'
 
 
 def main():
-    should_authenticate = role and role_secret_key and role_secret_key != 'YOUR_SECRET'
+    should_authenticate = role and role_secret_key\
+        and role_secret_key != 'YOUR_SECRET'
     if should_authenticate:
         auth_delegate = auth.RoleSecretAuthDelegate(role, role_secret_key)
     else:
@@ -107,7 +109,6 @@ def main():
         # request or timeout.
         publish_finished_event = Event()
 
-
         print('\nPress CTRL-C to exit\n')
 
         try:
@@ -117,11 +118,10 @@ def main():
                     -118.321506 + random.random()]
                 animal = {'who': 'zebra', 'where': coords}
 
-                # In case of publishing, there's no observer object involved because
-                # the process is simpler: we're guaranteed to receive exactly one
-                # reply callback and need only to inspect it to see if it's an OK or
-                # an error.
-                # See 'Publish PDU' section at
+                # In case of publishing, there's no observer object involved
+                # because the process is simpler: we're guaranteed to receive
+                # exactly one reply callback and need only to inspect it to see
+                # if it's an OK or an error. See 'Publish PDU' section at
                 # https://www.satori.com/docs/references/rtm-api for reference.
                 def publish_callback(ack):
                     if ack['action'] == 'rtm/publish/ok':
@@ -129,7 +129,7 @@ def main():
                         publish_finished_event.set()
                     elif ack['action'] == 'rtm/publish/error':
                         print(
-                            'Publish request failed, error {0}, reason {1}'.format(
+                            'Publish failed, error {0}, reason {1}'.format(
                                 ack['body']['error'], ack['body']['reason']))
                         sys.exit(1)
 
