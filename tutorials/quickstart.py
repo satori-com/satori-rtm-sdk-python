@@ -31,10 +31,13 @@ def main():
     else:
         auth_delegate = None
 
-    print("RTM connection config:\n",
-          "\tendpoint='{}'\n".format(endpoint),
-          "\tappkey='{}'\n".format(appkey),
-          "\tauthenticate?={}\n".format(should_authenticate))
+    print("RTM client config:")
+    print("\tendpoint =", endpoint)
+    print("\tappkey =", appkey)
+    if should_authenticate:
+        print("\tauthenticate? = True (as {0})".format(role))
+    else:
+        print("\tauthenticate? = False")
 
     with make_client(
             endpoint=endpoint, appkey=appkey,

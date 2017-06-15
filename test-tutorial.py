@@ -30,8 +30,8 @@ def main():
 
     out, err = p.communicate()
 
-    assert 'Publish OK' in out, out
-    assert 'Client got message' in out, out
+    assert 'Animal is published' in out, out
+    assert 'Animal is received' in out, out
 
     print('Tutorial seems to be working fine')
 
@@ -41,7 +41,7 @@ def inject_credentials(creds, s):
         .replace('YOUR_ENDPOINT', creds['endpoint'])\
         .replace('YOUR_APPKEY', creds['appkey'])\
         .replace('YOUR_ROLE', creds['auth_role_name'])\
-        .replace('YOUR_SECRET', creds['auth_role_secret_key'])
+        .replace(" = 'YOUR_SECRET'", " = '" + creds['auth_role_secret_key'] + "'")
 
 if __name__ == '__main__':
     main()
