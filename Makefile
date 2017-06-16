@@ -52,7 +52,7 @@ test-coverage: $(GENERATED_SOURCES)
 
 .PHONY: combined-coverage
 combined-coverage:
-	tox -e py27-coverage && mv .coverage .coverage.27 && tox -e py35-coverage && mv .coverage .coverage.35 && coverage combine && coverage html --omit '*venv*','*.tox*','*test*','*generated/statemap.py'
+	tox -e py27-coverage && mv .coverage .coverage.27 && tox -e py36-coverage && mv .coverage .coverage.36 && coverage combine && coverage html --omit '*venv*','*.tox*','*test*','*generated/statemap.py'
 
 .PHONY: bench
 bench: $(GENERATED_SOURCES)
