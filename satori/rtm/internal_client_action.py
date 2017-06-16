@@ -34,3 +34,5 @@ ChannelError = t('ChannelError', ['channel', 'payload'])
 FastForward = t('FastForward', ['channel', 'payload'])
 
 Tick = t('Tick', [])
+
+SolicitedPDU = t('SolicitedPDU', ['callback', 'payload'])

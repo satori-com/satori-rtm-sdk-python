@@ -879,7 +879,18 @@ Syntax
 
         callback = self.ack_callbacks_by_id.get(id_)
         if callback:
-            callback(incoming_json)
+
+            try:
+                delegate_on_solicited =\
+                    getattr(self.delegate, 'on_solicited_pdu')
+            except AttributeError:
+                delegate_on_solicited = None
+
+            if delegate_on_solicited:
+                delegate_on_solicited(callback, incoming_json)
+            else:
+                callback(incoming_json)
+
             if not incoming_json.get('action').endswith('/data'):
                 del self.ack_callbacks_by_id[id_]
 

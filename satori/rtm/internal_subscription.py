@@ -36,7 +36,7 @@ class Subscription(object):
             self, delivery_mode,
             send_subscribe_request, send_unsubscribe_request,
             args=None, observer=None):
-        self._mode = 'linked'
+        self.mode = 'linked'
 
         _lint_args(args)
         self._args = args
@@ -63,7 +63,7 @@ class Subscription(object):
         with self._lock:
             logger.debug('subscribe')
 
-            if self._mode in ['linked', 'cycle']:
+            if self.mode in ['linked', 'cycle']:
                 logger.error('Already subscribed or trying to')
                 return
 
@@ -75,7 +75,7 @@ class Subscription(object):
 
             self._next_observer = observer
             self._next_args = args
-            self._mode = 'cycle'
+            self.mode = 'cycle'
 
             return self._sm.advance(lambda sm: sm.ModeChange())
 
@@ -83,19 +83,19 @@ class Subscription(object):
         with self._lock:
             self._args = None
             if self.is_failed():
-                self._mode = 'unlinked'
+                self.mode = 'unlinked'
                 self._sm.advance(lambda sm: sm.UnsubscribeOK())
             else:
                 logger.debug('unsubscribe')
-                self._mode = 'unlinked'
+                self.mode = 'unlinked'
                 self._sm.advance(lambda sm: sm.ModeChange())
 
     def deleted(self):
-        if self._mode == 'unlinked':
+        if self.mode == 'unlinked':
             return self._sm.get_state_name() == 'Subscription.Unsubscribed'
 
     def _is_mode_linked(self):
-        return self._mode == 'linked'
+        return self.mode == 'linked'
 
     def _is_mode_not_linked(self):
         return not self._is_mode_linked()
@@ -104,7 +104,7 @@ class Subscription(object):
         return not self._is_mode_unlinked()
 
     def _is_mode_unlinked(self):
-        return self._mode == 'unlinked'
+        return self.mode == 'unlinked'
 
     def _is_fatal_channel_error(self, error_body):
         if not (self._delivery_mode.value &
@@ -120,8 +120,8 @@ class Subscription(object):
         return True
 
     def _change_mode_from_cycle_to_linked(self):
-        if self._mode == 'cycle':
-            self._mode = 'linked'
+        if self.mode == 'cycle':
+            self.mode = 'linked'
             if self._next_args:
                 self._args = self._next_args
 
@@ -135,7 +135,7 @@ class Subscription(object):
             else:
                 self.observer = None
             self._sm.advance(lambda sm: sm.ModeChange())
-        elif self._mode == 'unlinked':
+        elif self.mode == 'unlinked':
             self._perform_state_callback('on_deleted')
             self.observer = None
 
