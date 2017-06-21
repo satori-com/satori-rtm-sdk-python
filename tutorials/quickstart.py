@@ -16,8 +16,7 @@ import satori.rtm.auth as auth
 endpoint = 'YOUR_ENDPOINT'
 appkey = 'YOUR_APPKEY'
 
-# role and role_secret_key are optional.
-# Setting these to None means no authentication.
+# Role and secret are optional: replace only if you need to authenticate.
 role = 'YOUR_ROLE'
 role_secret_key = 'YOUR_SECRET'
 
