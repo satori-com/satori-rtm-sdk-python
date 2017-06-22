@@ -140,7 +140,7 @@ def main():
         if args['filter']:
             return subscribe(
                 client,
-                [args['<channel>']], prettify_json,
+                ['filtered'], prettify_json,
                 query=args['<query>'], delivery=delivery)
         elif args['publish']:
             return publish(client, args['<channel>'], enable_acks)
