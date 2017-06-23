@@ -75,7 +75,7 @@ class TestStateMachinesDoNotCrash(unittest.TestCase):
                     state_value = state_class(state_name, 1)
                     fsm_mock = FSM_Mock(
                         state_value, event_name, True)
-                    if event_name == 'ChannelError':
+                    if event_name in ['ChannelError', 'SubscribeError']:
                         getattr(state_value, event_name)(
                             fsm_mock, 'Test error')
                     else:
