@@ -235,7 +235,11 @@ def print_all_stacktraces():
     print("\n*** STACKTRACE - START ***\n")
     code = []
     for threadId, stack in sys._current_frames().items():
-        code.append("\n# ThreadID: %s" % threadId)
+        threadName = ''
+        for t in threading.enumerate():
+            if t.ident == threadId:
+                threadName = t.name
+        code.append("\n# ThreadID: %s %s" % (threadId, threadName))
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append('File: "%s", line %d, in %s' % (filename,
                                                         lineno, name))

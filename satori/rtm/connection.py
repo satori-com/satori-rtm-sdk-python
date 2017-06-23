@@ -754,7 +754,11 @@ Syntax
         self.logger.debug('Starting ping thread')
         try:
             while not self._time_to_stop_pinging:
-                time.sleep(ping_interval_in_seconds)
+                time.sleep(1)
+                now = time.time()
+                if self._last_ping_time and\
+                        now - self._last_ping_time < ping_interval_in_seconds:
+                    continue
                 self.logger.debug('send ping')
                 self.ws.send_ping()
                 if self._last_ping_time:
@@ -771,8 +775,8 @@ Syntax
                             self.logger.exception(e)
                 self._last_ping_time = time.time()
                 self.logger.debug('pinging')
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.exception(e)
         self.logger.debug('Finishing ping thread')
 
     def on_ws_closed(self):
@@ -780,6 +784,7 @@ Syntax
         if self.delegate:
             self.delegate.on_connection_closed()
         if self.ws:
+            self.ack_callbacks_by_id.clear()
             self.ws.delegate = None
             try:
                 self.ws.close()

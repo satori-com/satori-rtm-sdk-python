@@ -292,6 +292,7 @@ class InternalClient(object):
     def _forget_connection(self):
         logger.info('_forget_connection')
         if self.connection:
+            self.connection.ack_callbacks_by_id.clear()
             self.connection.delegate = None
             try:
                 self.connection.stop()
