@@ -1,5 +1,10 @@
-v1.2
-----
+v1.2.1 (2017-06-23)
+-------------------
+
+* Propagate subscribe error reason into SubscriptionObserver.on_enter_failed callback
+
+v1.2 (2017-06-13)
+-----------------
 
 * Added https proxy support (no authentication)
 
