@@ -200,10 +200,10 @@ class Subscription(object):
                 self.update_position(ack['body']['position'])
             self._sm.advance(lambda sm: sm.SubscribeOK())
 
-    def on_subscribe_error(self):
+    def on_subscribe_error(self, reason):
         with self._lock:
             logger.debug('on_subscribe_error')
-            self._sm.advance(lambda sm: sm.SubscribeError())
+            self._sm.advance(lambda sm: sm.SubscribeError(reason))
 
     def on_unsubscribe_ok(self):
         with self._lock:

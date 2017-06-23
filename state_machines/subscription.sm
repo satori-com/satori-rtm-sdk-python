@@ -17,7 +17,7 @@ Exit {on_leave_unsubscribed();}
     UnsubscribeAttempt nil {}
     UnsubscribeOK nil {}
     UnsubscribeError nil {}
-    SubscribeError nil {}
+    SubscribeError(error: JSON) nil {}
     SubscribeOK nil {}
 }
 
@@ -36,7 +36,7 @@ Exit {on_leave_subscribed();}
     UnsubscribeAttempt nil {}
     UnsubscribeOK nil {}
     UnsubscribeError nil {}
-    SubscribeError nil {}
+    SubscribeError(error: JSON) nil {}
     SubscribeOK nil {}
     Connect nil {}
 }
@@ -52,9 +52,9 @@ Exit {on_leave_subscribing();}
     SubscribeOK [ctxt._is_mode_linked()] Subscribed {}
     SubscribeOK Unsubscribing {}
 
-    SubscribeError [ctxt._is_mode_linked()] Failed {_set_last_error('Subscribe error');}
-    SubscribeError [ctxt._is_mode_unlinked()] Unsubscribed {}
-    SubscribeError Subscribing {_change_mode_from_cycle_to_linked();}
+    SubscribeError(error: JSON) [ctxt._is_mode_linked()] Failed {_set_last_error(error);}
+    SubscribeError(error: JSON) [ctxt._is_mode_unlinked()] Unsubscribed {}
+    SubscribeError(error: JSON) Subscribing {_change_mode_from_cycle_to_linked();}
 
     UnsubscribeAttempt nil {}
     UnsubscribeOK nil {}
@@ -73,7 +73,7 @@ Exit {on_leave_unsubscribing();}
     UnsubscribeError Subscribed {}
     UnsubscribeAttempt nil {}
     Connect nil {}
-    SubscribeError nil {}
+    SubscribeError(error: JSON) nil {}
     SubscribeOK nil {}
 }
 
@@ -83,7 +83,7 @@ Exit {on_leave_failed();}
 {
     UnsubscribeAttempt nil {}
 
-    SubscribeError nil {}
+    SubscribeError(error: JSON) nil {}
     SubscribeOK nil {}
     UnsubscribeError nil {}
 
