@@ -316,7 +316,13 @@ class InternalClient(object):
                 subscription.on_subscribe_ok(ack)
             elif ack.get('action') == 'rtm/subscribe/error':
                 logger.error('Subscription error: %s', ack)
-                subscription.on_subscribe_error()
+
+                body = ack.get('body')
+                reason = 'Unknown error'
+                if body:
+                    reason = body.get('reason') or body.get('error')
+
+                subscription.on_subscribe_error(reason)
             else:
                 self.on_internal_error(
                     'Unexpected subscribe ack: {0}'.format(ack))

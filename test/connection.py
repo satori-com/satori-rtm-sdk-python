@@ -7,10 +7,11 @@ import unittest
 import satori.rtm.connection as sc
 import threading
 
-from test.utils import make_channel_name, get_test_endpoint_and_appkey
-from test.utils import print_resource_usage
+from test.utils import make_channel_name, get_test_role_name_secret_and_channel
+from test.utils import print_resource_usage, get_test_endpoint_and_appkey
 
 endpoint, appkey = get_test_endpoint_and_appkey()
+_, _, restricted_channel = get_test_role_name_secret_and_channel()
 
 
 class TestConnection(unittest.TestCase):
@@ -79,7 +80,7 @@ class TestConnection(unittest.TestCase):
         conn.start()
         self.assertRaises(
             RuntimeError,
-            lambda: conn.publish_sync('$python.sdk.restricted', 'test'))
+            lambda: conn.publish_sync(restricted_channel, 'test'))
         conn.stop()
 
     def test_unsubscribe_sync_fail(self):

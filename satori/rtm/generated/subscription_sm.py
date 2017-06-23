@@ -26,7 +26,7 @@ class SubscriptionState(statemap.State):
     def ModeChange(self, fsm):
         self.Default(fsm)
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         self.Default(fsm)
 
     def SubscribeOK(self, fsm):
@@ -94,7 +94,7 @@ class Subscription_Unsubscribed(Subscription_Default):
             pass
 
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         # No actions.
         pass
 
@@ -174,7 +174,7 @@ class Subscription_Subscribed(Subscription_Default):
             pass
 
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         # No actions.
         pass
 
@@ -222,13 +222,13 @@ class Subscription_Subscribing(Subscription_Default):
         # No actions.
         pass
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         ctxt = fsm.getOwner()
         if ctxt._is_mode_linked() :
             fsm.getState().Exit(fsm)
             fsm.clearState()
             try:
-                ctxt._set_last_error('Subscribe error')
+                ctxt._set_last_error(error)
             finally:
                 fsm.setState(Subscription.Failed)
                 fsm.getState().Entry(fsm)
@@ -305,7 +305,7 @@ class Subscription_Unsubscribing(Subscription_Default):
         # No actions.
         pass
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         # No actions.
         pass
 
@@ -355,7 +355,7 @@ class Subscription_Failed(Subscription_Default):
         # No actions.
         pass
 
-    def SubscribeError(self, fsm):
+    def SubscribeError(self, fsm, error):
         # No actions.
         pass
 

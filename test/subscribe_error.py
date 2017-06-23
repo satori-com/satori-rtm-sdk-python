@@ -35,7 +35,7 @@ class TestSubscribeError(unittest.TestCase):
                 'on_leave_unsubscribed',
                 'on_enter_subscribing',
                 'on_leave_subscribing',
-                ('on_enter_failed', 'Subscribe error')]
+                ('on_enter_failed', "Invalid PDU: 'position' was invalid")]
 
             self.assertEqual(so.log, expected_log)
 
@@ -52,21 +52,20 @@ class TestSubscribeError(unittest.TestCase):
             class RecoveringSubscriptionObserver(SubscriptionObserver):
                 def on_enter_failed(this, error):
                     this.log.append(('on_enter_failed', error))
-                    if error == 'Subscribe error':
-                        import threading
+                    import threading
 
-                        def resubscribe_sans_position():
-                            client.unsubscribe(channel)
-                            client.subscribe(
-                                channel,
-                                SubscriptionMode.ADVANCED,
-                                this)
-                            ev.set()
-                        t = threading.Thread(
-                            target=resubscribe_sans_position,
-                            name='test_resubscribe_sans_position')
-                        t.start()
-                        threads.append(t)
+                    def resubscribe_sans_position():
+                        client.unsubscribe(channel)
+                        client.subscribe(
+                            channel,
+                            SubscriptionMode.ADVANCED,
+                            this)
+                        ev.set()
+                    t = threading.Thread(
+                        target=resubscribe_sans_position,
+                        name='test_resubscribe_sans_position')
+                    t.start()
+                    threads.append(t)
             so = RecoveringSubscriptionObserver()
             client.subscribe(
                 channel,
@@ -81,7 +80,7 @@ class TestSubscribeError(unittest.TestCase):
                 'on_leave_unsubscribed',
                 'on_enter_subscribing',
                 'on_leave_subscribing',
-                ('on_enter_failed', 'Subscribe error'),
+                ('on_enter_failed', "Invalid PDU: 'position' was invalid"),
                 'on_leave_failed',
                 'on_enter_unsubscribed',
                 'on_deleted',
@@ -220,7 +219,7 @@ class TestSubscribeError(unittest.TestCase):
                 'on_leave_unsubscribed',
                 'on_enter_subscribing',
                 'on_leave_subscribing',
-                ('on_enter_failed', 'Subscribe error')
+                ('on_enter_failed', 'Unknown error')
                 ]
 
             self.assertEqual(so.log, expected_log)

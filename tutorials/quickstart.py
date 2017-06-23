@@ -57,6 +57,10 @@ def main():
             def on_enter_subscribed(self):
                 print('Subscribed to the channel: ' + channel)
 
+            def on_enter_failed(self, reason):
+                print('Subscription failed, reason:', reason)
+                sys.exit(1)
+
             # This callback allows us to observe incoming messages
             def on_subscription_data(self, data):
                 for message in data['messages']:
