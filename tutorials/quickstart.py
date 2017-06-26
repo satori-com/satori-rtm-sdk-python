@@ -46,7 +46,7 @@ def main():
         # also authenticated (because we have passed auth_delegate to
         # make_client)
 
-        print('Connected to Satori!')
+        print('Connected to Satori RTM!')
 
         # We create a subscription observer object in order to receive callbacks
         # for incoming data, state changes and errors.
