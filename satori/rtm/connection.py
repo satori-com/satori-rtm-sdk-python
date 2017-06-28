@@ -735,7 +735,11 @@ Parameters
 
         id_ = incoming_json.get('id')
         if id_ is None:
+<<<<<<< HEAD
             message = u'"{0}" has no "id" field'.format(incoming_text)
+=======
+            message = '"{0}" has no "id" field'.format(incoming_json)
+>>>>>>> 5c6ead2... Remove repacking into and unpacking from json when using cbor
             return self.on_internal_error(message)
 
         if action.startswith('auth/'):
@@ -764,6 +768,34 @@ Parameters
 
             if not incoming_json.get('action').endswith('/data'):
                 del self.ack_callbacks_by_id[id_]
+
+    def on_incoming_binary_frame(self, incoming_binary):
+        try:
+            incoming_json = cbor.loads(incoming_binary)
+            # FIXME: remove workaround
+            try:
+                incoming_json['id'] = int(incoming_json['id'])
+            except KeyError:
+                pass
+        except ValueError as e:
+            self.logger.exception(e)
+            message = '"{0}" is not valid CBOR'.format(incoming_binary)
+            return self.on_internal_error(message)
+        self.on_incoming_json(incoming_json)
+
+    def on_incoming_text_frame(self, incoming_text):
+        self.logger.debug('incoming text: %s', incoming_text)
+
+        self.on_ws_ponged()
+
+        try:
+            incoming_json = json.loads(incoming_text)
+        except ValueError as e:
+            self.logger.exception(e)
+            message = '"{0}" is not valid JSON'.format(incoming_text)
+            return self.on_internal_error(message)
+
+        self.on_incoming_json(incoming_json)
 
 
 def enable_wsaccel():
