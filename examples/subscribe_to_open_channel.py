@@ -9,17 +9,17 @@ from satori.rtm.client import make_client, SubscriptionMode
 
 endpoint = "wss://open-data.api.satori.com"
 appkey = "YOUR_APPKEY"
-channel = "YOUR_CHANNEL"
+channel = "OPEN_CHANNEL"
 
 
 def main():
     with make_client(endpoint=endpoint, appkey=appkey) as client:
-        print('Connected!', file=sys.stderr)
+        print('Connected to Satori RTM!')
 
         class SubscriptionObserver(object):
             def on_subscription_data(self, data):
                 for message in data['messages']:
-                    print(message)
+                    print("Got message:", message)
 
         subscription_observer = SubscriptionObserver()
         client.subscribe(
