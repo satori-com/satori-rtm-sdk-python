@@ -17,9 +17,8 @@ _, _, restricted_channel = get_test_role_name_secret_and_channel()
 class TestConnection(unittest.TestCase):
     def test_stop_before_start(self):
         conn = sc.Connection(endpoint, appkey)
-        self.assertRaises(
-            RuntimeError,
-            lambda: conn.stop())
+        # check that it does not raise
+        conn.stop()
 
     def test_double_start(self):
         conn = sc.Connection(endpoint, appkey)
@@ -33,10 +32,11 @@ class TestConnection(unittest.TestCase):
         conn = sc.Connection(endpoint, appkey)
         conn.start()
         conn.stop()
-        time.sleep(2)
-        self.assertRaises(
-            RuntimeError,
-            lambda: conn.stop())
+        while conn.ws:
+            time.sleep(0.1)
+
+        # check that double stop does not raise
+        conn.stop()
 
     def test_forgot_to_stop(self):
         conn = sc.Connection(endpoint, appkey)
@@ -319,6 +319,9 @@ class TestConnection(unittest.TestCase):
                 conn.publish(channel, 'message', callback=callback)
 
             time.sleep(2)
+        except Exception as e:
+            import sys
+            print(e, file=sys.stderr)
         finally:
             conn.stop()
             sc.high_ack_count_watermark = wm

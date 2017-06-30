@@ -176,12 +176,14 @@ Description
                 self.logger.debug('Waiting for WS thread')
                 self._ws_thread.join()
                 self.logger.debug('WS thread finished normally')
-            except OSError as e:
+            except Exception as e:
                 # we could be trying to write a goodbye
                 # into already closed socket
+                # or just sending a close frame can fail for
+                # any number of reasons
                 self.logger.exception(e)
         else:
-            raise RuntimeError('Connection is not open yet')
+            self.logger.error('Connection is not open yet')
 
     def send(self, payload):
         """
