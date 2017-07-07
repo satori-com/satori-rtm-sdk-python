@@ -56,7 +56,7 @@ class TestChannelError(unittest.TestCase):
             sync_subscribe(client, channel, observer=so)
 
             emulate_channel_error(client, channel, 'out_of_sync')
-            sync_publish(client, channel, 'should-be-missed')
+            sync_publish(client, channel, u'should-be-missed')
             so.wait_not_subscribed()
 
             client._queue.join()
@@ -88,7 +88,7 @@ class TestChannelError(unittest.TestCase):
             client._queue.join()
             emulate_channel_error(client, channel)
             so.wait_not_subscribed()
-            sync_publish(client, channel, 'should-be-missed')
+            sync_publish(client, channel, u'should-be-missed')
             so.wait_not_subscribed()
 
             expected_log = [
