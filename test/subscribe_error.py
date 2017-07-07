@@ -131,8 +131,8 @@ class TestSubscribeError(unittest.TestCase):
 
             client.observer = ClientObserver()
             old_received_message =\
-                client._internal.connection.on_incoming_text_frame
-            client._internal.connection.on_incoming_text_frame =\
+                client._internal.connection.on_incoming_json
+            client._internal.connection.on_incoming_json =\
                 lambda *args: None
 
             so = SubscriptionObserver()
@@ -144,7 +144,7 @@ class TestSubscribeError(unittest.TestCase):
             client._queue.join()
 
             old_received_message(
-                '{"action":"rtm/publish/ok","body":{},"id":0}')
+                {u"action": u"rtm/publish/ok", u"body": {}, u"id": 0})
 
             client._queue.join()
 
@@ -160,8 +160,8 @@ class TestSubscribeError(unittest.TestCase):
                 reconnect_interval=1) as client:
 
             old_received_message =\
-                client._internal.connection.on_incoming_text_frame
-            client._internal.connection.on_incoming_text_frame =\
+                client._internal.connection.on_incoming_json
+            client._internal.connection.on_incoming_json =\
                 lambda *args: None
 
             so = SubscriptionObserver()
@@ -176,9 +176,9 @@ class TestSubscribeError(unittest.TestCase):
                 client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
-                '{"action":"rtm/subscribe/ok","body":{"channel":"' +
-                channel +
-                '","position":"position"},"id":0}')
+                {u"action": u"rtm/subscribe/ok",
+                 u"body": {u"channel": channel, u"position": u"position"},
+                 u"id": 0})
 
             so.wait_subscribed()
 
@@ -186,7 +186,7 @@ class TestSubscribeError(unittest.TestCase):
                 client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
-                '{"action":"rtm/unsubscribe/ok","body":{},"id":1}')
+                {u"action": u"rtm/unsubscribe/ok", u"body": {}, u"id": 1})
 
             client._queue.join()
 
@@ -194,7 +194,7 @@ class TestSubscribeError(unittest.TestCase):
                 client._internal.subscriptions[channel].mode,
                 'linked')
             old_received_message(
-                '{"action":"rtm/subscribe/error","body":{},"id":2}')
+                {u"action": u"rtm/subscribe/error", u"body": {}, u"id": 2})
 
             client._queue.join()
 
@@ -233,8 +233,8 @@ class TestSubscribeError(unittest.TestCase):
                 reconnect_interval=1) as client:
 
             old_received_message =\
-                client._internal.connection.on_incoming_text_frame
-            client._internal.connection.on_incoming_text_frame =\
+                client._internal.connection.on_incoming_json
+            client._internal.connection.on_incoming_json =\
                 lambda *args: None
 
             so = SubscriptionObserver()
@@ -249,7 +249,7 @@ class TestSubscribeError(unittest.TestCase):
                 client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
-                '{"action":"rtm/subscribe/error","body":{},"id":0}')
+                {u"action": u"rtm/subscribe/error", u"body": {}, u"id": 0})
 
             client._queue.join()
 
@@ -257,7 +257,7 @@ class TestSubscribeError(unittest.TestCase):
                 client._internal.subscriptions[channel].mode,
                 'linked')
             old_received_message(
-                '{"action":"rtm/subscribe/ok","body":{},"id":1}')
+                {u"action": u"rtm/subscribe/ok", u"body": {}, u"id": 1})
             so2.wait_subscribed()
 
             expected_log = [

@@ -22,7 +22,7 @@ class SubscriptionMode(Enum):
 def _lint_args(args):
     if not args:
         return
-    if args.get('fast_forward') is not None:
+    if args.get(u'fast_forward') is not None:
         logger.error(
             'Setting "fast_forward" in "args" parameter '
             'is deprecated. Choose appropriate subscription mode instead.')
@@ -158,19 +158,20 @@ class Subscription(object):
             ['Subscription.' + s for s in
                 ['Subscribed', 'Unsubscribing']]
         if self._sm.get_state_name() in accepting_states:
-            self.update_position(data['position'])
+            self.update_position(data[u'position'])
             if self.observer:
                 self.observer.on_subscription_data(data)
 
     def update_position(self, new_position):
+        logger.debug('update_position %s', new_position)
         if not (self._delivery_mode.value &
                 SubscriptionMode.TRACK_POSITION.value):
             return
 
         if self._args:
-            self._args['position'] = new_position
+            self._args[u'position'] = new_position
         else:
-            self._args = {'position': new_position}
+            self._args = {u'position': new_position}
 
     def on_subscription_error(self, error):
         self._sm.advance(lambda sm: sm.ChannelError(error))
@@ -179,7 +180,7 @@ class Subscription(object):
         logger.debug('_send_subscribe_request(%s)', self._args)
         args = {}
         if self._delivery_mode.value & SubscriptionMode.FAST_FORWARD.value:
-            args['fast_forward'] = True
+            args[u'fast_forward'] = True
         if self._args:
             args.update(self._args)
         self._send_subscribe_request_(args)
@@ -190,8 +191,8 @@ class Subscription(object):
 
     def on_subscribe_ok(self, ack):
         logger.debug('on_subscribe_ok')
-        if ack.get('body').get('position'):
-            self.update_position(ack['body']['position'])
+        if ack.get(u'body').get(u'position'):
+            self.update_position(ack[u'body'][u'position'])
         self._sm.advance(lambda sm: sm.SubscribeOK())
 
     def on_subscribe_error(self, reason):

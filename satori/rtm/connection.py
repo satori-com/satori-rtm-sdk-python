@@ -442,9 +442,9 @@ Parameters
         """
 
         if args is not None and args.get('filter'):
-            body = {'subscription_id': channel_or_subscription_id}
+            body = {u'subscription_id': channel_or_subscription_id}
         else:
-            body = {'channel': channel_or_subscription_id}
+            body = {u'channel': channel_or_subscription_id}
         if args:
             body.update(args)
         self.action(u'rtm/subscribe', body, callback)
@@ -502,7 +502,7 @@ Parameters
       response to the unsubscribe request, returned by RTM as a PDU.
         """
 
-        self.action(u'rtm/unsubscribe', {'subscription_id': channel}, callback)
+        self.action(u'rtm/unsubscribe', {u'subscription_id': channel}, callback)
 
     def unsubscribe_sync(self, channel, timeout=60):
         """

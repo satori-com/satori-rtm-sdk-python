@@ -24,11 +24,11 @@ def main():
     with make_client(
             endpoint=endpoint, appkey=appkey) as client:
         with in_chat(nick, channel, client) as chat:
-            chat.say('Hi!')
+            chat.say(u'Hi!')
             for _ in range(int(sys.argv[3])):
                 time.sleep(random.randint(1, 3))
-                chat.say(random.choice(('Zero', 'One')))
-            chat.say('Bye.')
+                chat.say(random.choice((u'Zero', u'One')))
+            chat.say(u'Bye.')
 
 
 if __name__ == '__main__':

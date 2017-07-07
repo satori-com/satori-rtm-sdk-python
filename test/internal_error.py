@@ -47,8 +47,8 @@ class TestInternalError(unittest.TestCase):
                 as client:
             client.observer = ClientObserver()
 
-            client._internal.connection.on_incoming_text_frame(
-                b'{"action":"rtm/read/ok", "id":42}')
+            client._internal.connection.on_incoming_json(
+                {u"action": u"rtm/read/ok", u"id": 42})
 
             client._queue.join()
 
@@ -64,8 +64,8 @@ class TestInternalError(unittest.TestCase):
                 as client:
             client.observer = ClientObserver()
 
-            client._internal.connection.on_incoming_text_frame(
-                b'{"body":{}, "id":42}')
+            client._internal.connection.on_incoming_json(
+                {u"body": {}, u"id": 42})
 
             client._queue.join()
 
@@ -81,8 +81,8 @@ class TestInternalError(unittest.TestCase):
                 as client:
             client.observer = ClientObserver()
 
-            client._internal.connection.on_incoming_text_frame(
-                b'{"action":"rtm/publish/ok", "body":{}}')
+            client._internal.connection.on_incoming_json(
+                {u"action": u"rtm/publish/ok", u"body": {}})
 
             client._queue.join()
 
@@ -98,8 +98,8 @@ class TestInternalError(unittest.TestCase):
                 as client:
             client.observer = ClientObserver()
 
-            client._internal.connection.on_incoming_text_frame(
-                b'{"action":"/error", "body":{"error":"bad"}}')
+            client._internal.connection.on_incoming_json(
+                {u"action": u"/error", u"body": {u"error": u"bad"}})
 
             client._queue.join()
 

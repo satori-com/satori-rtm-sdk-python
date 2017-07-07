@@ -51,8 +51,8 @@ class TestUnsubscribeError(unittest.TestCase):
             so = sync_subscribe(client, channel)
 
             old_received_message =\
-                client._internal.connection.on_incoming_text_frame
-            client._internal.connection.on_incoming_text_frame =\
+                client._internal.connection.on_incoming_json
+            client._internal.connection.on_incoming_json =\
                 lambda *args: None
 
             client.unsubscribe(channel)
@@ -60,7 +60,7 @@ class TestUnsubscribeError(unittest.TestCase):
             client._queue.join()
 
             old_received_message(
-                b'{"action":"rtm/unsubscribe/error","body":{},"id":1}')
+                {u"action": u"rtm/unsubscribe/error", u"body": {}, u"id": 1})
 
             client._queue.join()
 
@@ -86,8 +86,8 @@ class TestUnsubscribeError(unittest.TestCase):
             sync_subscribe(client, channel)
 
             old_received_message =\
-                client._internal.connection.on_incoming_text_frame
-            client._internal.connection.on_incoming_text_frame =\
+                client._internal.connection.on_incoming_json
+            client._internal.connection.on_incoming_json =\
                 lambda *args: None
 
             client.unsubscribe(channel)
@@ -95,7 +95,7 @@ class TestUnsubscribeError(unittest.TestCase):
             client._queue.join()
 
             old_received_message(
-                b'{"action":"rtm/publish/ok","body":{},"id":1}')
+                {u"action": u"rtm/publish/ok", u"body": {}, u"id": 1})
 
             client._queue.join()
 

@@ -230,7 +230,7 @@ class TestConnection(unittest.TestCase):
         conn = sc.Connection(endpoint, appkey)
         conn.start()
         channel = make_channel_name('sync_timeout')
-        conn.on_incoming_text_frame = lambda *args: None
+        conn.on_incoming_json = lambda *args: None
         with self.assertRaises(RuntimeError):
             conn.subscribe_sync(channel, timeout=0)
         with self.assertRaises(RuntimeError):

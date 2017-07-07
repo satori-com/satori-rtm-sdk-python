@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import json
 import unittest
 
 import threading
@@ -23,13 +22,12 @@ class TestUnexpected(unittest.TestCase):
                 endpoint=endpoint,
                 appkey=appkey) as client:
 
-            client._internal.connection.on_incoming_text_frame(
-                json.dumps({
-                    'action': 'rtm/subscription/data',
-                    'body': {
-                        'subscription_id': channel,
-                        'position': '1',
-                        'messages': ['spam', 'spam', 'spam']}}))
+            client._internal.connection.on_incoming_json(
+                {u'action': u'rtm/subscription/data',
+                 u'body':
+                 {u'subscription_id': channel,
+                  u'position': u'1',
+                  u'messages': [u'spam', u'spam', u'spam']}})
             # TODO check that on_error callback is called
 
     def test_unexpected_channel_error(self):
@@ -38,12 +36,11 @@ class TestUnexpected(unittest.TestCase):
                 endpoint=endpoint,
                 appkey=appkey) as client:
 
-            client._internal.connection.on_incoming_text_frame(
-                json.dumps({
-                    'action': 'rtm/subscription/error',
-                    'body': {
-                        'subscription_id': channel,
-                        'error': 'oh well'}}))
+            client._internal.connection.on_incoming_json(
+                {u'action': u'rtm/subscription/error',
+                 u'body':
+                 {u'subscription_id': channel,
+                  u'error': u'oh well'}})
 
             # TODO check that on_error callback is called
 

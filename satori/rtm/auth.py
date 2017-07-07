@@ -94,7 +94,7 @@ class RoleSecretAuthDelegate(AuthDelegate):
             self.role_secret = role_secret.encode('utf8')
 
     def start(self):
-        method = 'role_secret'
+        method = u'role_secret'
 
         def after_handshake(reply):
             if type(reply) == Error:
@@ -105,7 +105,7 @@ class RoleSecretAuthDelegate(AuthDelegate):
             if 'nonce' not in reply.data:
                 return Error('No nonce in handshake reply')
 
-            nonce = reply.data['nonce'].encode('utf8')
+            nonce = reply.data[u'nonce'].encode('utf8')
 
             binary_hash = hmac.new(
                 self.role_secret, nonce, hashlib.md5).digest()
@@ -113,7 +113,7 @@ class RoleSecretAuthDelegate(AuthDelegate):
 
             return Authenticate(
                 method,
-                {'hash': ascii_hash.decode('ascii')},
+                {u'hash': ascii_hash.decode('ascii')},
                 after_authenticate)
 
         def after_authenticate(reply):
@@ -124,4 +124,4 @@ class RoleSecretAuthDelegate(AuthDelegate):
 
             return Done()
 
-        return Handshake(method, {'role': self.role}, after_handshake)
+        return Handshake(method, {u'role': self.role}, after_handshake)

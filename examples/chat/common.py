@@ -25,7 +25,10 @@ class Chat(object):
 
     def __init__(self, nick, channel, platform_client):
         self.nick = nick
-        self.channel = channel
+        if isinstance(channel, unicode):
+            self.channel = channel
+        else:
+            self.channel = channel.decode('utf8')
         self.client = platform_client
 
         self.after_subscribe_event = threading.Event()
@@ -40,7 +43,7 @@ class Chat(object):
             raise RuntimeError('Timeout while subscribing to chat channel')
 
     def on_enter_subscribed(self):
-        join_line = '{0} joined the channel'.format(self.nick)
+        join_line = u'{0} joined the channel'.format(self.nick)
 
         def exit(ack):
             if not ack['action'] == 'rtm/publish/ok':
