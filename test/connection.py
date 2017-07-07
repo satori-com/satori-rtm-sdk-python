@@ -73,7 +73,7 @@ class TestConnection(unittest.TestCase):
         channel = make_channel_name('invalid_position')
         self.assertRaises(
             RuntimeError,
-            lambda: conn.subscribe_sync(channel, {'position': 'invalid'}, 5))
+            lambda: conn.subscribe_sync(channel, {u'position': 'invalid'}, 5))
         conn.stop()
 
     def test_publish_sync_fail(self):

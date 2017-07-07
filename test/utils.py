@@ -10,7 +10,7 @@ import traceback
 
 
 def make_channel_name(prefix):
-    return '{0}{1}{2}'.format(
+    return u'{0}{1}{2}'.format(
         prefix, '_test_', binascii.hexlify(os.urandom(5)).decode('utf8'))
 
 

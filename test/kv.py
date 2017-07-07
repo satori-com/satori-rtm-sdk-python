@@ -24,11 +24,13 @@ class TestKV(unittest.TestCase):
                 event.set()
 
             client.write(k, v, callback=callback)
-            event.wait(10)
+            if not event.wait(10):
+                raise RuntimeError(1)
             event.clear()
 
             client.read(k, callback=callback)
-            event.wait(10)
+            if not event.wait(10):
+                raise RuntimeError(2)
 
             assert len(mailbox) == 2
             write_ack = mailbox[0]

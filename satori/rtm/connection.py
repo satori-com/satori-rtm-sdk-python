@@ -41,7 +41,9 @@ resubscribe to all channels, and perform authentication again, if necessary.
           necessary.
     """
 
-    def __init__(self, endpoint, appkey, delegate=None, https_proxy=None):
+    def __init__(
+            self, endpoint, appkey,
+            delegate=None, https_proxy=None, protocol='cbor'):
         """
 Description
     Constructor for the Connection class. Creates and returns an instance of the
@@ -65,9 +67,10 @@ Parameters
     * delegate {object} [optional] - Delegate object to handle received
       messages, channel errors, internal errors, and closed connections.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
+    * protocol {string} [optional] - one of 'cbor' (default) or 'json'
         """
 
-        validate_endpoint(endpoint, appkey)
+        validate_endpoint(endpoint, appkey, protocol)
 
         self.logger = satori.rtm.internal_logger.logger
 
@@ -97,6 +100,11 @@ Parameters
         self._auth_callback = None
         self._ping_thread = None
         self._ws_thread = None
+        self.protocol = protocol
+        if self.protocol == 'cbor':
+            self.dumps = cbor.dumps
+        else:
+            self.dumps = json.dumps
 
     def start(self):
         """
@@ -194,20 +202,20 @@ Description
             payload =\
                 b''.join([
                     b'\xa3',
-                    cbor.dumps('action'),
+                    cbor.dumps(u'action'),
                     cbor.dumps(name),
-                    cbor.dumps('id'),
+                    cbor.dumps(u'id'),
                     cbor.dumps(action_id),
-                    cbor.dumps('body'),
+                    cbor.dumps(u'body'),
                     body])
             self.ack_callbacks_by_id[action_id] = callback
         else:
             payload =\
                 b''.join([
                     b'\xa3',
-                    cbor.dumps('action'),
+                    cbor.dumps(u'action'),
                     cbor.dumps(name),
-                    cbor.dumps('body'),
+                    cbor.dumps(u'body'),
                     body])
         self.send(payload)
 
@@ -240,8 +248,8 @@ Parameters
         """
 
         self.action(
-            'rtm/publish',
-            {'channel': channel, 'message': message},
+            u'rtm/publish',
+            {u'channel': channel, u'message': message},
             callback)
 
     def publish_preserialized_message(self, channel, message, callback=None):
@@ -273,8 +281,8 @@ Parameters
       subscribe request. See *Subscribe PDU* in the online docs.
         """
         body = args or {}
-        body['channel'] = channel
-        self.action('rtm/read', body, callback)
+        body[u'channel'] = channel
+        self.action(u'rtm/read', body, callback)
 
     def read_sync(self, channel, args=None, timeout=60):
         """
@@ -302,12 +310,12 @@ Parameters
             mailbox.append(ack)
             time_to_return.set()
         body = args or {}
-        body['channel'] = channel
-        self.action('rtm/read', body, callback)
+        body[u'channel'] = channel
+        self.action(u'rtm/read', body, callback)
         if not time_to_return.wait(timeout):
             raise RuntimeError('Timeout in read_sync')
         ack = mailbox[0]
-        if ack['action'] == 'rtm/read/ok':
+        if ack[u'action'] == u'rtm/read/ok':
             return ack['body']['message']
         raise RuntimeError(ack)
 
@@ -337,8 +345,8 @@ Parameters
       response to the publish request, returned by RTM as a PDU.
         """
         self.action(
-            'rtm/write',
-            {'channel': channel, 'message': value},
+            u'rtm/write',
+            {u'channel': channel, u'message': value},
             callback)
 
     def write_preserialized_value(self, channel, value, callback=None):
@@ -356,7 +364,7 @@ Parameters
       PDU from RTM. The response PDU is passed as a parameter to this function.
       RTM does not send a response PDU if a callback is not specified.
         """
-        self.action('rtm/delete', {'channel': key}, callback)
+        self.action(u'rtm/delete', {u'channel': key}, callback)
 
     def publish_sync(self, channel, message, timeout=60):
         """
@@ -392,7 +400,7 @@ Parameters
         time_to_return = threading.Event()
 
         def callback(ack):
-            if ack['action'] != 'rtm/publish/ok':
+            if ack[u'action'] != u'rtm/publish/ok':
                 error.append(ack)
             else:
                 position.append(ack['body']['position'])
@@ -439,7 +447,7 @@ Parameters
             body = {'channel': channel_or_subscription_id}
         if args:
             body.update(args)
-        self.action('rtm/subscribe', body, callback)
+        self.action(u'rtm/subscribe', body, callback)
 
     def subscribe_sync(self, channel, args=None, timeout=60):
         """
@@ -464,7 +472,7 @@ Parameters
         time_to_return = threading.Event()
 
         def callback(ack):
-            if ack['action'] != 'rtm/subscribe/ok':
+            if ack[u'action'] != u'rtm/subscribe/ok':
                 error.append(ack)
             time_to_return.set()
         self.subscribe(channel, args, callback=callback)
@@ -494,7 +502,7 @@ Parameters
       response to the unsubscribe request, returned by RTM as a PDU.
         """
 
-        self.action('rtm/unsubscribe', {'subscription_id': channel}, callback)
+        self.action(u'rtm/unsubscribe', {'subscription_id': channel}, callback)
 
     def unsubscribe_sync(self, channel, timeout=60):
         """
@@ -516,7 +524,7 @@ Parameters
         time_to_return = threading.Event()
 
         def callback(ack):
-            if ack['action'] != 'rtm/unsubscribe/ok':
+            if ack[u'action'] != u'rtm/unsubscribe/ok':
                 error.append(ack)
             time_to_return.set()
         self.unsubscribe(channel, callback)
@@ -569,27 +577,27 @@ Parameters
 
             if type(self._next_auth_action) == auth.Handshake:
                 action_id = next(self.action_id_iterator)
-                payload = cbor.dumps({
-                    'action': 'auth/handshake',
-                    'body': {
-                        'method': self._next_auth_action.method,
-                        'data': self._next_auth_action.data},
-                    'id': action_id
+                payload = self.dumps({
+                    u'action': u'auth/handshake',
+                    u'body': {
+                        u'method': self._next_auth_action.method,
+                        u'data': self._next_auth_action.data},
+                    u'id': action_id
                     })
                 return self.send(payload)
             elif type(self._next_auth_action) == auth.Authenticate:
                 action_id = next(self.action_id_iterator)
-                payload = cbor.dumps({
-                    'action': 'auth/authenticate',
-                    'body': {
-                        'method': self._next_auth_action.method,
-                        'credentials': self._next_auth_action.credentials},
-                    'id': action_id
+                payload = self.dumps({
+                    u'action': u'auth/authenticate',
+                    u'body': {
+                        u'method': self._next_auth_action.method,
+                        u'credentials': self._next_auth_action.credentials},
+                    u'id': action_id
                     })
                 return self.send(payload)
 
             self._auth_callback(auth.Error(
-                'auth_delegate returned {0} instead of an auth action'.format(
+                u'auth_delegate returned {0} instead of an auth action'.format(
                     self._next_auth_action)))
             self._auth_callback = None
 
@@ -681,72 +689,45 @@ Parameters
         if self.delegate:
             self.delegate.on_internal_error(message)
 
-    def on_incoming_binary_frame(self, incoming_binary):
-        try:
-            incoming_pdu = cbor.loads(incoming_binary)
-            # FIXME: remove workaround
-            try:
-                incoming_pdu['id'] = int(incoming_pdu['id'])
-            except KeyError:
-                pass
-            incoming_json = json.dumps(incoming_pdu)
-        except ValueError as e:
-            self.logger.exception(e)
-            message = '"{0}" is not valid CBOR'.format(incoming_binary)
-            return self.on_internal_error(message)
-        self.on_incoming_text_frame(incoming_json)
-
-    def on_incoming_text_frame(self, incoming_text):
-        self.logger.debug('incoming text: %s', incoming_text)
-
+    def on_incoming_json(self, incoming_json):
         self.on_ws_ponged()
-
-        try:
-            incoming_json = json.loads(incoming_text)
-        except ValueError as e:
-            self.logger.exception(e)
-            message = u'"{0}" is not valid JSON'.format(incoming_text)
-            return self.on_internal_error(message)
 
         action = incoming_json.get('action')
         if not action:
-            message = u'"{0}" has no "action" field'.format(incoming_text)
+            message = u'"{0}" has no "action" field'.format(incoming_json)
             return self.on_internal_error(message)
 
         body = incoming_json.get('body')
 
-        maybe_bodyless_actions = ['rtm/delete/ok', 'rtm/publish/ok']
+        maybe_bodyless_actions = [u'rtm/delete/ok', u'rtm/publish/ok']
         if body is None and action not in maybe_bodyless_actions:
-            message = u'"{0}" has no "body" field'.format(incoming_text)
+            message = u'"{0}" has no "body" field'.format(incoming_json)
             self.logger.error(message)
             return self.on_internal_error(message)
 
-        if action == 'rtm/subscription/data':
+        if action == u'rtm/subscription/data':
             return self.on_subscription_data(body)
-        elif action == 'rtm/subscription/error':
+        elif action == u'rtm/subscription/error':
             return self.on_subscription_error(body)
-        elif action == 'rtm/subscription/info'\
-                and body.get('info') == 'fast_forward':
+        elif action == u'rtm/subscription/info'\
+                and body.get(u'info') == u'fast_forward':
             return self.on_fast_forward(body)
 
-        if action == '/error':
-            return self.on_internal_error(
-                'General error: {0}'.format(incoming_json))
+        id_ = incoming_json.get(u'id')
 
-        id_ = incoming_json.get('id')
         if id_ is None:
-<<<<<<< HEAD
-            message = u'"{0}" has no "id" field'.format(incoming_text)
-=======
-            message = '"{0}" has no "id" field'.format(incoming_json)
->>>>>>> 5c6ead2... Remove repacking into and unpacking from json when using cbor
+            message = u'"{0}" has no "id" field'.format(incoming_json)
+            if action == u'/error':
+                return self.on_internal_error(
+                    'General error: {0}'.format(incoming_json))
+
             return self.on_internal_error(message)
 
         if action.startswith('auth/'):
             def convert(pdu):
-                if pdu['action'] == 'auth/handshake/ok':
+                if pdu[u'action'] == u'auth/handshake/ok':
                     return auth.HandshakeOK(pdu['body']['data'])
-                if pdu['action'] == 'auth/authenticate/ok':
+                if pdu[u'action'] == u'auth/authenticate/ok':
                     return auth.AuthenticateOK()
                 return auth.Error(pdu['body']['reason'])
 
@@ -771,12 +752,8 @@ Parameters
 
     def on_incoming_binary_frame(self, incoming_binary):
         try:
+            self.logger.debug(incoming_binary)
             incoming_json = cbor.loads(incoming_binary)
-            # FIXME: remove workaround
-            try:
-                incoming_json['id'] = int(incoming_json['id'])
-            except KeyError:
-                pass
         except ValueError as e:
             self.logger.exception(e)
             message = '"{0}" is not valid CBOR'.format(incoming_binary)
@@ -816,7 +793,7 @@ def enable_wsaccel():
     miniws4py.framing.mask = fast_mask
 
 
-def validate_endpoint(endpoint, appkey):
+def validate_endpoint(endpoint, appkey, protocol):
     if not endpoint:
         raise exs.MalformedCredentials("Missing endpoint")
 
@@ -826,3 +803,7 @@ def validate_endpoint(endpoint, appkey):
     if not endpoint.startswith('ws://') and not endpoint.startswith('wss://'):
         raise exs.MalformedCredentials(
             'Endpoint must start with "ws(s)://" but "%s" does not' % endpoint)
+
+    if protocol not in ('cbor', 'json'):
+        raise exs.MalformedCredentials(
+            'Protocol must be one of "cbor", "json", not %s' % protocol)
