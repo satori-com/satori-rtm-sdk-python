@@ -117,6 +117,7 @@ class TestUnexpected(unittest.TestCase):
                 args={'position': '123'})
             so.wait_deleted()
             client.unsubscribe(channel)
+            client._queue.join()
 
             if not exit.wait(20):
                 raise RuntimeError('Timeout')

@@ -1,5 +1,4 @@
 
-import threading
 from collections import deque
 
 from satori.rtm.logger import logger
@@ -7,11 +6,11 @@ from satori.rtm.logger import logger
 
 class StateMachineWrapper(object):
     def __init__(self, sm_class, delegate):
-        self.lock = threading.RLock()
         self._sm = sm_class(delegate)
         self._sm_transition_queue = deque()
 
     def advance(self, f):
+
         def go(g):
             if self._sm_transition_queue:
                 logger.debug('Appending to transition queue')
@@ -27,8 +26,7 @@ class StateMachineWrapper(object):
                     h = self._sm_transition_queue.popleft()
                     go(h)
 
-        with self.lock:
-            go(f)
+        go(f)
 
     def get_state_name(self):
         return self._sm.getState().getName()

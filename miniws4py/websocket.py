@@ -85,7 +85,10 @@ class WebSocket(object):
         """
         if not self.client_terminated:
             self.client_terminated = True
-            self._write(self.stream.close(code=code, reason=reason).single())
+            try:
+                self._write(self.stream.close(code=code, reason=reason).single())
+            except Exception as e:
+                logger.error("Error when sending close frame: %s", str(e))
 
     def closed(self, code, reason=None):
         """

@@ -36,7 +36,7 @@ class Subscription(object):
             self, delivery_mode,
             send_subscribe_request, send_unsubscribe_request,
             args=None, observer=None):
-        self._mode = 'linked'
+        self.mode = 'linked'
 
         _lint_args(args)
         self._args = args
@@ -49,7 +49,6 @@ class Subscription(object):
         self._next_observer = None
         self._next_args = {}
         self._sm = StateMachineWrapper(sm.Subscription_sm, self)
-        self._lock = self._sm.lock
         self._last_error = None
         self._sm.advance(lambda sm: sm.ModeChange())
 
@@ -60,42 +59,40 @@ class Subscription(object):
         return self._sm.get_state_name() == 'Subscription.Failed'
 
     def subscribe(self, args=None, observer=None):
-        with self._lock:
-            logger.debug('subscribe')
+        logger.debug('subscribe')
 
-            if self._mode in ['linked', 'cycle']:
-                logger.error('Already subscribed or trying to')
-                return
+        if self.mode in ['linked', 'cycle']:
+            logger.error('Already subscribed or trying to')
+            return
 
-            if self._next_observer:
-                try:
-                    self._next_observer.on_deleted()
-                except Exception:
-                    pass
+        if self._next_observer:
+            try:
+                self._next_observer.on_deleted()
+            except Exception:
+                pass
 
-            self._next_observer = observer
-            self._next_args = args
-            self._mode = 'cycle'
+        self._next_observer = observer
+        self._next_args = args
+        self.mode = 'cycle'
 
-            return self._sm.advance(lambda sm: sm.ModeChange())
+        return self._sm.advance(lambda sm: sm.ModeChange())
 
     def unsubscribe(self):
-        with self._lock:
-            self._args = None
-            if self.is_failed():
-                self._mode = 'unlinked'
-                self._sm.advance(lambda sm: sm.UnsubscribeOK())
-            else:
-                logger.debug('unsubscribe')
-                self._mode = 'unlinked'
-                self._sm.advance(lambda sm: sm.ModeChange())
+        self._args = None
+        if self.is_failed():
+            self.mode = 'unlinked'
+            self._sm.advance(lambda sm: sm.UnsubscribeOK())
+        else:
+            logger.debug('unsubscribe')
+            self.mode = 'unlinked'
+            self._sm.advance(lambda sm: sm.ModeChange())
 
     def deleted(self):
-        if self._mode == 'unlinked':
+        if self.mode == 'unlinked':
             return self._sm.get_state_name() == 'Subscription.Unsubscribed'
 
     def _is_mode_linked(self):
-        return self._mode == 'linked'
+        return self.mode == 'linked'
 
     def _is_mode_not_linked(self):
         return not self._is_mode_linked()
@@ -104,7 +101,7 @@ class Subscription(object):
         return not self._is_mode_unlinked()
 
     def _is_mode_unlinked(self):
-        return self._mode == 'unlinked'
+        return self.mode == 'unlinked'
 
     def _is_fatal_channel_error(self, error_body):
         if not (self._delivery_mode.value &
@@ -120,8 +117,8 @@ class Subscription(object):
         return True
 
     def _change_mode_from_cycle_to_linked(self):
-        if self._mode == 'cycle':
-            self._mode = 'linked'
+        if self.mode == 'cycle':
+            self.mode = 'linked'
             if self._next_args:
                 self._args = self._next_args
 
@@ -135,7 +132,7 @@ class Subscription(object):
             else:
                 self.observer = None
             self._sm.advance(lambda sm: sm.ModeChange())
-        elif self._mode == 'unlinked':
+        elif self.mode == 'unlinked':
             self._perform_state_callback('on_deleted')
             self.observer = None
 
@@ -147,15 +144,13 @@ class Subscription(object):
 
     def connect(self):
         logger.debug('connect')
-        with self._lock:
-            self._connected = True
-            self._sm.advance(lambda sm: sm.Connect())
+        self._connected = True
+        self._sm.advance(lambda sm: sm.Connect())
 
     def disconnect(self):
         logger.debug('disconnect')
-        with self._lock:
-            self._connected = False
-            self._sm.advance(lambda sm: sm.Disconnect())
+        self._connected = False
+        self._sm.advance(lambda sm: sm.Disconnect())
 
     def on_subscription_data(self, data):
         logger.debug('Got channel data %s', data)
@@ -194,26 +189,22 @@ class Subscription(object):
         self._send_unsubscribe_request_()
 
     def on_subscribe_ok(self, ack):
-        with self._lock:
-            logger.debug('on_subscribe_ok')
-            if ack.get('body').get('position'):
-                self.update_position(ack['body']['position'])
-            self._sm.advance(lambda sm: sm.SubscribeOK())
+        logger.debug('on_subscribe_ok')
+        if ack.get('body').get('position'):
+            self.update_position(ack['body']['position'])
+        self._sm.advance(lambda sm: sm.SubscribeOK())
 
     def on_subscribe_error(self, reason):
-        with self._lock:
-            logger.debug('on_subscribe_error')
-            self._sm.advance(lambda sm: sm.SubscribeError(reason))
+        logger.debug('on_subscribe_error')
+        self._sm.advance(lambda sm: sm.SubscribeError(reason))
 
     def on_unsubscribe_ok(self):
-        with self._lock:
-            logger.debug('on_unsubscribe_ok')
-            self._sm.advance(lambda sm: sm.UnsubscribeOK())
+        logger.debug('on_unsubscribe_ok')
+        self._sm.advance(lambda sm: sm.UnsubscribeOK())
 
     def on_unsubscribe_error(self):
-        with self._lock:
-            logger.debug('on_unsubscribe_error')
-            self._sm.advance(lambda sm: sm.UnsubscribeError())
+        logger.debug('on_unsubscribe_error')
+        self._sm.advance(lambda sm: sm.UnsubscribeError())
 
     def on_enter_failed(self, reason):
         self._perform_state_callback('on_enter_failed', reason)

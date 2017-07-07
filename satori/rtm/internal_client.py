@@ -106,6 +106,11 @@ class InternalClient(object):
                 self._authenticate(m.auth_delegate, m.callback)
             else:
                 self._offline_queue.append(m)
+        elif t == a.SolicitedPDU:
+            try:
+                m.callback(m.payload)
+            except Exception as e:
+                logger.error(e)
         elif t == a.Tick:
             self._sm.Tick()
 
@@ -150,6 +155,10 @@ class InternalClient(object):
     # called back by connection from some thread
     def on_subscription_error(self, channel, payload):
         self._queue.put(a.ChannelError(channel, payload))
+
+    # called back by connection from some thread
+    def on_solicited_pdu(self, callback, payload):
+        self._queue.put(a.SolicitedPDU(callback, payload))
 
     def _on_internal_error(self, payload):
         logger.error('RTM internal error: %s', payload)
@@ -283,6 +292,7 @@ class InternalClient(object):
     def _forget_connection(self):
         logger.info('_forget_connection')
         if self.connection:
+            self.connection.ack_callbacks_by_id.clear()
             self.connection.delegate = None
             try:
                 self.connection.stop()
@@ -340,7 +350,7 @@ class InternalClient(object):
             logger.info('USAck for channel %s: %s', channel, ack)
             if ack.get('action') == 'rtm/unsubscribe/ok':
                 s = self.subscriptions.get(channel)
-                if s:
+                if s and s.mode != 'cycle':
                     del self.subscriptions[channel]
                 subscription.on_unsubscribe_ok()
                 if s and not subscription.deleted():

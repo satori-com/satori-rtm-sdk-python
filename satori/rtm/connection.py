@@ -176,12 +176,14 @@ Description
                 self.logger.debug('Waiting for WS thread')
                 self._ws_thread.join()
                 self.logger.debug('WS thread finished normally')
-            except OSError as e:
+            except Exception as e:
                 # we could be trying to write a goodbye
                 # into already closed socket
+                # or just sending a close frame can fail for
+                # any number of reasons
                 self.logger.exception(e)
         else:
-            raise RuntimeError('Connection is not open yet')
+            self.logger.error('Connection is not open yet')
 
     def send(self, payload):
         """
@@ -754,7 +756,11 @@ Syntax
         self.logger.debug('Starting ping thread')
         try:
             while not self._time_to_stop_pinging:
-                time.sleep(ping_interval_in_seconds)
+                time.sleep(1)
+                now = time.time()
+                if self._last_ping_time and\
+                        now - self._last_ping_time < ping_interval_in_seconds:
+                    continue
                 self.logger.debug('send ping')
                 self.ws.send_ping()
                 if self._last_ping_time:
@@ -771,8 +777,8 @@ Syntax
                             self.logger.exception(e)
                 self._last_ping_time = time.time()
                 self.logger.debug('pinging')
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.exception(e)
         self.logger.debug('Finishing ping thread')
 
     def on_ws_closed(self):
@@ -780,6 +786,7 @@ Syntax
         if self.delegate:
             self.delegate.on_connection_closed()
         if self.ws:
+            self.ack_callbacks_by_id.clear()
             self.ws.delegate = None
             try:
                 self.ws.close()
@@ -879,7 +886,18 @@ Syntax
 
         callback = self.ack_callbacks_by_id.get(id_)
         if callback:
-            callback(incoming_json)
+
+            try:
+                delegate_on_solicited =\
+                    getattr(self.delegate, 'on_solicited_pdu')
+            except AttributeError:
+                delegate_on_solicited = None
+
+            if delegate_on_solicited:
+                delegate_on_solicited(callback, incoming_json)
+            else:
+                callback(incoming_json)
+
             if not incoming_json.get('action').endswith('/data'):
                 del self.ack_callbacks_by_id[id_]
 

@@ -173,7 +173,7 @@ class TestSubscribeError(unittest.TestCase):
             client._queue.join()
 
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
                 '{"action":"rtm/subscribe/ok","body":{"channel":"' +
@@ -183,21 +183,23 @@ class TestSubscribeError(unittest.TestCase):
             so.wait_subscribed()
 
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
                 '{"action":"rtm/unsubscribe/ok","body":{},"id":1}')
 
-            so.wait_not_subscribed()
+            client._queue.join()
 
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'linked')
             old_received_message(
                 '{"action":"rtm/subscribe/error","body":{},"id":2}')
 
+            client._queue.join()
+
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'linked')
             self.assertEqual(
                 client._internal
@@ -244,13 +246,15 @@ class TestSubscribeError(unittest.TestCase):
             client._queue.join()
 
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'cycle')
             old_received_message(
                 '{"action":"rtm/subscribe/error","body":{},"id":0}')
 
+            client._queue.join()
+
             self.assertEqual(
-                client._internal.subscriptions[channel]._mode,
+                client._internal.subscriptions[channel].mode,
                 'linked')
             old_received_message(
                 '{"action":"rtm/subscribe/ok","body":{},"id":1}')
