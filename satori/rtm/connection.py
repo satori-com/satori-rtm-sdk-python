@@ -13,7 +13,7 @@ from __future__ import print_function
 import itertools
 import posixpath
 import satori.rtm.internal_json as json
-import cbor
+import cbor2
 import re
 import sys
 import threading
@@ -102,7 +102,7 @@ Parameters
         self._ws_thread = None
         self.protocol = protocol
         if self.protocol == 'cbor':
-            self.dumps = cbor.dumps
+            self.dumps = cbor2.dumps
         else:
             self.dumps = json.dumps
 
@@ -190,7 +190,7 @@ Description
     updated SDK.
         """
         # TODO: make cbor-compatible
-        self.action_with_preserialized_body(name, cbor.dumps(body), callback)
+        self.action_with_preserialized_body(name, cbor2.dumps(body), callback)
 
     def action_with_preserialized_body(self, name, body, callback=None):
         if callback:
@@ -202,20 +202,20 @@ Description
             payload =\
                 b''.join([
                     b'\xa3',
-                    cbor.dumps(u'action'),
-                    cbor.dumps(name),
-                    cbor.dumps(u'id'),
-                    cbor.dumps(action_id),
-                    cbor.dumps(u'body'),
+                    cbor2.dumps(u'action'),
+                    cbor2.dumps(name),
+                    cbor2.dumps(u'id'),
+                    cbor2.dumps(action_id),
+                    cbor2.dumps(u'body'),
                     body])
             self.ack_callbacks_by_id[action_id] = callback
         else:
             payload =\
                 b''.join([
                     b'\xa3',
-                    cbor.dumps(u'action'),
-                    cbor.dumps(name),
-                    cbor.dumps(u'body'),
+                    cbor2.dumps(u'action'),
+                    cbor2.dumps(name),
+                    cbor2.dumps(u'body'),
                     body])
         self.send(payload)
 
@@ -753,7 +753,7 @@ Parameters
     def on_incoming_binary_frame(self, incoming_binary):
         try:
             self.logger.debug(incoming_binary)
-            incoming_json = cbor.loads(incoming_binary)
+            incoming_json = cbor2.loads(incoming_binary)
         except ValueError as e:
             self.logger.exception(e)
             message = '"{0}" is not valid CBOR'.format(incoming_binary)

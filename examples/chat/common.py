@@ -25,10 +25,10 @@ class Chat(object):
 
     def __init__(self, nick, channel, platform_client):
         self.nick = nick
-        if isinstance(channel, unicode):
-            self.channel = channel
-        else:
+        if isinstance(channel, bytes):
             self.channel = channel.decode('utf8')
+        else:
+            self.channel = channel
         self.client = platform_client
 
         self.after_subscribe_event = threading.Event()
