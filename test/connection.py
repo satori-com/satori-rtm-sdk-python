@@ -15,6 +15,7 @@ _, _, restricted_channel = get_test_role_name_secret_and_channel()
 
 
 class TestConnection(unittest.TestCase):
+
     def test_stop_before_start(self):
         conn = sc.Connection(endpoint, appkey)
         # check that it does not raise
@@ -318,7 +319,11 @@ class TestConnection(unittest.TestCase):
             for i in range(1000):
                 conn.publish(channel, 'message', callback=callback)
 
-            time.sleep(2)
+            origin = time.time()
+            while time.time() < origin + 5:
+                time.sleep(0.1)
+                if len(mailbox) == 1000:
+                    break
         except Exception as e:
             import sys
             print(e, file=sys.stderr)

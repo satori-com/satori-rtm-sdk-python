@@ -19,7 +19,7 @@ class TestTwoClients(unittest.TestCase):
 
         with make_client(
                 endpoint=endpoint, appkey=appkey,
-                reconnect_interval=1) as subscriber:
+                reconnect_interval=0) as subscriber:
             with make_client(endpoint=endpoint, appkey=appkey) as publisher:
 
                 co1 = ClientObserver()
@@ -48,10 +48,7 @@ class TestTwoClients(unittest.TestCase):
                     expected_messages =\
                         ['first-message', 'second-message', 'third-message']
 
-                    got_messages = []
-                    for log_entry in so.log:
-                        if log_entry[0] == 'data':
-                            got_messages += log_entry[1]['messages']
+                    got_messages = so.extract_received_messages()
 
                     self.assertEqual(got_messages, expected_messages)
                 except:
@@ -64,7 +61,7 @@ class TestTwoClients(unittest.TestCase):
 
         with make_client(
                 endpoint=endpoint, appkey=appkey,
-                reconnect_interval=1) as subscriber:
+                reconnect_interval=0) as subscriber:
             with make_client(endpoint=endpoint, appkey=appkey) as publisher:
 
                 co1 = ClientObserver()
@@ -112,7 +109,7 @@ class TestTwoClients(unittest.TestCase):
 
         with make_client(
                 endpoint=endpoint, appkey=appkey,
-                reconnect_interval=5) as subscriber:
+                reconnect_interval=0) as subscriber:
             with make_client(endpoint=endpoint, appkey=appkey) as publisher:
 
                 co1 = ClientObserver()

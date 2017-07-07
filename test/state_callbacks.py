@@ -87,11 +87,21 @@ class TestStateCallbacks(unittest.TestCase):
     def test_missing_subscription_observer_callbacks_are_fine(self):
 
         with make_client(endpoint=endpoint, appkey=appkey) as client:
+            channel = make_channel_name('missing_subscription_callbacks')
             client.subscribe(
-                make_channel_name('missing_subscription_callbacks'),
+                channel,
                 SubscriptionMode.ADVANCED,
                 object())
-            time.sleep(3)
+
+            origin = time.time()
+            while time.time() < origin + 5:
+                sub = client._internal.subscriptions.get(channel)
+                if sub and\
+                    sub._sm.get_state_name() == 'Subscription.Subscribed':
+                    break
+                time.sleep(0.1)
+            else:
+                self.assertFalse('Unexpectedly subscription failed')
 
 
 if __name__ == '__main__':

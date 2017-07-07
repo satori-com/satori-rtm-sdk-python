@@ -183,7 +183,7 @@ Description
                 # any number of reasons
                 self.logger.exception(e)
         else:
-            self.logger.error('Connection is not open yet')
+            self.logger.info('Trying to close a connection that is not open')
 
     def send(self, payload):
         """
@@ -756,11 +756,13 @@ Syntax
         self.logger.debug('Starting ping thread')
         try:
             while not self._time_to_stop_pinging:
-                time.sleep(1)
+                time.sleep(min(ping_interval_in_seconds, 1))
                 now = time.time()
                 if self._last_ping_time and\
                         now - self._last_ping_time < ping_interval_in_seconds:
                     continue
+                if self.ws is None:
+                    break
                 self.logger.debug('send ping')
                 self.ws.send_ping()
                 if self._last_ping_time:

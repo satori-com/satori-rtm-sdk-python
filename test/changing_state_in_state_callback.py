@@ -40,7 +40,7 @@ class TestChangingStateInStateCallbacks(unittest.TestCase):
 
             exit = threading.Event()
 
-            stop_timer = threading.Timer(1, lambda: client.stop())
+            stop_timer = threading.Timer(0.01, lambda: client.stop())
             stop_timer.daemon = True
             stop_timer.name = 'StopTimer'
             stop_timer.start()
