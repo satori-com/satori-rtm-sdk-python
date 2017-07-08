@@ -17,7 +17,8 @@ class TestIdenticalSubscribers(unittest.TestCase):
     def _run(self, N):
         channel = make_channel_name('two_identical_subscribers')
         with make_client(endpoint=endpoint, appkey=appkey) as pub:
-            with make_client(endpoint=endpoint, appkey=appkey) as sub1:
+            with make_client(
+                    endpoint=endpoint, appkey=appkey, protocol='json') as sub1:
                 with make_client(endpoint=endpoint, appkey=appkey) as sub2:
 
                     origin = sync_publish(pub, channel, 'prime')
@@ -40,9 +41,16 @@ class TestIdenticalSubscribers(unittest.TestCase):
 
                     self.assertEqual(msgs1, msgs2)
 
+    @unittest.skip("json and cbor clients can't talk to each other yet")
+    def test_single_publisher_one_message(self):
+        self._run(1)
+
+
+    @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_few_messages(self):
         self._run(10)
 
+    @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_lots_of_messages(self):
         self._run(1000)
 

@@ -8,7 +8,6 @@ class RtmWsClient(WebSocketBaseClient):
 
     def __init__(self, *args, **kwargs):
         WebSocketBaseClient.__init__(self, *args, **kwargs)
-        self.protocols = ['cbor']
         self.logger = satori.rtm.internal_logger.logger
         self.delegate = None
 
@@ -37,7 +36,7 @@ class RtmWsClient(WebSocketBaseClient):
     def received_message(self, message):
         d = message.data
         if self.delegate:
-            if self.protocols == [b'cbor']:
+            if self.protocols == ['cbor']:
                 self.delegate.on_incoming_binary_frame(d)
             else:
                 self.delegate.on_incoming_text_frame(d.decode('utf8'))

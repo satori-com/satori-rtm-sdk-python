@@ -118,7 +118,8 @@ Description
             raise RuntimeError('Connection is already open')
 
         self.logger.debug('connection.start %s', self.url)
-        self.ws = RtmWsClient(self.url, proxy=self.https_proxy)
+        ps = ['cbor'] if self.protocol == 'cbor' else []
+        self.ws = RtmWsClient(self.url, proxy=self.https_proxy, protocols=ps)
         self.ws.delegate = self
 
         try:

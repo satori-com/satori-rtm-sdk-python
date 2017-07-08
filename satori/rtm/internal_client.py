@@ -24,7 +24,7 @@ class InternalClient(object):
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
             observer=None, restore_auth_on_reconnect=True,
-            https_proxy=None):
+            https_proxy=None, protocol='cbor'):
 
         self._endpoint = endpoint
         self._appkey = appkey
@@ -46,6 +46,7 @@ class InternalClient(object):
         self._connection_attempts_left = self.fail_count_threshold
         self._successful_auth_delegates = []
         self._offline_queue = deque([], max_offline_queue_length)
+        self._protocol = protocol
 
     def process_one_message(self, timeout=1):
         '''Must be called from a single thread
@@ -214,7 +215,9 @@ class InternalClient(object):
         logger.info('_connect')
         self._time_of_last_reconnect = time.time()
         self.connection = Connection(
-            self._endpoint, self._appkey, self, self.https_proxy)
+            self._endpoint, self._appkey,
+            self,
+            self.https_proxy, self._protocol)
         try:
             self.connection.start()
             self._queue.put(a.ConnectingComplete())

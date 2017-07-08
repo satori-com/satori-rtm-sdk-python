@@ -272,7 +272,7 @@ class WebSocketBaseClient(WebSocket):
                     raise HandshakeError("Invalid challenge response: %s" % value)
 
             elif header == b'sec-websocket-protocol':
-                protocols = value.split(b',')
+                protocols = [p.decode('utf8') for p in value.split(b',')]
 
             elif header == b'sec-websocket-extensions':
                 extensions = value.split(b',')
