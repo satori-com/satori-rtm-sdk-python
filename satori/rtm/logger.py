@@ -24,11 +24,11 @@ import logging
 logger = logging.getLogger('satori')
 
 
-def configure(level):
+def configure(level, handler_class=logging.StreamHandler):
     ws4py_formatter = logging.Formatter(
         'miniws4py:%(asctime)s:%(levelname)s:'
         '%(threadName)s:%(module)s:%(lineno)d: %(message)s')
-    ws4py_handler = logging.StreamHandler()
+    ws4py_handler = handler_class()
     ws4py_handler.setFormatter(ws4py_formatter)
 
     ws4py_logger = logging.getLogger('miniws4py')
@@ -37,7 +37,7 @@ def configure(level):
 
     satori_formatter = logging.Formatter(
         'satori:%(asctime)s:%(levelname)s:%(threadName)s: %(message)s')
-    satori_handler = logging.StreamHandler()
+    satori_handler = handler_class()
     satori_handler.setFormatter(satori_formatter)
 
     logger.setLevel(level)
