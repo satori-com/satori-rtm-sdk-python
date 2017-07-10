@@ -25,16 +25,16 @@ class TestResubscribe(unittest.TestCase):
         client.start()
         client.observer.wait_connected()
         so = sync_subscribe(client, channel)
-        sync_publish(client, channel, 'first-message')
+        sync_publish(client, channel, u'first-message')
         first_channel_data = so.wait_for_channel_data()
-        sync_publish(client, channel, 'second-message')
+        sync_publish(client, channel, u'second-message')
         second_channel_data = so.wait_for_channel_data()
         client.unsubscribe(channel)
         client.subscribe(
             channel,
             SubscriptionMode.ADVANCED,
             so,
-            args={'position': first_channel_data['position']})
+            args={u'position': first_channel_data['position']})
         self.assertEqual(
             second_channel_data['messages'],
             so.wait_for_channel_data()['messages'])

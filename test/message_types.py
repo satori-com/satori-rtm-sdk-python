@@ -14,7 +14,7 @@ channel = make_channel_name('message_types')
 
 basic_messages =\
     [None, 42, 3.1415, 'hello', True, False, [], {}, '', u'Сообщение']
-dict_messages = [{'key': m} for m in basic_messages]
+dict_messages = [{u'key': m} for m in basic_messages]
 list_messages =\
     [[random.choice(basic_messages + dict_messages)
         for _ in range(len)] for len in range(1, 5)]

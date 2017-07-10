@@ -28,7 +28,7 @@ class TestSubscribeError(unittest.TestCase):
                 channel,
                 SubscriptionMode.ADVANCED,
                 so,
-                {u'position': 'this_is_invalid_position'})
+                {u'position': u'this_is_invalid_position'})
             so.wait_failed()
 
             expected_log = [
@@ -71,7 +71,7 @@ class TestSubscribeError(unittest.TestCase):
                 channel,
                 SubscriptionMode.ADVANCED,
                 so,
-                args={'position': 'this_is_invalid_position'})
+                args={u'position': 'this_is_invalid_position'})
             ev.wait(10)
 
             so.wait_subscribed()

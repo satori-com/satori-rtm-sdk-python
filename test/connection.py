@@ -236,7 +236,7 @@ class TestConnection(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             conn.unsubscribe_sync(channel, timeout=0)
         with self.assertRaises(RuntimeError):
-            conn.publish_sync(channel, 'msg', timeout=0)
+            conn.publish_sync(channel, u'msg', timeout=0)
         with self.assertRaises(RuntimeError):
             conn.read_sync(channel, timeout=0)
         conn.stop()
@@ -303,7 +303,7 @@ class TestConnection(unittest.TestCase):
         conn.ws._write = fail
 
         with self.assertRaises(ZeroDivisionError):
-            conn.publish('channel', 'message')
+            conn.publish(u'channel', u'message')
 
         self.assertEqual(mailbox, ['close'])
 
@@ -319,7 +319,7 @@ class TestConnection(unittest.TestCase):
                 mailbox.append(ack)
             channel = make_channel_name('request_throttling')
             for i in range(1000):
-                conn.publish(channel, 'message', callback=callback)
+                conn.publish(channel, u'message', callback=callback)
 
             origin = time.time()
             while time.time() < origin + 5:
