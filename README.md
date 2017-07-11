@@ -62,6 +62,19 @@ satori.rtm.connection.enable_wsaccel()
 You can view the latest SDK documentation
 [here](https://www.satori.com/docs/rtm-sdks/overview).
 
+# Using https proxy
+
+The SDK supports working through an https (not http) proxy.
+
+When constructing a client using the `Client` constructor or
+the `make_client` context manager, add a keyword argument
+`https_proxy=(host, port)` like this:
+
+```
+with make_client(endpoint, appkey, https_proxy=('127.0.0.1', 4443)) as client:
+    print('Connected to Satori RTM through a proxy')
+```
+
 # Development
 
 ## Development dependencies
