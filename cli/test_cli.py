@@ -3,7 +3,9 @@
 import json
 import re
 import signal
+import six
 import subprocess
+import sys
 import time
 import unittest
 
@@ -14,8 +16,9 @@ from test.utils import make_channel_name
 endpoint, appkey = get_test_endpoint_and_appkey('../credentials.json')
 role, secret, restricted_channel =\
     get_test_role_name_secret_and_channel('../credentials.json')
-string_message = b'string message'
-json_message = b'{"text": ["json", "message"]}'
+string_message = make_channel_name('string').encode('utf8')
+json_message = u'{{"text": ["{}", "message"]}}'.format(make_channel_name('json'))
+json_message = json_message.encode('utf8')
 
 
 class TestCLI(unittest.TestCase):
@@ -244,22 +247,25 @@ def generic_test(self, should_authenticate=False):
         (sub_out, sub_err) = subscriber.communicate()
         self.assertEqual(subscriber.returncode, 0,
             "subscriber failed with code {0}".format(subscriber.returncode))
-        self.assertEqual(
-            u'\n'.join(
-                [u'{0}: "{1}"',
-                 u'{0}: {2}\n',
-                ]).format(
-                    channel.decode('utf8'),
-                    string_message.decode('utf8'),
-                    json_message.decode('utf8')),
-            sub_out.decode('utf8'))
-    except Exception as e:
+
+        u_channel = channel.decode('utf8')
+        u_string_message = string_message.decode('utf8')
+        u_json_message = json_message.decode('utf8')
+        u_sub_out = sub_out.decode('utf8')
+        self.assertTrue(
+            u'{0}: "{1}"'.format(u_channel, u_string_message) in u_sub_out,
+            u_sub_out)
+        self.assertTrue(
+            u'{0}: {1}'.format(u_channel, u_json_message) in u_sub_out,
+            u_sub_out)
+    except Exception:
+        e_type, e_value, e_traceback = sys.exc_info()
         try:
             print('Publisher out, err: {0}'.format(publisher.communicate()))
             print('Subscriber out, err: {0}'.format(subscriber.communicate()))
         except:
             pass
-        raise e
+        six.reraise(e_type, e_value, e_traceback)
 
 if __name__ == '__main__':
     unittest.main()
