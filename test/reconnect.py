@@ -211,18 +211,20 @@ class TestReconnect(unittest.TestCase):
 
         so = sync_subscribe(client, restricted_channel)
 
-        sync_publish(client, restricted_channel, 'before disconnect')
+        message1 = make_channel_name('before disconnect')
+        sync_publish(client, restricted_channel, message1)
         first_data = so.wait_for_channel_data()
-        self.assertEqual(first_data['messages'], ['before disconnect'])
+        self.assertTrue(message1 in first_data['messages'])
 
         emulate_websocket_disconnect(client)
 
         co.wait_disconnected()
         co.wait_connected()
 
-        sync_publish(client, restricted_channel, 'after reconnect')
+        message2 = make_channel_name('after reconnect')
+        sync_publish(client, restricted_channel, message2)
         second_data = so.wait_for_channel_data()
-        self.assertEqual(second_data['messages'], ['after reconnect'])
+        self.assertTrue(message2 in second_data['messages'])
 
         client.stop()
         client.dispose()
