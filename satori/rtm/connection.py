@@ -841,19 +841,19 @@ Syntax
             incoming_json = json.loads(incoming_text)
         except ValueError as e:
             self.logger.exception(e)
-            message = '"{0}" is not valid JSON'.format(incoming_text)
+            message = u'"{0}" is not valid JSON'.format(incoming_text)
             return self.on_internal_error(message)
 
         action = incoming_json.get('action')
         if not action:
-            message = '"{0}" has no "action" field'.format(incoming_text)
+            message = u'"{0}" has no "action" field'.format(incoming_text)
             return self.on_internal_error(message)
 
         body = incoming_json.get('body')
 
         maybe_bodyless_actions = ['rtm/delete/ok', 'rtm/publish/ok']
         if body is None and action not in maybe_bodyless_actions:
-            message = '"{0}" has no "body" field'.format(incoming_text)
+            message = u'"{0}" has no "body" field'.format(incoming_text)
             self.logger.error(message)
             return self.on_internal_error(message)
 
@@ -871,7 +871,7 @@ Syntax
 
         id_ = incoming_json.get('id')
         if id_ is None:
-            message = '"{0}" has no "id" field'.format(incoming_text)
+            message = u'"{0}" has no "id" field'.format(incoming_text)
             return self.on_internal_error(message)
 
         if action.startswith('auth/'):
