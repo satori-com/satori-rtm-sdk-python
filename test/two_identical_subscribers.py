@@ -45,7 +45,6 @@ class TestIdenticalSubscribers(unittest.TestCase):
     def test_single_publisher_one_message(self):
         self._run(1)
 
-
     @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_few_messages(self):
         self._run(10)

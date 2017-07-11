@@ -98,7 +98,8 @@ class TestRoleAuth(unittest.TestCase):
                 appkey=appkey) as client:
 
             auth_event = threading.Event()
-            auth_delegate = auth.RoleSecretAuthDelegate(u'superuser', b'bad_key')
+            auth_delegate = auth.RoleSecretAuthDelegate(
+                u'superuser', b'bad_key')
             mailbox = []
 
             def auth_callback(auth_result):
