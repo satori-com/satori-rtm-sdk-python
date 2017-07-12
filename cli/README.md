@@ -1,6 +1,6 @@
 
-satori_rtm_cli.py
-=================
+satori-rtm-cli
+==============
 
 This is a debugging and exploration tool for [Satori](https://www.satori.com) RTM.
 
@@ -16,7 +16,7 @@ pip install satori-rtm-cli
 If you only have `pip3` on your system, `pip3 install satori-rtm-cli` works too.
 In general, any command using `pip` in this README is `pip3`-compatible.
 
-If that command failed or `satori_rtm_cli.py` has not become available in your
+If that command failed or `satori-rtm-cli` has not become available in your
 shell, see [Troubleshooting](#troubleshooting).
 
 Common flags
@@ -28,7 +28,7 @@ Common flags
 * role_secret
 * verbosity -- from 0 (the least chatty) to 3 (the most chatty), default is 2 (quite chatty)
 
-Run `satori_rtm_cli.py --help` for full help on flags.
+Run `satori-rtm-cli --help` for full help on flags.
 
 Example usage
 -------------
@@ -38,32 +38,32 @@ Examples assume that $MY_ENDPOINT, $MY_APPKEY and $MY_CHANNEL have valid values.
 ### Read single message and exit
 
 ```
-satori_rtm_cli.py --appkey=$MY_APPKEY read big-rss
+satori-rtm-cli --appkey=$MY_APPKEY read big-rss
 ```
 
 ### Subscribe (human-friendly output)
 
 ```
-satori_rtm_cli.py --appkey=$MY_APPKEY --prettify_json subscribe big-rss
+satori-rtm-cli --appkey=$MY_APPKEY --prettify_json subscribe big-rss
 ```
 
 ### Filter
 
 ```
-satori_rtm_cli.py --appkey=$MY_APPKEY --prettify_json filter 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
+satori-rtm-cli --appkey=$MY_APPKEY --prettify_json filter 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
 ```
 
 ### Record (machine-friendly output, every line is a JSON object)
 
 ```
 # record to stdout (press Control-C to stop)
-satori_rtm_cli.py --appkey=$MY_APPKEY record big-rss
+satori-rtm-cli --appkey=$MY_APPKEY record big-rss
 
 # record to file (press Control-C to stop)
-satori_rtm_cli.py --appkey=$MY_APPKEY -o big-rss.recording record big-rss
+satori-rtm-cli --appkey=$MY_APPKEY -o big-rss.recording record big-rss
 
 # replay big-rss recording to $MY_CHANNEL
-satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay -i big-rss.recording --override_channel=$MY_CHANNEL
+satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay -i big-rss.recording --override_channel=$MY_CHANNEL
 ```
 
 
@@ -71,30 +71,30 @@ satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay -i big-rss.
 
 ```
 # publish a single JSON object message
-echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
 
 # publish a single string message
-echo "Hello" | satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo "Hello" | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
 
 # publish a few messages
-echo "Hello\nHallo\nCiao" | satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo "Hello\nHallo\nCiao" | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
 
 # publish a few messages from a file
 echo "Hello\nHallo\nCiao" > hello.txt
-satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY -i hello.txt publish $MY_CHANNEL
+satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY -i hello.txt publish $MY_CHANNEL
 ```
 
 ### Key-value
 
 ```
 # write
-echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY write $MY_CHANNEL
+echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY write $MY_CHANNEL
 
 # read
-satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY read $MY_CHANNEL
+satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY read $MY_CHANNEL
 
 # delete
-satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY delete $MY_CHANNEL
+satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY delete $MY_CHANNEL
 ```
 
 Troubleshooting
@@ -120,7 +120,7 @@ There are multiple choices here:
 
 1. Install the package as root. The upside is that `sudo pip install` usually
    installs scripts in a location that's already on PATH, meaning
-   `satori_rtm_cli.py` will become available in your shell. A notable exception
+   `satori-rtm-cli` will become available in your shell. A notable exception
    is pip from MacPorts, it installs scripts deeply into its internal directory
    so you can't run them immediately after installation.
 
@@ -140,11 +140,11 @@ pip install --user --install-option="--install-scripts=$HOME/bin" satori-rtm-cli
 
 ---
 
-Problem: satori-rtm-cli package installed successfully, but satori_rtm_cli.py is
+Problem: satori-rtm-cli package installed successfully, but satori-rtm-cli is
          not available in the shell
 
-Symptom: running `satori_rtm_cli.py` results in something like `bash: command
-         not found: satori_rtm_cli.py`
+Symptom: running `satori-rtm-cli` results in something like `bash: command
+         not found: satori-rtm-cli`
 
 There are two approaches to fixing it:
 

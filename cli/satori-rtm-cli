@@ -25,15 +25,15 @@ except Exception:
 __doc__ = '''Satori RTM CLI
 
 Usage:
-  satori_rtm_cli.py --help
-  satori_rtm_cli.py [options] [--prettify_json] subscribe <channels>...
-  satori_rtm_cli.py [options] [--prettify_json] filter <query>
-  satori_rtm_cli.py [options] publish [--disable_acks] <channel>
-  satori_rtm_cli.py [options] [--prettify_json] read <key>
-  satori_rtm_cli.py [options] write [--disable_acks] <key> <value>
-  satori_rtm_cli.py [options] delete [--disable_acks] <key>
-  satori_rtm_cli.py [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
-  satori_rtm_cli.py [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
+  satori-rtm-cli --help
+  satori-rtm-cli [options] [--prettify_json] subscribe <channels>...
+  satori-rtm-cli [options] [--prettify_json] filter <query>
+  satori-rtm-cli [options] publish [--disable_acks] <channel>
+  satori-rtm-cli [options] [--prettify_json] read <key>
+  satori-rtm-cli [options] write [--disable_acks] <key> <value>
+  satori-rtm-cli [options] delete [--disable_acks] <key>
+  satori-rtm-cli [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
+  satori-rtm-cli [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
     --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 2

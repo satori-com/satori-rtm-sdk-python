@@ -8,5 +8,5 @@ setup(name='satori-rtm-cli',
       author='Satori',
       author_email='sdk@satori.com',
       url='http://www.satori.com/',
-      scripts=['satori_rtm_cli.py'],
+      scripts=['satori-rtm-cli'],
       install_requires=['satori-rtm-sdk >=1.2.0', 'docopt'])

@@ -34,7 +34,7 @@ class TestCLI(unittest.TestCase):
         tcpkali1 = start_tcpkali()
 
         satori_rtm_cli = subprocess.Popen(
-            ['python', 'satori_rtm_cli.py',
+            ['python', 'satori-rtm-cli',
                 '--appkey', 'bogus',
                 '--endpoint', 'ws://localhost:8999/',
 
@@ -67,7 +67,7 @@ class TestCLI(unittest.TestCase):
         channel = make_channel_name('replayer_timing')
 
         rerecorder = subprocess.Popen(
-            ['python', 'satori_rtm_cli.py',
+            ['python', 'satori-rtm-cli',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
 
@@ -76,7 +76,7 @@ class TestCLI(unittest.TestCase):
             stderr=subprocess.PIPE)
 
         replayer = subprocess.Popen(
-            ['python', 'satori_rtm_cli.py',
+            ['python', 'satori-rtm-cli',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
                 'replay'],
@@ -147,7 +147,7 @@ class TestCLI(unittest.TestCase):
                 (offset, "is far from", first_offset))
 
     def test_kv(self):
-        cmd_prefix = ['python', 'satori_rtm_cli.py',
+        cmd_prefix = ['python', 'satori-rtm-cli',
             '--appkey', appkey,
             '--endpoint', endpoint]
 
@@ -192,7 +192,7 @@ def generic_test(self, should_authenticate=False):
 
 
     publisher = subprocess.Popen(
-        ['python', 'satori_rtm_cli.py',
+        ['python', 'satori-rtm-cli',
             '--appkey', appkey,
             '--endpoint', endpoint,
             'publish', channel] + auth_args,
@@ -201,7 +201,7 @@ def generic_test(self, should_authenticate=False):
         stdin=subprocess.PIPE)
 
     subscriber = subprocess.Popen(
-        ['python', 'satori_rtm_cli.py',
+        ['python', 'satori-rtm-cli',
             '--appkey', appkey,
             '--endpoint', endpoint,
             'subscribe', channel] + auth_args,
