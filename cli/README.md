@@ -13,32 +13,8 @@ It's available from PyPI:
 pip install satori-rtm-cli
 ```
 
-Depending on exactly how Python is set up on your machine you might have to
-instead use one of
+If that command failed or `satori_rtm_cli.py` has not become available in your shell, see [Troubleshooting](#troubleshooting).
 
-```
-pip install --user satori-rtm-cli
-```
-
-or
-
-```
-sudo pip install satori-rtm-cli
-```
-
-This will result in an executable `satori_rtm_cli.py` being available in your
-shell. If the installation command succeeded, but the executable is not
-available, it probably means that it was installed in a directory that's
-not in your PATH. For a comprehensive guide see
-[Python packaging manual](https://packaging.python.org/installing/).
-
-If you want to control where the executable ends up, you can do this:
-
-```
-pip install --user --install-option="--install-scripts=$HOME/bin" satori-cli
-```
-
-As a result `satori_rtm_cli.py` will be in `$HOME/bin` directory.
 
 Common flags
 ------------
@@ -116,4 +92,66 @@ satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY read $MY_CHANNEL
 
 # delete
 satori_rtm_cli.py --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY delete $MY_CHANNEL
+```
+
+Troubleshooting
+---------------
+
+Note: when trying different ways to install satori-rtm-cli (or any python package)
+      beware that pip will NOT reinstall it by default, even if installation flags differ.
+      You'll likely have to uninstall it first to try another way of installing:
+
+```
+pip uninstall satori-rtm-cli
+pip install --some --new -flags satori-rtm-cli
+```
+
+---
+
+Problem: satori-rtm-cli package failed to install
+
+Symptom: `pip show -f satori-rtm-cli` has empty output
+
+The most frequent reason for `pip install satori-rtm-cli` failing is permissions problem.
+There are multiple choices here:
+
+1. Install the package as root. The upside is that `sudo pip install` usually
+   installs scripts in a location that's already on PATH, meaning
+   `satori_rtm_cli.py` will become available in your shell. A notable exception
+   is pip from MacPorts, it installs scripts deeply into its internal directory
+   so you can't run them immediately after installation.
+
+2. Install the package somewhere in the user directory. This `somewhere` is different
+   based on OS and Python installation. To see what it is on your system, run:
+
+```
+pip install --user satori-rtm-cli
+```
+
+3. Install the script into a specific directory (that is in your PATH and is writable by you).
+   For example if such a directory is $HOME/bin, run:
+
+```
+pip install --user --install-option="--install-scripts=$HOME/bin" satori-rtm-cli
+```
+
+---
+
+Problem: satori-rtm-cli package installed successfully, but satori_rtm_cli.py is
+         not available in the shell
+
+Symptom: running `satori_rtm_cli.py` results in something like `bash: command
+         not found: satori_rtm_cli.py`
+
+There are two approaches to fixing it:
+
+1. Add the location where script resides to your PATH. You can see this location
+   by running `pip show -f satori-rtm-cli`
+
+2. Uninstall satori-rtm-cli and install it again into a directory that already
+   is in your PATH. For example, if desired destination directory is "$HOME/bin",
+   install the package like this:
+
+```
+pip install --user --install-option="--install-scripts=$HOME/bin" satori-rtm-cli
 ```
