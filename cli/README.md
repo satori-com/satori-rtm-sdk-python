@@ -13,8 +13,11 @@ It's available from PyPI:
 pip install satori-rtm-cli
 ```
 
-If that command failed or `satori_rtm_cli.py` has not become available in your shell, see [Troubleshooting](#troubleshooting).
+If you only have `pip3` on your system, `pip3 install satori-rtm-cli` works too.
+In general, any command using `pip` in this README is `pip3`-compatible.
 
+If that command failed or `satori_rtm_cli.py` has not become available in your
+shell, see [Troubleshooting](#troubleshooting).
 
 Common flags
 ------------
