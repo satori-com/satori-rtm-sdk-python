@@ -27,7 +27,7 @@ __doc__ = '''Satori RTM CLI
 Usage:
   satori-rtm-cli --help
   satori-rtm-cli [options] [--prettify_json] subscribe <channels>...
-  satori-rtm-cli [options] [--prettify_json] filter <query>
+  satori-rtm-cli [options] [--prettify_json] view [--period=<period_in_seconds>] <query>
   satori-rtm-cli [options] publish [--disable_acks] <channel>
   satori-rtm-cli [options] [--prettify_json] read <key>
   satori-rtm-cli [options] write [--disable_acks] <key> <value>
@@ -137,11 +137,15 @@ def main():
                 client,
                 args['<channels>'], prettify_json,
                 delivery=delivery)
-        if args['filter']:
+        if args['view']:
+            extra_args = {'filter': args['<query>']}
+            if args['--period']:
+                extra_args['period'] = int(args['--period'])
             return subscribe(
                 client,
-                ['filtered'], prettify_json,
-                query=args['<query>'], delivery=delivery)
+                ['view'], prettify_json,
+                # TODO replace with 'view' when the time comes
+                extra_args=extra_args, delivery=delivery)
         elif args['publish']:
             return publish(client, args['<channel>'], enable_acks)
         elif args['record']:
@@ -348,7 +352,7 @@ def replay(client, override_channel=None, fast=False, input_file=None, enable_ac
 
 
 def generic_subscribe(client, handle_channel_data, channels,
-        query=None, delivery=None):
+        extra_args=None, delivery=None):
     logger.info(
         'Subscribing to %s, press C-c to stop',
         channels[0] if len(channels) == 1 else '{0} channels'.format(
@@ -371,8 +375,8 @@ def generic_subscribe(client, handle_channel_data, channels,
 
     for channel in channels:
         args = {}
-        if query:
-            args.update({'filter': query})
+        if extra_args:
+            args.update(extra_args)
         client.subscribe(channel, delivery, so, args)
 
     try:
@@ -383,7 +387,7 @@ def generic_subscribe(client, handle_channel_data, channels,
 
 
 def subscribe(client, channels,
-        prettify_json=False, query=None,
+        prettify_json=False, extra_args=None,
         delivery=None):
     def on_subscription_data(data):
         channel = data['subscription_id']
@@ -393,8 +397,10 @@ def subscribe(client, channels,
             print('{0}: {1}'.format(channel, pretty_message))
         sys.stdout.flush()
 
-    generic_subscribe(client,
-        on_subscription_data, channels, query=query, delivery=delivery)
+    generic_subscribe(
+        client, on_subscription_data, channels,
+        extra_args=extra_args, delivery=delivery)
+
 
 def record(client, *args, **kwargs):
     # one does not simply pass a mutable variable inside an inner function

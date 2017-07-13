@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='satori-rtm-cli',
-      version='1.1.0',
+      version='1.2.0',
       description='Satori RTM CLI',
       author='Satori',
       author_email='sdk@satori.com',
