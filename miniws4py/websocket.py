@@ -31,6 +31,7 @@ class WebSocket(object):
         """
 
         self.stream = Stream()
+        self.unparsed_input_bytes = b''
         """
         Underlying websocket stream that performs the websocket
         parsing to high level objects.
@@ -281,18 +282,26 @@ class WebSocket(object):
             return False
 
         try:
-            b = self.sock.recv(self.reading_buffer_size, 0)
-            # This will only make sense with secure sockets.
-            if self._is_secure:
-                b += self._get_from_pending()
+            effective_read_size =\
+                self.reading_buffer_size - len(self.unparsed_input_bytes)
+            if effective_read_size > 0:
+                b = self.sock.recv(effective_read_size, 0)
+                self.unparsed_input_bytes += b
+                if self._is_secure:
+                    b2 = self._get_from_pending()
+                    self.unparsed_input_bytes += b2
         except (socket.error, OSError, pyOpenSSLError) as e:
-            self.unhandled_error(e)
-            return False
-        else:
-            if not self.process(b):
+            import errno
+            if hasattr(e, "errno") and e.errno == errno.EINTR:
+                pass
+            else:
+                self.unhandled_error(e)
                 return False
 
-        return True
+        expected_bytes = self.unparsed_input_bytes[:self.reading_buffer_size]
+        self.unparsed_input_bytes =\
+            self.unparsed_input_bytes[self.reading_buffer_size:]
+        return self.process(expected_bytes)
 
     def terminate(self):
         """
