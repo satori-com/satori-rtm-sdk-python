@@ -75,7 +75,7 @@ class WebSocketBaseClient(WebSocket):
                 host, port = self.proxy
             else:
                 host, port = (self.host, self.port)
-            family, socktype, proto, canonname, sa = socket.getaddrinfo(
+            family, socktype, proto, _canonname, _sa = socket.getaddrinfo(
                 host, port,
                 socket.AF_UNSPEC,
                 socket.SOCK_STREAM,
@@ -285,7 +285,7 @@ def _send_http_connect(sock, host, port):
 
     sock.send(connect_header)
 
-    code, status, headers, body = _read_http_response(sock)
+    code, status, _headers, _body = _read_http_response(sock)
 
     if code != b'200':
         raise HandshakeError(
