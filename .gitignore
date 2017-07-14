@@ -1,8 +1,13 @@
 *.pyc
 .tox
-.coverage
+.coverage*
 __pycache__
 htmlcov
 venv*
 .test_appkey
-credentials.json
+credentials*.json
+.cache
+.compiled
+build
+dist
+*.egg-info
