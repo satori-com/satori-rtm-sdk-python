@@ -1,0 +1,59 @@
+
+from __future__ import print_function
+import os
+import subprocess
+import test.utils
+import time
+
+endpoint, appkey = test.utils.get_test_endpoint_and_appkey()
+role, secret, _ = test.utils.get_test_role_name_secret_and_channel()
+
+examples_that_must_be_stopped_externally = [
+    'publish.py',
+    'replacing_subscription.py',
+    'subscribe_to_channel.py',
+    'subscribe_to_open_channel.py',
+    'subscribe_with_age.py',
+    'subscribe_with_count.py',
+    'subscribe_with_multiple_views.py',
+    'subscribe_with_position.py',
+    'subscribe_with_view.py']
+
+
+def main():
+    for file in os.listdir('examples'):
+        if file.endswith('.py') and\
+                file not in [os.path.basename(__file__), '__init__.py']:
+            print('  examples', file)
+            run_example(
+                os.path.join('examples', file),
+                file in examples_that_must_be_stopped_externally)
+
+
+def run_example(file, must_kill):
+    mname = file.replace('/', '.').replace('.py', '')
+    print('#', mname, must_kill)
+    command = [
+        'python',
+        '-c',
+        '''import {} as m;'''
+        '''m.endpoint = "{}";'''
+        '''m.appkey = "{}";'''
+        '''m.role = "{}";'''
+        '''m.role_secret_key = "{}";'''
+        '''m.main()'''.format(mname, endpoint, appkey, role, secret)]
+    p = subprocess.Popen(command)
+
+    if must_kill:
+        time.sleep(5)
+        assert p.returncode is None
+        p.terminate()
+
+    p.communicate()
+
+    if not must_kill:
+        assert p.returncode == 0
+
+
+if __name__ == '__main__':
+    main()

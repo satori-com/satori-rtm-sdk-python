@@ -26,8 +26,10 @@ def main():
             print('Connected to Satori RTM and authenticated as', role)
     except AuthError as e:
         print('Failed to authenticate:', e, file=sys.stderr)
+        sys.exit(1)
     except Exception as e:
         print('Error occurred:', e, file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == '__main__':

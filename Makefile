@@ -29,11 +29,8 @@ doc/index.html: $(PUBLIC_SOURCES) $(GENERATED_SOURCES) doc/generate.py
 
 .PHONY: run-examples
 run-examples: $(GENERATED_SOURCES)
-	PYTHONPATH=. python examples/simple_publish.py
-	PYTHONPATH=. python examples/simple_subscribe.py
+	PYTHONPATH=. python examples/run_all_examples.py
 	PYTHONPATH=. python examples/chat/bot.py bender `python -c 'import binascii; import os; print(binascii.hexlify(os.urandom(10)))'` 1
-	PYTHONPATH=. python examples/role_auth.py
-	PYTHONPATH=. python examples/using_connection.py
 
 .PHONY: test
 test: $(GENERATED_SOURCES)
