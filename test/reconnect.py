@@ -22,7 +22,7 @@ class TestReconnect(unittest.TestCase):
     def test_reconnect(self):
         client = Client(
             endpoint=endpoint, appkey=appkey,
-            reconnect_interval=1, fail_count_threshold=1)
+            reconnect_interval=0, fail_count_threshold=1)
         client.observer = ClientObserver()
 
         client.start()
@@ -57,7 +57,7 @@ class TestReconnect(unittest.TestCase):
     def test_reconnect_zero_threshold(self):
         client = Client(
             endpoint=endpoint, appkey=appkey,
-            reconnect_interval=1, fail_count_threshold=0)
+            reconnect_interval=0, fail_count_threshold=0)
         client.observer = ClientObserver()
 
         client.start()
@@ -89,7 +89,7 @@ class TestReconnect(unittest.TestCase):
     def test_automatic_resubscribe(self):
         client = Client(
             endpoint=endpoint, appkey=appkey,
-            reconnect_interval=1)
+            reconnect_interval=0)
         client.observer = ClientObserver()
 
         channel = make_channel_name('resubscribe')
@@ -183,7 +183,7 @@ class TestReconnect(unittest.TestCase):
         self.assertEqual(so.log, expected_log)
 
     def test_reauth(self):
-        client = Client(endpoint=endpoint, appkey=appkey)
+        client = Client(endpoint=endpoint, appkey=appkey, reconnect_interval=0)
         auth_delegate = auth.RoleSecretAuthDelegate(role, secret)
         auth_event = threading.Event()
         mailbox = []
@@ -230,8 +230,8 @@ class TestReconnect(unittest.TestCase):
         client.dispose()
 
     def test_missing_pong(self):
-        satori.rtm.connection.ping_interval_in_seconds = 1
-        client = Client(endpoint=endpoint, appkey=appkey)
+        satori.rtm.connection.ping_interval_in_seconds = 0.4
+        client = Client(endpoint=endpoint, appkey=appkey, reconnect_interval=0)
         co = ClientObserver()
         client.observer = co
 

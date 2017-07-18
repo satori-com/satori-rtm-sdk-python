@@ -77,7 +77,10 @@ class TestUnsubscribeError(unittest.TestCase):
             self.assertEqual(so.log, expected_log)
 
     def test_wrong_unsubscribe_ack(self):
-        with make_client(endpoint=endpoint, appkey=appkey) as client:
+        with make_client(
+                endpoint=endpoint,
+                appkey=appkey,
+                reconnect_interval=0) as client:
 
             client.observer = ClientObserver()
             sync_subscribe(client, channel)
