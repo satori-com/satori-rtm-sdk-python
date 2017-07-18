@@ -21,10 +21,10 @@ examples_that_must_be_stopped_externally = [
 
 
 def main():
+    subprocess.check_call(['touch', 'examples/__init__.py'])
     for file in os.listdir('examples'):
         if file.endswith('.py') and\
                 file not in [os.path.basename(__file__), '__init__.py']:
-            print('  examples', file)
             run_example(
                 os.path.join('examples', file),
                 file in examples_that_must_be_stopped_externally)
@@ -32,7 +32,6 @@ def main():
 
 def run_example(file, must_kill):
     mname = file.replace('/', '.').replace('.py', '')
-    print('#', mname, must_kill)
     command = [
         'python',
         '-c',
@@ -46,13 +45,13 @@ def run_example(file, must_kill):
 
     if must_kill:
         time.sleep(5)
-        assert p.returncode is None
+        assert p.returncode is None, file
         p.terminate()
 
     p.communicate()
 
     if not must_kill:
-        assert p.returncode == 0
+        assert p.returncode == 0, file
 
 
 if __name__ == '__main__':
