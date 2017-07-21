@@ -43,7 +43,6 @@ class TestIdenticalSubscribers(unittest.TestCase):
     def test_single_publisher_few_messages(self):
         self._run(10)
 
-
     def test_single_publisher_lots_of_messages(self):
         self._run(1000)
 

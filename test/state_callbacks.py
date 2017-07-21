@@ -97,7 +97,7 @@ class TestStateCallbacks(unittest.TestCase):
             while time.time() < origin + 5:
                 sub = client._internal.subscriptions.get(channel)
                 if sub and\
-                    sub._sm.get_state_name() == 'Subscription.Subscribed':
+                        sub._sm.get_state_name() == 'Subscription.Subscribed':
                     break
                 time.sleep(0.1)
             else:
