@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+* Added shortcuts for most options (like -e for --endpoint)
+
 1.2.0 (2017-07-13)
 ------------------
 
