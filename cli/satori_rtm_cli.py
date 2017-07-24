@@ -8,10 +8,13 @@ try:
 except ImportError:
     import json
 import logging
+import os
 from six.moves import queue
 import sys
 import threading
 import time
+import toml
+from xdg import XDG_CONFIG_HOME
 
 import satori.rtm.connection
 from satori.rtm.client import make_client, SubscriptionMode
@@ -49,6 +52,7 @@ Options:
     -p <period_in_seconds>, --period=<period_in_seconds>
     -r <rate_or_unlimited>, --rate=<rate_or_unlimited>  # relative rate of replaying, can be a <number>x (2x for double speed, 0.5x for half speed) or "unlimited" for replaying as fast as possible, default is 1x
     -d simple|reliable|advanced, --delivery=simple|reliable|advanced
+    -c <config_file_path> --config <config_file_path>
 '''
 
 
@@ -81,8 +85,23 @@ class ClientObserver(object):
         logger.warning('on_enter_stopped')
 
 
+def get_args():
+    docopt_args = docopt.docopt(__doc__)
+    config_file_path = docopt_args['--config']
+    if not config_file_path:
+        config_file_path =\
+            os.path.join(XDG_CONFIG_HOME, 'satori', 'rtm-cli.config')
+    args = load_args_from_config_file(config_file_path)
+    args.update(load_args_from_env())
+
+    for k, v in docopt_args.items():
+        if not k in args or v is not None:
+            args[k] = v
+    return args
+
+
 def main():
-    args = docopt.docopt(__doc__)
+    args = get_args()
 
     appkey = args['--appkey']
 
@@ -124,7 +143,7 @@ def main():
     else:
         auth_delegate = None
 
-    if args['--verbosity'] in ('0', '1', '2', '3'):
+    if int(args['--verbosity']) in (0, 1, 2, 3):
         verbosity = int(args['--verbosity'])
     elif args['--verbosity']:
         print('Unexpected verbosity value {0}'.format(args['--verbosity']))
@@ -563,6 +582,44 @@ class Counter(object):
     def decrement(self):
         with self._lock:
             self._value -= 1
+
+
+def load_args_from_config_file(path):
+    result = {}
+    try:
+        with open(path) as f:
+            fileconfig = toml.load(f)
+            for k, v in fileconfig.items():
+                print(
+                    "From config file: {0} = {1}".format(k, v),
+                    file=sys.stderr)
+                result[u'--' + k] = v
+    except ValueError:
+        print(
+            "Invalid config file at {0}".format(path),
+            file=sys.stderr)
+    except (IOError, OSError):
+        print(
+            "Couldn't read the config file at {0}".format(path),
+            file=sys.stderr)
+    return result
+
+
+def load_args_from_env():
+    result = {}
+    endpoint = os.environ.get("SATORI_ENDPOINT")
+    appkey = os.environ.get("SATORI_APPKEY")
+    role_name = os.environ.get("SATORI_ROLE_NAME")
+    role_secret = os.environ.get("SATORI_ROLE_SECRET")
+    if endpoint:
+        result['--endpoint'] = endpoint
+    if appkey:
+        result['--appkey'] = appkey
+    if role_name:
+        result['--role_name'] = role_name
+    if role_secret:
+        result['--role_secret'] = role_secret
+    return result
 
 
 if __name__ == '__main__':
