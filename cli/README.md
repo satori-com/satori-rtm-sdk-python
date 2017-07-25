@@ -47,10 +47,10 @@ satori-rtm-cli --appkey=$MY_APPKEY read big-rss
 satori-rtm-cli --appkey=$MY_APPKEY --prettify_json subscribe big-rss
 ```
 
-### Filter
+### View
 
 ```
-satori-rtm-cli --appkey=$MY_APPKEY --prettify_json filter 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
+satori-rtm-cli --appkey=$MY_APPKEY --prettify_json view 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
 ```
 
 ### Record (machine-friendly output, every line is a JSON object)
