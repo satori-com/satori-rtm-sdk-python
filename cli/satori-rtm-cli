@@ -36,7 +36,7 @@ Usage:
   satori-rtm-cli [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
-    --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 2
+    --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 1
     --endpoint=<endpoint>  # default is Open Data Platform endpoint
     --appkey=<appkey>
     -i <input_file> --input_file=<input_file>
