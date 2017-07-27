@@ -32,7 +32,7 @@ def main():
             'zebras',
             SubscriptionMode.SIMPLE,
             observer,
-            args={'view': "select * from `animals` where `who` = 'zebra'"})
+            args={'filter': "select * from `animals` where `who` = 'zebra'"})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:
