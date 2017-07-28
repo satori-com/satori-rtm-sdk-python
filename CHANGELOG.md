@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+* Client object now stops when any user callback throws an exception
+
 v1.2.1 (2017-06-23)
 -------------------
 

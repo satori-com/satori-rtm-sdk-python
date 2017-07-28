@@ -83,7 +83,7 @@ class TestUnexpected(unittest.TestCase):
             if not exit.wait(20):
                 raise RuntimeError('Timeout')
 
-    def test_exception_in_subscription_callback(self):
+    def test_exception_in_subscription_state_change_callback(self):
 
         with make_client(
                 endpoint=endpoint,
@@ -121,6 +121,43 @@ class TestUnexpected(unittest.TestCase):
 
             if not exit.wait(20):
                 raise RuntimeError('Timeout')
+
+    def test_exception_in_subscription_data_callback(self):
+
+        observer = ClientObserver()
+
+        with make_client(
+                endpoint=endpoint,
+                appkey=appkey,
+                observer=observer) as client:
+
+            class CrashyObserver(SubscriptionObserver):
+                def on_subscription_data(this, data):
+                    SubscriptionObserver.on_subscription_data(this, data)
+                    raise ValueError('Error in on_subscription_data')
+
+            observer.stopped.clear()
+            so = CrashyObserver()
+            client.subscribe(channel, SubscriptionMode.SIMPLE, so)
+            so.wait_subscribed()
+            client.publish(channel, 'message')
+            observer.wait_stopped()
+
+    def test_exception_in_solicited_pdu_callback(self):
+
+        observer = ClientObserver()
+
+        with make_client(
+                endpoint=endpoint,
+                appkey=appkey,
+                observer=observer) as client:
+
+            def crashy(ack):
+                print(ack["no-such-field"])
+
+            observer.stopped.clear()
+            client.publish(channel, 'message', callback=crashy)
+            observer.wait_stopped()
 
 
 if __name__ == '__main__':
