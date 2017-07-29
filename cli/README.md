@@ -82,6 +82,18 @@ echo "Hello\nHallo\nCiao" | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_
 # publish a few messages from a file
 echo "Hello\nHallo\nCiao" > hello.txt
 satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY -i hello.txt publish $MY_CHANNEL
+
+# publish json messages from a file ([jq](https://stedolan.github.io/jq/) is used to convert file to value-per-line format)
+# $ cat messages
+# {"key1": "value",
+#          "key2": "foo"
+#     }
+# ["array", "of",
+#  "stuff"]
+jq -c . messages | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY publish $MY_CHANNEL
+
+# publish a message every 5 seconds to create some activity in the channel
+while true; do echo "mymessage" | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY $MY_CHANNEL mychan && sleep 5; done
 ```
 
 ### Key-value
