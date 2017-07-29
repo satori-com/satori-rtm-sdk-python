@@ -46,7 +46,7 @@ Options:
     -j --prettify_json
     -q --disable_acks
     -p <period_in_seconds>, --period=<period_in_seconds>
-    -r <rate_or_unlimited>, --rate=<rate_or_unlimited>
+    -r <rate_or_unlimited>, --rate=<rate_or_unlimited>  # relative rate of replaying, can be a <number>x (2x for double speed, 0.5x for half speed) or "unlimited" for replaying as fast as possible, default is 1x
     -d simple|reliable|advanced, --delivery=simple|reliable|advanced
 '''
 
@@ -105,6 +105,19 @@ def main():
     elif delivery is not None:
         print('Invalid delivery mode ' + delivery)
         sys.exit(1)
+
+    if args['--rate'] is not None:
+        if args['--rate'] == 'unlimited':
+            rate = float('inf')
+        else:
+            try:
+                assert args['--rate'][-1] == 'x'
+                rate = float(args['--rate'][:-1])
+            except Exception:
+                print('Invalid rate {}'.format(args['--rate']), file=sys.stderr)
+                sys.exit(1)
+    else:
+        rate = 1
 
     if role_name and role_secret:
         auth_delegate = RoleSecretAuthDelegate(role_name, role_secret)
@@ -172,10 +185,9 @@ def main():
                 time_limit=time_limit, output_file=args['--output_file'],
                 delivery=delivery)
         elif args['replay']:
-            fast = args['--rate'] == 'unlimited'
             return replay(
                 client,
-                override_channel=args['--override_channel'], fast=fast,
+                override_channel=args['--override_channel'], rate=rate,
                 input_file=args['--input_file'], enable_acks=enable_acks)
         elif args['read']:
             return kv_read(
@@ -279,7 +291,7 @@ def publish(client, channel, enable_acks):
             logger.info('%s publishes remain unacked', counter.value())
 
 
-def replay(client, override_channel=None, fast=False, input_file=None, enable_acks=True):
+def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks=True):
     try:
         counter = Counter()
 
@@ -312,10 +324,10 @@ def replay(client, override_channel=None, fast=False, input_file=None, enable_ac
                 messages = data['messages']
                 now = time.time()
 
-                if first_message_send_date is not None and not fast:
-                    sleep_amount = (first_message_send_date
-                        + (current_message_recv_date - first_message_recv_date)
-                        - now)
+                if first_message_send_date is not None:
+                    sleep_amount =\
+                        ((current_message_recv_date - first_message_recv_date) / rate)\
+                        - (now - first_message_send_date)
                 else:
                     sleep_amount = 0
 
