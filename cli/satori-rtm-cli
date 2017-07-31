@@ -16,6 +16,7 @@ import time
 import satori.rtm.connection
 from satori.rtm.client import make_client, SubscriptionMode
 from satori.rtm.auth import RoleSecretAuthDelegate
+import satori.rtm.logger
 
 try:
     satori.rtm.connection.enable_wsaccel()
@@ -55,7 +56,6 @@ default_endpoint = 'wss://open-data.api.satori.com'
 
 
 logger = logging.getLogger('satori_rtm_cli')
-verbosity = 1
 
 
 class ClientObserver(object):
@@ -124,7 +124,6 @@ def main():
     else:
         auth_delegate = None
 
-    global verbosity
     if args['--verbosity'] in ('0', '1', '2', '3'):
         verbosity = int(args['--verbosity'])
     elif args['--verbosity']:
@@ -197,7 +196,7 @@ def main():
             value = args['<value>']
             try:
                 value = json.loads(value)
-            except:
+            except Exception:
                 pass
 
             return kv_write(client, args['<key>'], value, enable_acks)
@@ -206,7 +205,6 @@ def main():
 
 
 def configure_logger(level):
-    import satori.rtm.logger
     satori.rtm.logger.configure(level)
 
     formatter = logging.Formatter(
@@ -268,7 +266,7 @@ def publish(client, channel, enable_acks):
             line = line.rstrip()
             try:
                 message = json.loads(line)
-            except:
+            except ValueError:
                 message = line
 
             if enable_acks:

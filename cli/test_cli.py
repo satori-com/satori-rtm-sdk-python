@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import json
 import re
@@ -17,7 +17,7 @@ endpoint, appkey = get_test_endpoint_and_appkey('../credentials.json')
 role, secret, restricted_channel =\
     get_test_role_name_secret_and_channel('../credentials.json')
 string_message = make_channel_name('string').encode('utf8')
-json_message = u'{{"text": ["{}", "message"]}}'.format(make_channel_name('json'))
+json_message = u'{{"text": ["{}", "message"]}}'.format(make_channel_name('m'))
 json_message = json_message.encode('utf8')
 
 
@@ -58,8 +58,7 @@ class TestCLI(unittest.TestCase):
         (out, err) = satori_rtm_cli.communicate()
         if len(re.findall(b'on_enter_connected', err)) != 1:
             print('out:', out)
-            self.assertTrue(
-                False,
+            raise RuntimeError(
                 "Expected to find 'on_enter_connected' in {0}".format(err))
 
     def test_replayer_timing(self):
@@ -87,10 +86,9 @@ class TestCLI(unittest.TestCase):
         timestamps =\
             (list(range(0, 5)) +
 
-            # range only works with ints, sorry
-            [float(x) / 100 for x in range(600, 1000)]
-
-            + list(range(11, 13)))
+                # range only works with ints, sorry
+                [float(x) / 100 for x in range(600, 1000)]\
+                + list(range(11, 13)))
 
         # give recorder and replayer some time to connect
         time.sleep(10)
@@ -98,12 +96,12 @@ class TestCLI(unittest.TestCase):
         def replayer_stdin():
             for ts in timestamps:
                 yield json.dumps({
-                        'timestamp': ts,
-                        'messages': [ts],
-                        'subscription_id': channel
-                    }).encode('utf8')
+                    'timestamp': ts,
+                    'messages': [ts],
+                    'subscription_id': channel
+                }).encode('utf8')
 
-        rep_out, rep_err = replayer.communicate(input=b'\n'.join(replayer_stdin()))
+        replayer.communicate(input=b'\n'.join(replayer_stdin()))
 
         time.sleep(30)
 
@@ -147,20 +145,23 @@ class TestCLI(unittest.TestCase):
                 (offset, "is far from", first_offset))
 
     def test_kv(self):
-        cmd_prefix = ['python', 'satori-rtm-cli',
-            '--appkey', appkey,
-            '--endpoint', endpoint]
+        cmd_prefix =\
+            ['python', 'satori-rtm-cli', '--appkey', appkey,
+                '--endpoint', endpoint]
 
         channel = make_channel_name('test_kv')
 
         def read():
-            return subprocess.check_output(cmd_prefix + ['read', channel]).rstrip()
+            return subprocess.check_output(
+                cmd_prefix + ['read', channel]).rstrip()
 
         def write(value):
-            return subprocess.check_output(cmd_prefix + ['write', channel, value])
+            return subprocess.check_output(
+                cmd_prefix + ['write', channel, value])
 
         def delete():
-            return subprocess.check_output(cmd_prefix + ['delete', channel])
+            return subprocess.check_output(
+                cmd_prefix + ['delete', channel])
 
         mailbox = []
         mailbox.append(delete())
@@ -179,8 +180,6 @@ class TestCLI(unittest.TestCase):
 
 def generic_test(self, should_authenticate=False):
 
-    endpoint, appkey = get_test_endpoint_and_appkey('../credentials.json')
-
     if should_authenticate:
         auth_args = [
             '--role_name', role,
@@ -189,7 +188,6 @@ def generic_test(self, should_authenticate=False):
     else:
         auth_args = []
         channel = make_channel_name('test_cli')
-
 
     publisher = subprocess.Popen(
         ['python', 'satori-rtm-cli',
@@ -230,22 +228,22 @@ def generic_test(self, should_authenticate=False):
         time.sleep(1)
 
         publisher.send_signal(signal.SIGINT)
-        (pub_out, pub_err) = publisher.communicate()
+        (pub_out, _) = publisher.communicate()
 
-        self.assertEqual(0, publisher.returncode,
+        self.assertEqual(
+            0, publisher.returncode,
             "publisher failed with code {0}".format(publisher.returncode))
         self.assertEqual(
-            u'\n'.join(
-                [u'Sending input to {0}, press C-d or C-c to stop\n'.format(
-                    channel.decode('utf8'))
-                ]),
+            u'Sending input to {0}, press C-d or C-c to stop\n'.format(
+                channel.decode('utf8')),
             pub_out.decode('utf8'))
 
         time.sleep(1)
 
         subscriber.send_signal(signal.SIGINT)
         (sub_out, sub_err) = subscriber.communicate()
-        self.assertEqual(subscriber.returncode, 0,
+        self.assertEqual(
+            subscriber.returncode, 0,
             "subscriber failed with code {0}".format(subscriber.returncode))
 
         u_channel = channel.decode('utf8')
@@ -263,9 +261,10 @@ def generic_test(self, should_authenticate=False):
         try:
             print('Publisher out, err: {0}'.format(publisher.communicate()))
             print('Subscriber out, err: {0}'.format(subscriber.communicate()))
-        except:
+        except Exception:
             pass
         six.reraise(e_type, e_value, e_traceback)
+
 
 if __name__ == '__main__':
     unittest.main()

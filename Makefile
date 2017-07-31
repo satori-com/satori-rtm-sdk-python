@@ -5,10 +5,12 @@ GENERATED_SOURCES := satori/rtm/generated/client_sm.py satori/rtm/generated/subs
 
 .PHONY: lint
 lint: $(GENERATED_SOURCES)
-	python -mflake8 satori tutorials test --exclude generated --max-line-length=80
+	python -mflake8 cli satori tutorials test --exclude generated --max-line-length=80
 	python -mflake8 --max-line-length=80 --ignore=F841 examples
-	python -mpylint --reports=no --disable=R,C,broad-except,fixme,import-error satori/**/*.py
+	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error satori/**/*.py
 	python -mpylint --reports=no --disable=R,C,broad-except,no-member,relative-import miniws4py/**/*.py
+	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error cli/*.py
+	python -mpylint --reports=no --disable=R,C,broad-except,redefined-builtin,fixme cli/satori-rtm-cli
 	@echo 'Linters are happy'
 
 .PHONY: clean
@@ -69,7 +71,14 @@ $(GENERATED_SOURCES): satori/rtm/generated/%_sm.py: state_machines/%.sm
 
 .PHONY: auto-%
 auto-%:
-	sos --pattern 'tutorials/.*\.py$$' --pattern 'doc/.*\.py$$' --pattern 'test/.*\.py$$' --pattern 'examples/.*\.py$$' --pattern 'satori/.*\.py$$' --pattern 'miniws4py/.*\.py$$' --command '$(MAKE) $*'
+	sos --pattern 'tutorials/.*\.py$$'\
+		--pattern 'doc/.*\.py$$'\
+		--pattern 'test/.*\.py$$'\
+		--pattern 'examples/.*\.py$$'\
+		--pattern 'satori/.*\.py$$'\
+		--pattern 'miniws4py/.*\.py$$'\
+		--pattern 'cli/.*\.py$$'\
+		--command '$(MAKE) $*'
 
 .PHONY: sdist
 sdist: $(GENERATED_SOURCES)
