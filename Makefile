@@ -5,11 +5,12 @@ GENERATED_SOURCES := satori/rtm/generated/client_sm.py satori/rtm/generated/subs
 
 .PHONY: lint
 lint: $(GENERATED_SOURCES)
-	python -mflake8 cli satori tutorials test --exclude generated --max-line-length=80
+	python -mflake8 satori tutorials test --exclude generated --max-line-length=80
 	python -mflake8 --max-line-length=80 --ignore=F841 examples
+	python3 -mflake8 cli --max-line-length=80
 	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error satori/**/*.py
 	python -mpylint --reports=no --disable=R,C,broad-except,no-member,relative-import miniws4py/**/*.py
-	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error cli/*.py
+	python3 -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error cli/*.py
 	python -mpylint --reports=no --disable=R,C,broad-except,redefined-builtin,fixme cli/satori-rtm-cli
 	@echo 'Linters are happy'
 

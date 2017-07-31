@@ -4,7 +4,6 @@ import json
 import re
 import signal
 import subprocess
-import sys
 import time
 import unittest
 
@@ -255,10 +254,11 @@ def generic_test(self, should_authenticate=False):
             u'{0}: {1}'.format(channel, u_json_message) in u_sub_out,
             u_sub_out)
     except Exception as e:
-        e_type, e_value, e_traceback = sys.exc_info()
         try:
-            print('Publisher out, err: {0}'.format(publisher.communicate(timeout=20)))
-            print('Subscriber out, err: {0}'.format(subscriber.communicate(timeout=20)))
+            print('Publisher out, err: {0}'.format(
+                publisher.communicate(timeout=20)))
+            print('Subscriber out, err: {0}'.format(
+                subscriber.communicate(timeout=20)))
         except Exception:
             pass
         raise Exception from e
