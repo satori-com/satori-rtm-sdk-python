@@ -3,7 +3,6 @@
 import json
 import re
 import signal
-import six
 import subprocess
 import sys
 import time
@@ -43,19 +42,19 @@ class TestCLI(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
-        tcpkali1.communicate()
+        tcpkali1.communicate(timeout=20)
 
         satori_rtm_cli.poll()
         if satori_rtm_cli.returncode is not None:
-            (out, err) = satori_rtm_cli.communicate()
+            (out, err) = satori_rtm_cli.communicate(timeout=20)
             print('out:', out)
             print('err:', err)
             self.assertEqual(satori_rtm_cli.returncode, None)
 
         tcpkali2 = start_tcpkali()
-        tcpkali2.communicate()
+        tcpkali2.communicate(timeout=20)
 
-        (out, err) = satori_rtm_cli.communicate()
+        (out, err) = satori_rtm_cli.communicate(timeout=20)
         if len(re.findall(b'on_enter_connected', err)) != 1:
             print('out:', out)
             raise RuntimeError(
@@ -101,7 +100,7 @@ class TestCLI(unittest.TestCase):
                     'subscription_id': channel
                 }).encode('utf8')
 
-        replayer.communicate(input=b'\n'.join(replayer_stdin()))
+        replayer.communicate(timeout=20, input=b'\n'.join(replayer_stdin()))
 
         time.sleep(30)
 
@@ -111,7 +110,7 @@ class TestCLI(unittest.TestCase):
         for _ in range(2):
             rerecorder.send_signal(signal.SIGINT)
 
-        rec_out, rec_err = rerecorder.communicate()
+        rec_out, rec_err = rerecorder.communicate(timeout=20)
 
         pdus = []
         message_count = 0
@@ -208,7 +207,7 @@ def generic_test(self, should_authenticate=False):
         stdin=subprocess.PIPE)
 
     if subscriber.returncode is not None:
-        (sub_out, sub_err) = subscriber.communicate()
+        (sub_out, sub_err) = subscriber.communicate(timeout=20)
         print(sub_out)
         print(sub_err)
 
@@ -228,42 +227,41 @@ def generic_test(self, should_authenticate=False):
         time.sleep(1)
 
         publisher.send_signal(signal.SIGINT)
-        (pub_out, _) = publisher.communicate()
+        (pub_out, _) = publisher.communicate(timeout=20)
 
         self.assertEqual(
             0, publisher.returncode,
             "publisher failed with code {0}".format(publisher.returncode))
         self.assertEqual(
             u'Sending input to {0}, press C-d or C-c to stop\n'.format(
-                channel.decode('utf8')),
+                channel),
             pub_out.decode('utf8'))
 
         time.sleep(1)
 
         subscriber.send_signal(signal.SIGINT)
-        (sub_out, sub_err) = subscriber.communicate()
+        (sub_out, sub_err) = subscriber.communicate(timeout=20)
         self.assertEqual(
             subscriber.returncode, 0,
             "subscriber failed with code {0}".format(subscriber.returncode))
 
-        u_channel = channel.decode('utf8')
         u_string_message = string_message.decode('utf8')
         u_json_message = json_message.decode('utf8')
         u_sub_out = sub_out.decode('utf8')
         self.assertTrue(
-            u'{0}: "{1}"'.format(u_channel, u_string_message) in u_sub_out,
+            u'{0}: "{1}"'.format(channel, u_string_message) in u_sub_out,
             u_sub_out)
         self.assertTrue(
-            u'{0}: {1}'.format(u_channel, u_json_message) in u_sub_out,
+            u'{0}: {1}'.format(channel, u_json_message) in u_sub_out,
             u_sub_out)
-    except Exception:
+    except Exception as e:
         e_type, e_value, e_traceback = sys.exc_info()
         try:
-            print('Publisher out, err: {0}'.format(publisher.communicate()))
-            print('Subscriber out, err: {0}'.format(subscriber.communicate()))
+            print('Publisher out, err: {0}'.format(publisher.communicate(timeout=20)))
+            print('Subscriber out, err: {0}'.format(subscriber.communicate(timeout=20)))
         except Exception:
             pass
-        six.reraise(e_type, e_value, e_traceback)
+        raise Exception from e
 
 
 if __name__ == '__main__':
