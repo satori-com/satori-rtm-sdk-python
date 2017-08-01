@@ -124,12 +124,6 @@ Syntax
         self._ping_thread = None
         self._ws_thread = None
 
-    def __del__(self):
-        try:
-            self.stop()
-        except Exception:
-            pass
-
     def start(self):
         """
 Description
