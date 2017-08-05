@@ -27,8 +27,30 @@ Common flags
 * role_name
 * role_secret
 * verbosity -- from 0 (the least chatty) to 3 (the most chatty), default is 2 (quite chatty)
+* config -- path to config file, default is $XDF_CONFIG_HOME/satori/rtm-cli.config (usually this is "$HOME/.config/satori/rtm-cli.config")
 
 Run `satori-rtm-cli --help` for full help on flags.
+
+Config file format
+------------------
+
+```
+# Comments start with '#'
+
+# If --key is a flag that satori-rtm-cli can take
+# Then configuring it here looks like this:
+#     key = "value"
+
+# For example, this is how you configure endpoint and appkey:
+endpoint = "wss://open-data.api.satori.com"
+appkey = "YOUR_APPKEY"
+
+# Example of an option for integer value:
+verbosity = 3
+
+# Same for boolean
+prettify_json = true
+```
 
 Example usage
 -------------
