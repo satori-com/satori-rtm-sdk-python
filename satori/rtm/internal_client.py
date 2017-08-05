@@ -65,7 +65,12 @@ class InternalClient(object):
             channel = data['subscription_id']
             subscription = self.subscriptions.get(channel)
             if subscription:
-                subscription.on_subscription_data(data)
+                try:
+                    subscription.on_subscription_data(data)
+                except Exception as e:
+                    logger.error("Exception in on_subscription_data")
+                    logger.exception(e)
+                    self._queue.put(a.Stop())
             else:
                 logger.error('Subscription for %s not found', data)
         elif t == a.Start:
@@ -110,7 +115,9 @@ class InternalClient(object):
             try:
                 m.callback(m.payload)
             except Exception as e:
-                logger.error(e)
+                logger.error("Exception in a solicited PDU callback")
+                logger.exception(e)
+                self._queue.put(a.Stop())
         elif t == a.Tick:
             self._sm.Tick()
 
@@ -197,6 +204,7 @@ class InternalClient(object):
         except Exception as e:
             logger.error('Caught exception in state callback')
             logger.exception(e)
+            self._queue.put(a.Stop())
         finally:
             logger.info(
                 'exiting callback %s',
