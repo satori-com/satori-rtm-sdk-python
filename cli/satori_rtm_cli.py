@@ -95,7 +95,7 @@ def get_args():
     args.update(load_args_from_env())
 
     for k, v in docopt_args.items():
-        if not k in args or v is not None:
+        if k not in args or v is not None:
             args[k] = v
     return args
 
@@ -110,8 +110,8 @@ def main():
         sys.exit(1)
 
     endpoint = args['--endpoint'] or default_endpoint
-    role_name=args['--role_name']
-    role_secret=args['--role_secret']
+    role_name = args['--role_name']
+    role_secret = args['--role_secret']
     prettify_json = args['--prettify_json']
     delivery = args['--delivery']
 
@@ -255,13 +255,14 @@ def parse_size(size_string):
     return int(s) * multiplier
 
 
-assert parse_size(None) == None
+assert parse_size(None) is None
 assert parse_size('1') == 1
 assert parse_size('1k') == 1000
 assert parse_size('3kk') == 3000000
 assert parse_size('1M') == 1000000
 assert parse_size('1g') == 1000000000
 assert parse_size('24k') == 24000
+
 
 def publish(client, channel, enable_acks):
     print('Sending input to {0}, press C-d or C-c to stop'.format(channel))
@@ -384,7 +385,8 @@ def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks
                 logger.info('%s publishes remain unacked', counter.value())
 
 
-def generic_subscribe(client, handle_channel_data, channels,
+def generic_subscribe(
+        client, handle_channel_data, channels,
         extra_args=None, delivery=None):
     logger.info(
         'Subscribing to %s, press C-c to stop',
@@ -419,7 +421,8 @@ def generic_subscribe(client, handle_channel_data, channels,
         sys.exit(0)
 
 
-def subscribe(client, channels,
+def subscribe(
+        client, channels,
         prettify_json=False, extra_args=None,
         delivery=None):
     def on_subscription_data(data):
@@ -515,7 +518,7 @@ def kv_write(client, key, value, enable_acks):
             mailbox.append(ack)
             event.set()
     else:
-        callback=None
+        callback = None
 
     client.write(key, value, callback=callback)
 
@@ -565,6 +568,7 @@ def stop_main_thread():
     except ImportError:
         import _thread
         _thread.interrupt_main()
+
 
 class Counter(object):
     def __init__(self):
