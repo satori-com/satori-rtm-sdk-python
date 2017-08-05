@@ -143,11 +143,12 @@ def main():
     else:
         auth_delegate = None
 
-    if int(args['--verbosity']) in (0, 1, 2, 3):
-        verbosity = int(args['--verbosity'])
-    elif args['--verbosity']:
-        print('Unexpected verbosity value {0}'.format(args['--verbosity']))
-        sys.exit(1)
+    if args['--verbosity'] is not None:
+        if int(args['--verbosity']) in (0, 1, 2, 3):
+            verbosity = int(args['--verbosity'])
+        else:
+            print('Unexpected verbosity value {0}'.format(args['--verbosity']))
+            sys.exit(1)
     else:
         verbosity = 1
 
