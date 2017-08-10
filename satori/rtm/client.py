@@ -80,15 +80,6 @@ Parameters
       for the first one has not yet arrived, this 11th call to `client.publish`
       will throw the `satori.rtm.client.Full` exception.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
-
-Syntax
-
-    ::
-        from satori.rtm.client import Client
-
-        client = Client(endpoint='<ENDPOINT>', appkey=<APP_KEY>)
-        ...
-
         """
 
         assert endpoint
@@ -135,18 +126,6 @@ Description
 
     If you publish any messages before calling this method, the SDK queues the
     messages to publish after establishing the WebSocket connection.
-
-Syntax
-    ::
-
-        with sc.make_client(
-            endpoint=endpoint, appkey=appkey) as client:
-
-            client.stop()
-            ...
-            client.start()
-            ...
-
         """
         self._enqueue(a.Start())
 
@@ -159,17 +138,6 @@ Description
     After you use this method, if you call publish or subscribe methods
     while the client is stopped, the SDK queues the requests and sends them when
     the client reconnects.
-
-Syntax
-    ::
-
-        with make_client(
-            endpoint=endpoint, appkey=appkey) as client:
-
-            ...
-            client.stop()
-            ...
-
         """
         self._enqueue(a.Stop())
 
@@ -194,23 +162,6 @@ Parameters
       authentication process.
     * callback {function} [required] - Function to execute after RTM
       returns a response.
-
-Syntax
-    ::
-
-        secret_key = '<ROLE_SECRET_KEY>'
-
-        auth_delegate = auth.RoleSecretAuthDelegate('<ROLE>', secret_key)
-        auth_event = threading.Event()
-
-        def auth_callback(auth_result):
-            if type(auth_result) == auth.Done:
-                auth_event.set()
-
-        client.authenticate(auth_delegate, auth_callback)
-
-        auth_event.wait()
-
         """
         self._enqueue(a.Authenticate(auth_delegate, callback))
 
@@ -241,17 +192,6 @@ Parameters
       publish.
     * callback {function} [optional] - Callback function to execute on the PDU
       response returned by RTM to the publish request.
-
-Syntax
-    ::
-
-        with sc.make_client(
-            endpoint=endpoint, appkey=appkey) as client:
-
-            ...
-            print('Publishing a message')
-            client.publish(channel=channel, message=message)
-
         """
         self._enqueue(a.Publish(channel, message, callback))
 
@@ -273,24 +213,6 @@ Parameters
       value for `filter` key.
     * callback {function} [optional] - Callback function to execute on the PDU
       response returned to the subscribe request by RTM.
-
-Syntax
-    ::
-
-        with make_client(endpoint=endpoint, appkey=appkey) as client:
-
-            mailbox = []
-            event = threading.Event()
-
-            def read_callback(reply):
-                mailbox.append(reply)
-                event.set()
-
-            client.read(channel, callback=read_callback)
-            if not event.wait(5):
-                print('Read request timed out')
-            else:
-                print('Read request returned {0}'.format(mailbox[0]))
         """
         self._enqueue(a.Read(channel, args, callback))
 
@@ -305,24 +227,6 @@ Parameters
       to publish.
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
-
-Syntax
-    ::
-
-        with make_client(endpoint=endpoint, appkey=appkey) as client:
-
-            mailbox = []
-            event = threading.Event()
-
-            def write_callback(reply):
-                mailbox.append(reply)
-                event.set()
-
-            client.write("answer", 42, callback=write_callback)
-            if not event.wait(5):
-                print('Write request timed out')
-            else:
-                print('Write request returned {0}'.format(mailbox[0]))
         """
         self._enqueue(a.Write(channel, value, callback))
 
@@ -335,24 +239,6 @@ Parameters
     * channel {string} [required] - Channel name.
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
-
-Syntax
-    ::
-
-        with make_client(endpoint=endpoint, appkey=appkey) as client:
-
-            mailbox = []
-            event = threading.Event()
-
-            def delete_callback(reply):
-                mailbox.append(reply)
-                event.set()
-
-            client.delete("old_stuff", callback=delete_callback)
-            if not event.wait(5):
-                print('Delete request timed out')
-            else:
-                print('Delete request returned {0}'.format(mailbox[0]))
         """
         self._enqueue(a.Delete(channel, callback))
 
@@ -391,24 +277,6 @@ Parameters
       subscribe request. To include a filter, put the desired fSQL query
       as a string value for the `filter` key. See *Subscribe PDU* in the
       online docs.
-
-Syntax
-    ::
-
-        with make_client(
-                endpoint=endpoint, appkey=appkey) as client:
-
-            class SubscriptionObserver(object):
-                def on_subscription_data(self, data):
-                    for message in data['messages']:
-                        print('Client got message {0}'.format(message))
-
-            subscription_observer = SubscriptionObserver()
-            client.subscribe(
-                channel,
-                SubscriptionMode.RELIABLE,
-                subscription_observer)
-
         """
         self._enqueue(
             a.Subscribe(
@@ -427,21 +295,6 @@ Description
 Parameters
     * channel {string} [required] - Name of the channel from which you want to
       unsubscribe.
-
-Syntax
-    ::
-
-        with make_client(
-                endpoint=endpoint, appkey=appkey) as client:
-
-            ...
-            client.subscribe(
-                "My Channel",
-                SubscriptionMode.RELIABLE,
-                subscription_observer)
-            ...
-            client.unsubscribe("My Channel")
-
         """
         self._enqueue(a.Unsubscribe(channel_or_subscription_id))
 
@@ -489,20 +342,6 @@ Description
 
 Returns
     Boolean
-
-Syntax
-    ::
-
-        with sc.make_client(
-            endpoint=platform_endpoint,
-            appkey=platform_appkey) as client:
-
-            ...
-            if client.is_connected()
-                # do something
-            else:
-                # do something else
-
         """
         return self._internal.is_connected()
 
@@ -598,16 +437,6 @@ Parameters
       will throw the `satori.rtm.client.Full` exception.
     * auth_delegate {AuthDelegate} [optional] - if auth_delegate parameter is
       present, the client yielded by make_client will be already authenticated.
-
-Syntax
-    ::
-
-        import satori.rtm.client as sc
-
-        endpoint = 'ENDPOINT'
-        appkey = 'APPKEY'
-
-        with sc.make_client(endpoint=endpoint, appkey=appkey) as client:
 
 Client Observer
 ---------------

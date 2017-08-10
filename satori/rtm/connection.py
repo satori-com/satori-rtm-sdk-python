@@ -66,29 +66,6 @@ Parameters
     * delegate {object} [optional] - Delegate object to handle received
       messages, channel errors, internal errors, and closed connections.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
-
-Syntax
-
-::
-
-    ...
-    connection = Connection(endpoint, appkey, delegate=None)
-    after_receive = threading.Event()
-
-    class ConnectionDelegate(object):
-        def on_connection_closed(self):
-            print('connection closed')
-
-        def on_internal_error(error):
-            print('internal error', error)
-
-        def on_subscription_data(data):
-            print('data:', data)
-            after_receive.set()
-
-    connection.delegate = ConnectionDelegate()
-    connection.start()
-
         """
 
         assert endpoint
@@ -246,14 +223,6 @@ Parameters
       publish.
     * callback {function} [optional] - Callback function to execute on the PDU
       returned by RTM as a response to the publish request.
-
-Syntax
-
-::
-
-    connection.start()
-    connection.publish("My Channel", "Message text to publish")
-
         """
 
         self.action(
@@ -284,16 +253,6 @@ Parameters
       response returned to the subscribe request as a PDU.
     * args {object} [optional] - Any JSON key-value pairs to send in the
       subscribe request. See *Subscribe PDU* in the online docs.
-
-Syntax
-
-::
-
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe(channel, {'position': position})
-
         """
         body = args or {}
         body['channel'] = channel
@@ -315,17 +274,6 @@ Parameters
     * timeout {int} [optional] - Amount of time, in seconds, to allow RTM
       to complete the read operation before it generates an error.
       Default is 60.
-
-Syntax
-
-::
-
-    connection.start()
-
-    message = 'hello'
-    connection.publish_sync(channel, message)
-    value = connection.read_sync(channel)
-    # value should be "hello"
     ...
 
         """
@@ -369,14 +317,6 @@ Parameters
     * channel {string} [required] - Name of the channel.
     * callback {function} [optional] - Callback function to execute on the
       response to the publish request, returned by RTM as a PDU.
-
-Syntax
-
-::
-
-    connection.start()
-    connection.write("my_dog", {"latitude": 52.52, "longitude":13.405})
-
         """
         self.action(
             'rtm/write',
@@ -393,24 +333,6 @@ Parameters
     * callback {function} [optional] -  Callback to execute on the response
       PDU from RTM. The response PDU is passed as a parameter to this function.
       RTM does not send a response PDU if a callback is not specified.
-
-Syntax
-    ::
-
-        connection.start()
-
-        mailbox = []
-        event = threading.Event()
-
-        def delete_callback(reply):
-            mailbox.append(reply)
-            event.set()
-
-        connection.delete("old_stuff", callback=delete_callback)
-        if not event.wait(5):
-            print('Delete request timed out')
-        else:
-            print('Delete request returned {0}'.format(mailbox[0]))
         """
         self.action('rtm/delete', {'channel': key}, callback)
 
@@ -441,17 +363,6 @@ Parameters
     * timeout {int} [optional] - Amount of time, in seconds, to allow RTM
       to complete the publish operation before it generates an error.
       Default is 60.
-
-Syntax
-
-::
-
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe_sync(channel, {'position': position})
-    ...
-
         """
 
         error = []
@@ -498,16 +409,6 @@ Parameters
       response to the subscribe request, returned by RTM as a PDU.
     * args {object} [optional] - Any JSON key-value pairs to send in the
       subscribe request. See *Subscribe PDU* in the online docs.
-
-Syntax
-
-::
-
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe(channel, {'position': position})
-
         """
 
         if args is not None and args.get('filter'):
@@ -535,18 +436,6 @@ Parameters
     * timeout {int} [optional] - Amount of time, in seconds, to allow RTM
       to complete the subscribe operation before it generates an error.
       Default is 60.
-
-Syntax
-
-::
-
-    ...
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe_sync(channel, {'position': position})
-    ...
-
         """
 
         error = []
@@ -581,20 +470,6 @@ Parameters
     * channel {string} [required] - Name of the channel.
     * callback {function} [optional] - Callback function to execute on the
       response to the unsubscribe request, returned by RTM as a PDU.
-
-Syntax
-
-::
-
-    ...
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe(channel, {'position': position})
-    ...
-    connection.unsubscribe(channel)
-    ...
-
         """
 
         self.action('rtm/unsubscribe', {'subscription_id': channel}, callback)
@@ -613,19 +488,6 @@ Parameters
     * timeout {int} [optional] - Amount of time, in seconds, to allow RTM
       to complete the unsubscribe operation before it generates an
       error. Default is 60.
-
-Syntax
-
-::
-
-    ...
-    connection.start()
-
-    position = connection.publish_sync(channel, message)
-    connection.subscribe_sync(channel, {'position': position})
-    ...
-    unsubscribe_sync(channel)
-    ...
         """
 
         error = []
@@ -681,19 +543,6 @@ Parameters
       the role-based authentication process.
     * callback {function} [required] - Function to execute after RTM
       returns a response.
-
-Syntax
-
-::
-
-    secret_key = '<ROLE_SECRET_KEY>'
-
-    auth_delegate = auth.RoleSecretAuthDelegate('<ROLE>', secret_key)
-    auth_event = threading.Event()
-
-    def auth_callback(auth_result):
-        if type(auth_result) == auth.Done:
-            auth_event.set()
         """
 
         with self._auth_lock:
