@@ -85,7 +85,8 @@ class InternalClient(object):
         elif t == a.Publish:
             if self.is_connected():
                 try:
-                    self.connection.publish(m.channel, m.message, m.callback)
+                    self.connection.publish_preserialized_message(
+                        m.channel, m.message, m.callback)
                 except Exception as e:
                     logger.exception(e)
             else:
@@ -101,7 +102,8 @@ class InternalClient(object):
         elif t == a.Read:
             self.connection.read(m.key, m.args, m.callback)
         elif t == a.Write:
-            self.connection.write(m.key, m.value, m.callback)
+            self.connection.write_preserialized_value(
+                m.key, m.value, m.callback)
         elif t == a.Delete:
             self.connection.delete(m.key, m.callback)
         elif t == a.Search:

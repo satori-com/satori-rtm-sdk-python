@@ -20,6 +20,7 @@ from contextlib import contextmanager
 import satori.rtm.auth as auth
 from satori.rtm.exceptions import AuthError
 import satori.rtm.internal_queue as queue
+import satori.rtm.internal_json as json
 import threading
 
 import satori.rtm.internal_client_action as a
@@ -193,7 +194,7 @@ Parameters
     * callback {function} [optional] - Callback function to execute on the PDU
       response returned by RTM to the publish request.
         """
-        self._enqueue(a.Publish(channel, message, callback))
+        self._enqueue(a.Publish(channel, json.dumps(message), callback))
 
     def read(self, channel, args=None, callback=None):
         """
@@ -228,7 +229,7 @@ Parameters
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
         """
-        self._enqueue(a.Write(channel, value, callback))
+        self._enqueue(a.Write(channel, json.dumps(value), callback))
 
     def delete(self, channel, callback=None):
         """

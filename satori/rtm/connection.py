@@ -12,10 +12,7 @@ from __future__ import print_function
 
 import itertools
 import posixpath
-try:
-    import rapidjson as json
-except ImportError:
-    import json
+import satori.rtm.internal_json as json
 import re
 import sys
 import threading
@@ -184,18 +181,21 @@ Description
     advantage of changes to PDU specifications by Satori without requiring an
     updated SDK.
         """
-        payload = {'action': name, 'body': body}
-        if callback:
+        self.action_with_preserialized_body(name, json.dumps(body), callback)
 
-            # throttle if waiting for many acks already
+    def action_with_preserialized_body(self, name, body, callback=None):
+        if callback:
             if len(self.ack_callbacks_by_id) >= high_ack_count_watermark:
                 self.logger.debug('Throttling %s request', name)
                 time.sleep(0.001)
 
             action_id = next(self.action_id_iterator)
-            payload['id'] = action_id
+            payload = '{{"action":"{0}","id":{1},"body":{2}}}'.format(
+                name, action_id, body)
             self.ack_callbacks_by_id[action_id] = callback
-        self.send(json.dumps(payload))
+        else:
+            payload = '{{"action":"{0}","body":{1}}}'.format(name, body)
+        self.send(payload)
 
     def publish(self, channel, message, callback=None):
         """
@@ -229,6 +229,10 @@ Parameters
             'rtm/publish',
             {'channel': channel, 'message': message},
             callback)
+
+    def publish_preserialized_message(self, channel, message, callback=None):
+        body = '{{"channel":"{0}","message": {1}}}'.format(channel, message)
+        self.action_with_preserialized_body('rtm/publish', body, callback)
 
     def read(self, channel, args=None, callback=None):
         """
@@ -322,6 +326,10 @@ Parameters
             'rtm/write',
             {'channel': channel, 'message': value},
             callback)
+
+    def write_preserialized_value(self, channel, value, callback=None):
+        body = '{{"channel":"{0}","message":{1}}}'.format(channel, value)
+        self.action_with_preserialized_body('rtm/write', body, callback)
 
     def delete(self, key, callback=None):
         """
