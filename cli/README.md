@@ -60,41 +60,41 @@ Examples assume that $MY_ENDPOINT, $MY_APPKEY and $MY_CHANNEL have valid values.
 ### Read single message and exit
 
 ```
-satori-rtm-cli --appkey=$MY_APPKEY read big-rss
+satori-rtm-cli --appkey $MY_APPKEY read big-rss
 ```
 
 ### Subscribe (human-friendly output)
 
 ```
-satori-rtm-cli --appkey=$MY_APPKEY --prettify_json subscribe big-rss
+satori-rtm-cli --appkey $MY_APPKEY --prettify_json subscribe big-rss
 ```
 
 ### View
 
 ```
-satori-rtm-cli --appkey=$MY_APPKEY --prettify_json view 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
+satori-rtm-cli --appkey $MY_APPKEY --prettify_json view 'select * from `big-rss` where title like "%Japan%" or title like "%Korea%"'
 ```
 
 ### Record (machine-friendly output, every line is a JSON object)
 
 ```
 # record to stdout (press Control-C to stop)
-satori-rtm-cli --appkey=$MY_APPKEY record big-rss
+satori-rtm-cli --appkey $MY_APPKEY record big-rss
 
 # record to file (press Control-C to stop)
-satori-rtm-cli --appkey=$MY_APPKEY -o big-rss.recording record big-rss
+satori-rtm-cli --appkey $MY_APPKEY -o big-rss.recording record big-rss
 
 # replay big-rss recording to $MY_CHANNEL
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay -i big-rss.recording --override_channel=$MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay -i big-rss.recording --override_channel $MY_CHANNEL
 
 # replay big-rss recording to $MY_CHANNEL at half speed
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay --rate 0.5x -i big-rss.recording --override_channel=$MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --rate 0.5x -i big-rss.recording --override_channel $MY_CHANNEL
 
 # replay big-rss recording to $MY_CHANNEL at triple speed
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay --rate 3x -i big-rss.recording --override_channel=$MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --rate 3x -i big-rss.recording --override_channel $MY_CHANNEL
 
 # replay big-rss recording to $MY_CHANNEL at as fast as possible
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay --rate unlimited -i big-rss.recording --override_channel=$MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --rate unlimited -i big-rss.recording --override_channel $MY_CHANNEL
 ```
 
 
@@ -102,17 +102,17 @@ satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY replay --rate unlimit
 
 ```
 # publish a single JSON object message
-echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY publish $MY_CHANNEL
 
 # publish a single string message
-echo "Hello" | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo "Hello" | satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY publish $MY_CHANNEL
 
 # publish a few messages
-echo "Hello\nHallo\nCiao" | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY publish $MY_CHANNEL
+echo "Hello\nHallo\nCiao" | satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY publish $MY_CHANNEL
 
 # publish a few messages from a file
 echo "Hello\nHallo\nCiao" > hello.txt
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY -i hello.txt publish $MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY -i hello.txt publish $MY_CHANNEL
 
 # publish json messages from a file ([jq](https://stedolan.github.io/jq/) is used to convert file to value-per-line format)
 # $ cat messages
@@ -131,13 +131,13 @@ while true; do echo "mymessage" | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY $
 
 ```
 # write
-echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY write $MY_CHANNEL
+echo '{"coords": {"x": 0.0, "y": 0.0}}' | satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY write $MY_CHANNEL
 
 # read
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY read $MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY read $MY_CHANNEL
 
 # delete
-satori-rtm-cli --endpoint=$MY_ENDPOINT --appkey=$MY_APPKEY delete $MY_CHANNEL
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY delete $MY_CHANNEL
 ```
 
 Troubleshooting
