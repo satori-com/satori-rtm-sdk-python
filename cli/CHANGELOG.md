@@ -1,3 +1,13 @@
+1.4.3 (2017-08-11)
+------------------
+
+* Silence the warning about missing config file unless --config option was explicitly used
+
+1.4.2 (2017-08-05)
+------------------
+
+* Take options from a configuration file and from environment variables
+
 1.3.0 (2017-07-29)
 ------------------
 
