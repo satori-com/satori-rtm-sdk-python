@@ -29,7 +29,7 @@ Common flags
 * verbosity -- from 0 (the least chatty) to 3 (the most chatty), default is 2 (quite chatty)
 * config -- path to config file, default is $XDF_CONFIG_HOME/satori/rtm-cli.config (usually this is "$HOME/.config/satori/rtm-cli.config")
 
-Run `satori-rtm-cli --help` for full help on flags.
+Run `satori-rtm-cli --help` for full help on flags including shorthands like `-e` for `--endpoint`.
 
 Config file format
 ------------------
