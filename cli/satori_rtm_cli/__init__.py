@@ -88,9 +88,6 @@ class ClientObserver(object):
 def get_args():
     docopt_args = docopt.docopt(__doc__)
     config_file_path = docopt_args['--config']
-    if not config_file_path:
-        config_file_path =\
-            os.path.join(XDG_CONFIG_HOME, 'satori', 'rtm-cli.config')
     args = load_args_from_config_file(config_file_path)
     args.update(load_args_from_env())
 
@@ -589,7 +586,11 @@ class Counter(object):
             self._value -= 1
 
 
-def load_args_from_config_file(path):
+def load_args_from_config_file(path=None):
+    quiet = False
+    if path is None:
+        quiet = True
+        path = os.path.join(XDG_CONFIG_HOME, 'satori', 'rtm-cli.config')
     result = {}
     try:
         with open(path) as f:
@@ -604,9 +605,10 @@ def load_args_from_config_file(path):
             "Invalid config file at {0}".format(path),
             file=sys.stderr)
     except (IOError, OSError):
-        print(
-            "Couldn't read the config file at {0}".format(path),
-            file=sys.stderr)
+        if not quiet:
+            print(
+                "Couldn't read the config file at {0}".format(path),
+                file=sys.stderr)
     return result
 
 
