@@ -511,22 +511,6 @@ Parameters
         if error:
             raise RuntimeError(error[0])
 
-    def search(self, prefix, callback):
-        """
-Description
-    Asynchronously performs a channel search for a given user-defined prefix.
-    This method passes RTM replies to the callback. RTM may send multiple
-    responses to the same search request: zero or more search result PDUs with
-    an action of `rtm/search/data` (depending on the results of the search).
-    Each channel found is only sent once.
-
-    After the search result PDUs, RTM follows with a positive response PDU:
-    `rtm/search/ok`. Callback must inspect the reply object passed to the
-    callback for the reply['body']['channels'] list. The callback is called on
-    each response.
-        """
-        self.action('rtm/search', {'prefix': prefix}, callback)
-
     def authenticate(self, auth_delegate, callback):
         """
 authenticate(auth_delegate, callback)

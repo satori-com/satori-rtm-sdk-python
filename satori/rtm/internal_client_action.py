@@ -16,9 +16,6 @@ Read = t('Read', ['key', 'args', 'callback'])
 Write = t('Write', ['key', 'value', 'callback'])
 Delete = t('Delete', ['key', 'callback'])
 
-# Search
-Search = t('Search', ['prefix', 'callback'])
-
 Authenticate = t('Authenticate', ['auth_delegate', 'callback'])
 
 Start = t('Start', [])
