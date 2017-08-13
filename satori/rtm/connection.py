@@ -21,6 +21,7 @@ import time
 import satori.rtm.logger
 from satori.rtm.internal_connection_miniws4py import RtmWsClient
 import satori.rtm.auth as auth
+import satori.rtm.exceptions as exs
 
 ping_interval_in_seconds = 60
 high_ack_count_watermark = 20000
@@ -65,10 +66,7 @@ Parameters
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
         """
 
-        assert endpoint
-        assert appkey
-        assert endpoint.startswith('ws://') or endpoint.startswith('wss://'),\
-            'Endpoint must start with "ws(s)://" but "%s" does not' % endpoint
+        validate_endpoint(endpoint, appkey)
 
         self.logger = satori.rtm.logger.logger
 
@@ -771,3 +769,15 @@ def enable_wsaccel():
         return masker.process(data)
 
     miniws4py.framing.mask = fast_mask
+
+
+def validate_endpoint(endpoint, appkey):
+    if not endpoint:
+        raise exs.MalformedCredentials("Missing endpoint")
+
+    if not appkey:
+        raise exs.MalformedCredentials("Missing appkey")
+
+    if not endpoint.startswith('ws://') and not endpoint.startswith('wss://'):
+        raise exs.MalformedCredentials(
+            'Endpoint must start with "ws(s)://" but "%s" does not' % endpoint)
