@@ -27,14 +27,26 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     ]
 
-setup(name='satori-rtm-sdk',
-      version='1.2.1',
-      description='Satori SDK',
-      author='Satori Worldwide, Inc.',
-      author_email='sdk@satori.com',
-      url='https://www.satori.com/',
-      packages=find_packages(exclude='ez_setup'),
-      py_modules=py_modules,
-      install_requires=install_requires,
-      classifiers=classifiers
-     )
+long_description = '''
+RTM is the realtime messaging service at the core of the
+`Satori platform <https://www.satori.com>`_.
+
+Python SDK makes it more convenient to use Satori RTM
+from `Python programming language <https://www.python.org>`_.
+'''
+
+setup(
+    name='satori-rtm-sdk',
+    version='1.2.1',
+    description='Python SDK for Satori RTM',
+    long_description=long_description,
+    author='Satori Worldwide, Inc.',
+    author_email='sdk@satori.com',
+    url='https://www.satori.com/',
+    packages=find_packages(exclude=['doc', 'test', 'examples', 'tutorials']),
+    py_modules=py_modules,
+    install_requires=install_requires,
+    classifiers=classifiers,
+    license='Proprietary',
+    keywords=['satori'],
+    zip_safe=True)

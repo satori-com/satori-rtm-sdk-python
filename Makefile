@@ -13,6 +13,11 @@ lint: $(GENERATED_SOURCES)
 	python3 -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error,redefined-builtin cli/*.py
 	@echo 'Linters are happy'
 
+.PHONY: lint-setup-py
+lint-setup-py:
+	pyroma . | grep Mascarpone
+	pyroma cli | grep Mascarpone
+
 .PHONY: clean
 clean:
 	-@find . -name '*.pyc' -delete
