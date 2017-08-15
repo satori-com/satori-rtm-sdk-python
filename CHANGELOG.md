@@ -1,6 +1,8 @@
-Unreleased
-----------
+v1.3.0 (2017-08-15)
+-------------------
 
+* Serialize messages before publishing to avoid issues with mutable messages
+* All callbacks (state changes, subscription data and errors, request replies) are now called from a single thread.
 * Client object now stops when any user callback throws an exception
 
 v1.2.1 (2017-06-23)

@@ -3,12 +3,6 @@
 from setuptools import setup, find_packages
 import sys
 
-py_modules =\
-    ['satori.rtm.' + m for m in (
-        'client',
-        'auth',
-        'connection')]
-
 install_requires = ['certifi', 'enum34', 'six']
 
 if sys.version_info < (2, 7, 9):
@@ -37,14 +31,13 @@ from `Python programming language <https://www.python.org>`_.
 
 setup(
     name='satori-rtm-sdk',
-    version='1.2.1',
+    version='1.3.0',
     description='Python SDK for Satori RTM',
     long_description=long_description,
     author='Satori Worldwide, Inc.',
     author_email='sdk@satori.com',
     url='https://www.satori.com/',
     packages=find_packages(exclude=['doc', 'test', 'examples', 'tutorials']),
-    py_modules=py_modules,
     install_requires=install_requires,
     classifiers=classifiers,
     license='Proprietary',
