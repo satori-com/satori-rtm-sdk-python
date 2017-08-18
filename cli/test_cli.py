@@ -63,7 +63,7 @@ class TestCLI(unittest.TestCase):
             raise RuntimeError(
                 "Expected to find 'on_enter_connected' in {0}".format(err))
 
-    def test_replayer_timing(self):
+    def generic_test_replayer_timing(self, rate):
 
         channel = make_channel_name('replayer_timing')
 
@@ -71,16 +71,22 @@ class TestCLI(unittest.TestCase):
             ['python', 'satori_rtm_cli/__init__.py',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
-
                 'record', channel],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
-        replayer = subprocess.Popen(
+        cmd =\
             ['python', 'satori_rtm_cli/__init__.py',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
-                'replay'],
+                'replay']
+
+        if rate:
+            cmd.append('--rate')
+            cmd.append('{}x'.format(rate))
+
+        replayer = subprocess.Popen(
+            cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
@@ -134,17 +140,28 @@ class TestCLI(unittest.TestCase):
         # no messages are lost
         self.assertEqual(message_count, len(timestamps))
 
-        first_offset = pdus[0]['timestamp'] - pdus[0]['messages'][0]
+        first_record_ts = pdus[0]['messages'][0]
+        first_replay_ts = pdus[0]['timestamp']
         for pdu in pdus:
-            offset = pdu['timestamp'] - pdu['messages'][0]
+            if not rate:
+                rate = 1
+            error =\
+                (pdu['timestamp'] - first_replay_ts) * rate -\
+                (pdu['messages'][0] - first_record_ts)
 
-            # offset is stable within 1 seconds
+            # offset is stable within 1 second
             self.assertTrue(
-                offset + 0.5 > first_offset,
-                (offset, "is far from", first_offset))
+                error < 0.5,
+                ("timing error is ", error))
             self.assertTrue(
-                offset - 0.5 < first_offset,
-                (offset, "is far from", first_offset))
+                error > -0.5,
+                ("timing error is ", error))
+
+    def test_replayer_timing(self):
+        return self.generic_test_replayer_timing(rate=None)
+
+    def test_replayer_timing_2x(self):
+        return self.generic_test_replayer_timing(rate=1.41)
 
     def test_kv(self):
         cmd_prefix =\
