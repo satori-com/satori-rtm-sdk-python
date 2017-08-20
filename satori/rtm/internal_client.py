@@ -106,8 +106,6 @@ class InternalClient(object):
                 m.key, m.value, m.callback)
         elif t == a.Delete:
             self.connection.delete(m.key, m.callback)
-        elif t == a.Search:
-            self.connection.search(m.prefix, m.callback)
         elif t == a.Authenticate:
             if self.is_connected():
                 self._authenticate(m.auth_delegate, m.callback)

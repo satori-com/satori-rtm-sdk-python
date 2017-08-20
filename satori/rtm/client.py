@@ -299,22 +299,6 @@ Parameters
         """
         self._enqueue(a.Unsubscribe(channel_or_subscription_id))
 
-    def search(self, prefix, callback):
-        """
-Description
-    Asynchronously performs a channel search for a given user-defined prefix.
-    This method passes RTM replies to the callback. RTM may send multiple
-    responses to the same search request: zero or more search result PDUs with
-    an action of `rtm/search/data` (depending on the results of the search).
-    Each channel found is only sent once.
-
-    After the search result PDUs, RTM follows with a positive response PDU:
-    `rtm/search/ok`. Callback must inspect the reply object passed to the
-    callback for the reply['body']['channels'] list. The callback is called on
-    each response.
-        """
-        self._enqueue(a.Search(prefix, callback))
-
     def dispose(self):
         """
 Description
