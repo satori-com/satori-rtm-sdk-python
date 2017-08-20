@@ -111,7 +111,7 @@ class TestCLI(unittest.TestCase):
 
         replayer.communicate(timeout=20, input=b'\n'.join(replayer_stdin()))
 
-        time.sleep(30)
+        time.sleep(10)
 
         self.assertTrue(rerecorder.returncode is None)
 

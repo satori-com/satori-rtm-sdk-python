@@ -30,13 +30,13 @@ __doc__ = '''Satori RTM CLI
 
 Usage:
   satori-rtm-cli --help
-  satori-rtm-cli [options] [--prettify_json] subscribe <channels>...
-  satori-rtm-cli [options] [--prettify_json] view [--period=<period_in_seconds>] <query>
+  satori-rtm-cli [options] [--prettify_json] subscribe [--position=<position>] [(--count=<count> | --age=<age>)] <channels>...
+  satori-rtm-cli [options] [--prettify_json] view [--position=<position>] [--count=<count>] [--age=<age>] [--period=<period_in_seconds>] <query>
   satori-rtm-cli [options] publish [--disable_acks] <channel>
   satori-rtm-cli [options] [--prettify_json] read <key>
   satori-rtm-cli [options] write [--disable_acks] <key> <value>
   satori-rtm-cli [options] delete [--disable_acks] <key>
-  satori-rtm-cli [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] <channels>...
+  satori-rtm-cli [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] [--position=<position>] [(--count=<count> | --age=<age>)] <channels>...
   satori-rtm-cli [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
@@ -53,6 +53,9 @@ Options:
     -r <rate_or_unlimited>, --rate=<rate_or_unlimited>  # relative rate of replaying, can be a <number>x (2x for double speed, 0.5x for half speed) or "unlimited" for replaying as fast as possible, default is 1x
     -d simple|reliable|advanced, --delivery=simple|reliable|advanced
     -c <config_file_path> --config <config_file_path>
+    --position <position>  # subscribe from this position, makes sense only when subscribing to a single channel
+    --count <count>  # include this many past messages in the subscription data
+    --age <age>  # include this many past seconds worth of messages in the subscription data
 '''
 
 
@@ -166,14 +169,27 @@ def main():
             auth_delegate=auth_delegate, observer=observer) as client:
         logger.info('Connected to %s %s', endpoint, appkey)
         if args['subscribe']:
+            extra_args={}
+            if args['--position']:
+                extra_args['position'] = args['--position']
+            if args['--age']:
+                extra_args['history'] = {'age': int(args['--age'])}
+            elif args['--count']:
+                extra_args['history'] = {'count': int(args['--count'])}
             return subscribe(
                 client,
-                args['<channels>'], prettify_json,
+                args['<channels>'], prettify_json, extra_args=extra_args,
                 delivery=delivery)
         if args['view']:
             extra_args = {'filter': args['<query>']}
             if args['--period']:
                 extra_args['period'] = int(args['--period'])
+            if args['--position']:
+                extra_args['position'] = args['--position']
+            if args['--age']:
+                extra_args['history'] = {'age': int(args['--age'])}
+            elif args['--count']:
+                extra_args['history'] = {'count': int(args['--count'])}
             return subscribe(
                 client,
                 ['view'], prettify_json,
@@ -194,11 +210,20 @@ def main():
             if time_limit:
                 logger.info('Time limit: %s seconds', time_limit)
 
+            extra_args={}
+            if args['--position']:
+                extra_args['position'] = args['--position']
+            if args['--age']:
+                extra_args['history'] = {'age': int(args['--age'])}
+            elif args['--count']:
+                extra_args['history'] = {'count': int(args['--count'])}
+
             return record(
                 client,
                 args['<channels>'],
                 size_limit=size_limit, count_limit=count_limit,
                 time_limit=time_limit, output_file=args['--output_file'],
+                extra_args=extra_args,
                 delivery=delivery)
         elif args['replay']:
             return replay(
