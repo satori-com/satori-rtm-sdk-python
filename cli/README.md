@@ -69,6 +69,21 @@ satori-rtm-cli --appkey $MY_APPKEY read big-rss
 satori-rtm-cli --appkey $MY_APPKEY --prettify_json subscribe big-rss
 ```
 
+```
+# subscribe to a private channel from a specific position
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY --position 12345678:012 --prettify_json subscribe big-rss
+```
+
+```
+# include 10 last messages when subscribing
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY --count 10 --prettify_json subscribe big-rss
+```
+
+```
+# include 5 last seconds worth of messages when subscribing
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY --age 5 --prettify_json subscribe big-rss
+```
+
 ### View
 
 ```

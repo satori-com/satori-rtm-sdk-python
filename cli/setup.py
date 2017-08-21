@@ -22,7 +22,7 @@ See `README <https://github.com/satori-com/satori-rtm-sdk-python/tree/master/cli
 
 setup(
     name='satori-rtm-cli',
-    version='1.4.3',
+    version='1.5.0',
     description='Satori RTM CLI',
     long_description=long_description,
     author='Satori',
@@ -32,7 +32,7 @@ setup(
         'console_scripts': ['satori-rtm-cli=satori_rtm_cli:main']
     },
     packages=['satori_rtm_cli'],
-    install_requires=['satori-rtm-sdk >=1.2.1', 'docopt', 'toml', 'xdg'],
+    install_requires=['satori-rtm-sdk >=1.3.0', 'docopt', 'toml', 'xdg'],
     classifiers=classifiers,
     keywords='satori',
     license='Proprietary',

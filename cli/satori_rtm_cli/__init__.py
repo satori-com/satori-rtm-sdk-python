@@ -297,7 +297,7 @@ def publish(client, channel, enable_acks):
             def callback(reply):
                 if reply['action'] != 'rtm/publish/ok':
                     print('Publish failed: ', file=sys.stderr)
-                    sys.exit(1)
+                    stop_main_thread()
                 counter.decrement()
         else:
             callback = None
@@ -340,7 +340,7 @@ def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks
             def callback(reply):
                 if reply['action'] != 'rtm/publish/ok':
                     print('Publish failed: ', file=sys.stderr)
-                    sys.exit(1)
+                    stop_main_thread()
                 counter.decrement()
         else:
             callback = None
@@ -391,7 +391,7 @@ def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks
                 logger.error('Bad line: %s', line)
             except Exception as e:
                 logger.error('Exception: %s', e)
-                sys.exit(2)
+                stop_main_thread()
 
     except KeyboardInterrupt:
         pass
@@ -422,7 +422,7 @@ def generic_subscribe(
 
         def on_enter_failed(self, reason):
             logger.error('Subscription failed because:\n%s', reason)
-            sys.exit(1)
+            stop_main_thread()
 
         def on_subscription_data(self, data):
             handle_channel_data(data)
@@ -441,7 +441,7 @@ def generic_subscribe(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        sys.exit(0)
+        stop_main_thread()
 
 
 def subscribe(
