@@ -27,7 +27,7 @@ import satori.rtm.internal_client_action as a
 from satori.rtm.internal_client import InternalClient
 import satori.rtm.internal_subscription as s
 
-from satori.rtm.logger import logger
+from satori.rtm.internal_logger import logger
 
 
 SubscriptionMode = s.SubscriptionMode

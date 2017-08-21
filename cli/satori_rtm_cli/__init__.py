@@ -19,7 +19,7 @@ from xdg import XDG_CONFIG_HOME
 import satori.rtm.connection
 from satori.rtm.client import make_client, SubscriptionMode
 from satori.rtm.auth import RoleSecretAuthDelegate
-import satori.rtm.logger
+import satori.rtm.internal_logger
 
 try:
     satori.rtm.connection.enable_wsaccel()
@@ -62,30 +62,30 @@ Options:
 default_endpoint = 'wss://open-data.api.satori.com'
 
 
-logger = logging.getLogger('satori_rtm_cli')
+logger = logging.getLogger('satori-rtm-cli')
 
 
 class ClientObserver(object):
     def on_leave_awaiting(self):
-        logger.warning('on_leave_awaiting')
+        logger.debug('on_leave_awaiting')
 
     def on_enter_awaiting(self):
-        logger.warning('on_enter_awaiting')
+        logger.debug('on_enter_awaiting')
 
     def on_leave_connecting(self):
-        logger.warning('on_leave_connecting')
+        logger.debug('on_leave_connecting')
 
     def on_enter_connecting(self):
-        logger.warning('on_enter_connecting')
+        logger.debug('on_enter_connecting')
 
     def on_leave_connected(self):
-        logger.warning('on_leave_connected')
+        logger.warning('Disconnected')
 
     def on_enter_connected(self):
-        logger.warning('on_enter_connected')
+        logger.warning('Connected')
 
     def on_enter_stopped(self):
-        logger.warning('on_enter_stopped')
+        logger.debug('on_enter_stopped')
 
 
 def get_args():
@@ -162,12 +162,12 @@ def main():
     enable_acks = not args['--disable_acks']
 
     observer = ClientObserver()
-    logger.info('Connecting to %s using appkey %s', endpoint, appkey)
+    logger.warning('Connecting to %s using appkey %s', endpoint, appkey)
 
     with make_client(
             endpoint, appkey,
             auth_delegate=auth_delegate, observer=observer) as client:
-        logger.info('Connected to %s %s', endpoint, appkey)
+        logger.warning('Connected')
         if args['subscribe']:
             extra_args={}
             if args['--position']:
@@ -247,15 +247,38 @@ def main():
 
 
 def configure_logger(level):
-    satori.rtm.logger.configure(level)
 
-    formatter = logging.Formatter(
-        'satori_rtm_cli:%(asctime)s: %(message)s')
+    class Formatter(logging.Formatter):
+        def format(self, record):
+            if record.name == 'satori-rtm-cli':
+                self._fmt = "%(message)s"
+            else:
+                self._fmt = "%(asctime)s %(module)s.%(funcName)s():%(lineno)s %(message)s"
+
+            if record.levelno >= logging.ERROR:
+                self._fmt = "%(levelname)s " + self._fmt
+            return logging.Formatter.format(self, record)
+
+    formatter = Formatter()
+
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
     logger.setLevel(level)
     logger.addHandler(handler)
+    ws4py_formatter = formatter
+    ws4py_handler = logging.StreamHandler()
+    ws4py_handler.setFormatter(ws4py_formatter)
+
+    ws4py_logger = logging.getLogger('miniws4py')
+    ws4py_logger.setLevel(level)
+    ws4py_logger.addHandler(ws4py_handler)
+
+    satori_logger = logging.getLogger('satori.rtm')
+    satori_formatter = formatter
+    satori_handler = logging.StreamHandler()
+    satori_handler.setFormatter(satori_formatter)
+    satori_logger.addHandler(satori_handler)
 
 
 def parse_size(size_string):
@@ -421,7 +444,7 @@ def generic_subscribe(
             logger.info('Subscription became active')
 
         def on_enter_failed(self, reason):
-            logger.error('Subscription failed because:\n%s', reason)
+            logger.error('Subscription failed because: %s', reason)
             stop_main_thread()
 
         def on_subscription_data(self, data):
@@ -441,7 +464,7 @@ def generic_subscribe(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        stop_main_thread()
+        sys.exit(1)
 
 
 def subscribe(

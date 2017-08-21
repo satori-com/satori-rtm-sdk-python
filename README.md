@@ -75,6 +75,20 @@ with make_client(endpoint, appkey, https_proxy=('127.0.0.1', 4443)) as client:
     print('Connected to Satori RTM through a proxy')
 ```
 
+# Logging
+
+The SDK uses the standard `logging` module using namespaces `satori.rtm` and
+`miniws4py`. If you're writing an application using this SDK, be sure to configure
+logging, the simplest way is to do the following at the startup of your application:
+
+```
+import logging
+logging.basicConfig()
+```
+
+If you're writing a library, the best practice is not to configure logging at
+all, leaving that for the applications.
+
 # Development
 
 ## Development dependencies

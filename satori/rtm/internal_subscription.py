@@ -5,7 +5,7 @@ from __future__ import print_function
 import threading
 from enum import Enum
 
-from satori.rtm.logger import logger
+from satori.rtm.internal_logger import logger
 
 from satori.rtm.internal_state_machine_wrapper import StateMachineWrapper
 import satori.rtm.generated.subscription_sm as sm

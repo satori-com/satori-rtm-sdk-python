@@ -18,7 +18,6 @@ def public_modules():
         ['Client', 'make_client'])
     yield ('satori.rtm.auth',
         ['RoleSecretAuthDelegate'])
-    yield ('satori.rtm.logger', [])
 
 
 def signature(module_name, class_name, fun_expr):

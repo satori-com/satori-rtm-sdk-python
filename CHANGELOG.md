@@ -1,3 +1,14 @@
+v1.4.0 (2017-08-21)
+-------------------
+
+* satori.rtm.logger module is now internal. Client code should access the logger
+  object as `logging.getLogger('satori.rtm')` for configuration. If in doubt,
+  configure logging at the startup of your application like this:
+  ```
+  import logging
+  logging.basicConfig()
+  ```
+
 v1.3.0 (2017-08-15)
 -------------------
 

@@ -1,7 +1,7 @@
 
 from collections import deque
 
-from satori.rtm.logger import logger
+from satori.rtm.internal_logger import logger
 
 
 class StateMachineWrapper(object):

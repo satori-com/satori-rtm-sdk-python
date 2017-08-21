@@ -1,6 +1,6 @@
 
 SMC_JAR ?= Smc.jar
-PUBLIC_SOURCES := satori/rtm/client.py satori/rtm/connection.py satori/rtm/auth.py satori/rtm/__init__.py satori/rtm/logger.py
+PUBLIC_SOURCES := satori/rtm/client.py satori/rtm/connection.py satori/rtm/auth.py satori/rtm/__init__.py satori/rtm/exceptions.py
 GENERATED_SOURCES := satori/rtm/generated/client_sm.py satori/rtm/generated/subscription_sm.py
 
 .PHONY: lint

@@ -1,14 +1,14 @@
 
 from miniws4py.client import WebSocketBaseClient
 
-import satori.rtm.logger
+import satori.rtm.internal_logger
 
 
 class RtmWsClient(WebSocketBaseClient):
 
     def __init__(self, *args, **kwargs):
         WebSocketBaseClient.__init__(self, *args, **kwargs)
-        self.logger = satori.rtm.logger.logger
+        self.logger = satori.rtm.internal_logger.logger
         self.delegate = None
 
     def send_ping(self):

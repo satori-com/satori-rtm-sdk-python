@@ -18,7 +18,7 @@ import sys
 import threading
 import time
 
-import satori.rtm.logger
+import satori.rtm.internal_logger
 from satori.rtm.internal_connection_miniws4py import RtmWsClient
 import satori.rtm.auth as auth
 import satori.rtm.exceptions as exs
@@ -68,7 +68,7 @@ Parameters
 
         validate_endpoint(endpoint, appkey)
 
-        self.logger = satori.rtm.logger.logger
+        self.logger = satori.rtm.internal_logger.logger
 
         re_version = re.compile(r'/v(\d+)$')
         version_match = re_version.search(endpoint)

@@ -11,7 +11,7 @@ import satori.rtm.internal_client_action as a
 import satori.rtm.auth as auth
 from satori.rtm.generated.statemap import StateUndefinedException
 from satori.rtm.generated.client_sm import Client_sm
-from satori.rtm.logger import logger
+from satori.rtm.internal_logger import logger
 from satori.rtm.internal_subscription import Subscription
 
 max_offline_queue_length = 1000

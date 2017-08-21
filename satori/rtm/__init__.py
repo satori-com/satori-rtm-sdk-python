@@ -14,8 +14,8 @@ The following table lists the Python SDK modules and classes:
 `satori.rtm.auth`_
     Provides the delegate object to be used when authenticating
     clients with RTM.
-`satori.rtm.logger`_
-    Logging module for the Python SDK.
+`satori.rtm.exceptions`_
+    Exception classes
 
 .. |logo| image:: https://www.satori.com/assets/images/logo-light@2x.png
           :height: 30px
@@ -24,3 +24,8 @@ The following table lists the Python SDK modules and classes:
           :target: https://www.satori.com
           :align: middle
 '''
+
+import logging
+
+logger = logging.getLogger('satori.rtm')
+logger.addHandler(logging.NullHandler())
