@@ -13,6 +13,8 @@ appkey = "YOUR_APPKEY"
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.WARNING)
 
     class SubscriptionObserver(object):
         def on_enter_subscribed(self):

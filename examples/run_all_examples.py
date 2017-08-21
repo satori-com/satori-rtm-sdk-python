@@ -21,6 +21,9 @@ examples_that_must_be_stopped_externally = [
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.WARNING)
+
     subprocess.check_call(['touch', 'examples/__init__.py'])
     for file in os.listdir('examples'):
         if file.endswith('.py') and\

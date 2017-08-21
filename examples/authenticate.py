@@ -15,6 +15,9 @@ role_secret_key = "YOUR_SECRET"
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.WARNING)
+
     auth_delegate = auth.RoleSecretAuthDelegate(role, role_secret_key)
 
     try:

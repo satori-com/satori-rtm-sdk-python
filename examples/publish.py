@@ -12,6 +12,9 @@ appkey = "YOUR_APPKEY"
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.WARNING)
+
     with make_client(endpoint=endpoint, appkey=appkey) as client:
         print('Connected to Satori RTM!')
 

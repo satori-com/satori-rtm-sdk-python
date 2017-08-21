@@ -24,6 +24,9 @@ channel = 'animals'
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.WARNING)
+
     should_authenticate = role and role_secret_key\
         and role_secret_key != 'YOUR_SECRET'
     if should_authenticate:
