@@ -58,10 +58,10 @@ class TestCLI(unittest.TestCase):
         tcpkali2.communicate(timeout=20)
 
         (out, err) = satori_rtm_cli.communicate(timeout=20)
-        if len(re.findall(b'on_enter_connected', err)) != 1:
+        if len(re.findall(b'Connected', err)) == 0:
             print('out:', out)
             raise RuntimeError(
-                "Expected to find 'on_enter_connected' in {0}".format(err))
+                "Expected to find 'Connected' in {0}".format(err))
 
     def generic_test_replayer_timing(self, rate):
 
@@ -263,7 +263,8 @@ def generic_test(self, should_authenticate=False):
         (sub_out, sub_err) = subscriber.communicate(timeout=20)
         self.assertEqual(
             subscriber.returncode, 0,
-            "subscriber failed with code {0}".format(subscriber.returncode))
+            "subscriber failed with code {0}, out: {1}, err: {2}".format(
+                subscriber.returncode, sub_out, sub_err))
 
         u_string_message = string_message.decode('utf8')
         u_json_message = json_message.decode('utf8')

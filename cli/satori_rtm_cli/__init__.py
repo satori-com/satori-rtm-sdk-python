@@ -19,7 +19,6 @@ from xdg import XDG_CONFIG_HOME
 import satori.rtm.connection
 from satori.rtm.client import make_client, SubscriptionMode
 from satori.rtm.auth import RoleSecretAuthDelegate
-import satori.rtm.internal_logger
 
 try:
     satori.rtm.connection.enable_wsaccel()
@@ -464,7 +463,7 @@ def generic_subscribe(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        sys.exit(1)
+        sys.exit(0)
 
 
 def subscribe(
