@@ -2,6 +2,7 @@
 ------------------
 
 * Support --position, --age and --count
+* Added an undocumented feature
 
 1.4.3 (2017-08-11)
 ------------------

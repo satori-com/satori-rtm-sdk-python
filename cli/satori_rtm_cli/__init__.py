@@ -640,17 +640,32 @@ def load_args_from_config_file(path=None):
         path = os.path.join(XDG_CONFIG_HOME, 'satori', 'rtm-cli.config')
     result = {}
     try:
-        with open(path) as f:
-            fileconfig = toml.load(f)
-            for k, v in fileconfig.items():
+        try:
+            with open(path) as f:
+                fileconfig = toml.load(f)
+                for k, v in fileconfig.items():
+                    print(
+                        "From config file: {0} = {1}".format(k, v),
+                        file=sys.stderr)
+                    result[u'--' + k] = v
+        except toml.TomlDecodeError:
+            try:
+                # Just in case the config file has the format credentials.json
+                with open(path) as f:
+                    fileconfig = json.load(f)
+                    for k, v in fileconfig.items():
+                        if k == 'auth_role_name':
+                            k = 'role_name'
+                        if k == 'auth_role_secret_key':
+                            k = 'role_secret'
+                        print(
+                            "From config file: {0} = {1}".format(k, v),
+                            file=sys.stderr)
+                        result[u'--' + k] = v
+            except ValueError:
                 print(
-                    "From config file: {0} = {1}".format(k, v),
+                    "Invalid config file at {0}".format(path),
                     file=sys.stderr)
-                result[u'--' + k] = v
-    except ValueError:
-        print(
-            "Invalid config file at {0}".format(path),
-            file=sys.stderr)
     except (IOError, OSError):
         if not quiet:
             print(
