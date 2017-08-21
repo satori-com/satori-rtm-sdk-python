@@ -7,7 +7,8 @@ logger = logging.getLogger('satori.rtm')
 
 def configure_for_debugging():
     ws4py_formatter = logging.Formatter(
-        'miniws4py:%(asctime)s:%(levelname)s:%(module)s.%(funcName)s:%(lineno)s:%(threadName)s: %(message)s')
+        'miniws4py:%(asctime)s:%(levelname)s:'
+        '%(module)s.%(funcName)s:%(lineno)s:%(threadName)s: %(message)s')
     ws4py_handler = logging.StreamHandler()
     ws4py_handler.setFormatter(ws4py_formatter)
 
@@ -16,7 +17,8 @@ def configure_for_debugging():
     ws4py_logger.addHandler(ws4py_handler)
 
     satori_formatter = logging.Formatter(
-        'satori.rtm:%(asctime)s:%(levelname)s:%(module)s.%(funcName)s:%(lineno)s:%(threadName)s: %(message)s')
+        'satori.rtm:%(asctime)s:%(levelname)s:'
+        '%(module)s.%(funcName)s:%(lineno)s:%(threadName)s: %(message)s')
     satori_handler = logging.StreamHandler()
     satori_handler.setFormatter(satori_formatter)
 

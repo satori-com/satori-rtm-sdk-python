@@ -169,7 +169,7 @@ def main():
             auth_delegate=auth_delegate, observer=observer) as client:
         logger.warning('Connected')
         if args['subscribe']:
-            extra_args={}
+            extra_args = {}
             if args['--position']:
                 extra_args['position'] = args['--position']
             if args['--age']:
@@ -210,7 +210,7 @@ def main():
             if time_limit:
                 logger.info('Time limit: %s seconds', time_limit)
 
-            extra_args={}
+            extra_args = {}
             if args['--position']:
                 extra_args['position'] = args['--position']
             if args['--age']:
