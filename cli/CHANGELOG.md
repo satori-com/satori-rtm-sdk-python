@@ -1,7 +1,12 @@
+Unreleased
+------------------
+
+* Added --loop option to replay subcommand
+
 1.5.0 (2017-08-21)
 ------------------
 
-* Support --position, --age and --count
+* Added --position, --age and --count options for subscribe and view subcommands
 * Added an undocumented feature
 
 1.4.3 (2017-08-11)
