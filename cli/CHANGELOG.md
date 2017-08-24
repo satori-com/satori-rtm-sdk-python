@@ -1,7 +1,8 @@
-Unreleased
+1.5.1 (2017-08-24)
 ------------------
 
 * Added --loop option to replay subcommand
+* replay subcommand now shows some stats
 
 1.5.0 (2017-08-21)
 ------------------

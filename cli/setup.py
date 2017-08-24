@@ -22,7 +22,7 @@ See `README <https://github.com/satori-com/satori-rtm-sdk-python/tree/master/cli
 
 setup(
     name='satori-rtm-cli',
-    version='1.5.0',
+    version='1.5.1',
     description='Satori RTM CLI',
     long_description=long_description,
     author='Satori',
