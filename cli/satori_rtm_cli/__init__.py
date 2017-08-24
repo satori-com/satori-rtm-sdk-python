@@ -362,14 +362,16 @@ def publish(client, channel, enable_acks):
 
 def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, enable_acks=True):
     try:
-        counter = Counter()
+        publish_counter = Counter()
+        publish_ack_counter = Counter()
+        start_timestamp = time.time()
 
         if enable_acks:
             def callback(reply):
                 if reply['action'] != 'rtm/publish/ok':
                     print('Publish failed: ', file=sys.stderr)
                     stop_main_thread()
-                counter.decrement()
+                publish_ack_counter.increment()
         else:
             callback = None
 
@@ -388,6 +390,11 @@ def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, ena
                     if input_file:
                         input_stream.close()
                         loop -= 1
+                        logger.warning(
+                            'Messages published: %d', publish_counter.value())
+                        if loop > 0:
+                            logger.warning(
+                                'Playback cycle finished, %d to go', loop)
                     else:
                         loop = 0
                     break
@@ -415,8 +422,7 @@ def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, ena
 
                     for message in messages:
                         try:
-                            if enable_acks:
-                                counter.increment()
+                            publish_counter.increment()
                             client.publish(channel, message, callback=callback)
                         except queue.Full as e:
                             logger.error('Publish queue is full')
@@ -427,19 +433,25 @@ def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, ena
                     logger.error('Exception: %s', e)
                     stop_main_thread()
 
+        logger.warning(
+            'Playback finished, total time: %.2f seconds',
+            time.time() - start_timestamp)
+
     except KeyboardInterrupt:
         pass
     if not enable_acks:
         return
-    if counter.value() > 0:
+    def unacked_count():
+        return publish_counter.value() - publish_ack_counter.value()
+    if unacked_count() > 0:
         sleep = 0.1
         while sleep < 3.0:
             time.sleep(sleep)
             sleep += sleep
-            if not counter.value():
+            if not unacked_count():
                 break
             else:
-                logger.info('%s publishes remain unacked', counter.value())
+                logger.info('%s publishes remain unacked', unacked_count())
 
 
 def generic_subscribe(
