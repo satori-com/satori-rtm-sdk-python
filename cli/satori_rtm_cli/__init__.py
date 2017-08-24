@@ -441,6 +441,7 @@ def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, ena
         pass
     if not enable_acks:
         return
+
     def unacked_count():
         return publish_counter.value() - publish_ack_counter.value()
     if unacked_count() > 0:

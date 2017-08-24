@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import re
 import signal
 import subprocess
@@ -200,6 +201,79 @@ class TestCLI(unittest.TestCase):
             mailbox,
             [b'', b'', b'"v1"', b'', b'null', b'', b'', b'"v3"'])
 
+    def test_replay_twice(self):
+        channel = make_channel_name('replay_twice')
+
+        msgs = [
+            {"position": "0:1", "subscription_id": channel, "messages": [{"who": "zebra"}], "timestamp": 1.0},
+            {"position": "0:2", "subscription_id": channel, "messages": [{"who": "owl"}], "timestamp": 1.1},
+            {"position": "0:3", "subscription_id": channel, "messages": [{"who": "pangolin"}], "timestamp": 1.2}
+            ]
+
+        rerecorder = subprocess.Popen(
+            ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
+                '--appkey', appkey,
+                '--endpoint', endpoint,
+                'record', channel],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        filename = channel
+        with open(filename, 'w') as f:
+            f.write('\n'.join(map(json.dumps, msgs)))
+
+        replayer = subprocess.Popen(
+            ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
+                '--appkey', appkey,
+                '--endpoint', endpoint,
+                '--loop', '2',
+                '--input_file', filename,
+                'replay'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        # give recorder and replayer some time to connect
+        time.sleep(10)
+
+        rep_out, rep_err = replayer.communicate(timeout=20)
+
+        print('Replayer out:', rep_out.decode('utf8'))
+        print('Replayer err:', rep_err.decode('utf8'))
+
+        os.remove(filename)
+
+        time.sleep(10)
+
+        self.assertTrue(rerecorder.returncode is None)
+
+        # double ctrl-c because we don't care about cleanup here
+        for _ in range(2):
+            rerecorder.send_signal(signal.SIGINT)
+
+        rec_out, rec_err = rerecorder.communicate(timeout=20)
+
+        got_messages = []
+
+        print('Rerecorder out:', rec_out.decode('utf8'))
+        print('Rerecorder err:', rec_err.decode('utf8'))
+
+        for line in rec_out.split(b'\n'):
+            line = line.strip()
+            if line:
+                pdu = json.loads(line.decode('utf8'))
+                got_messages += pdu['messages']
+
+        print('Got messages:', got_messages)
+
+        # some pdus could contain multiple messages
+        self.assertEqual(len(got_messages), 2 * len(msgs))
+
+        for i, m in enumerate(got_messages):
+            self.assertEqual(m, msgs[i % len(msgs)]['messages'][0])
+
 
 def generic_test(self, should_authenticate=False):
 
@@ -290,69 +364,6 @@ def generic_test(self, should_authenticate=False):
         except Exception:
             pass
         raise Exception from e
-
-    def test_replay_twice(self):
-        channel = make_channel_name('replay_twice')
-
-        msgs = [
-            {"position": "0:1", "subscription_id": channel, "messages": [{"who": "zebra"}], "timestamp": 1.0},
-            {"position": "0:2", "subscription_id": channel, "messages": [{"who": "owl"}], "timestamp": 1.1},
-            {"position": "0:3", "subscription_id": channel, "messages": [{"who": "pangolin"}], "timestamp": 1.2}
-            ]
-
-        rerecorder = subprocess.Popen(
-            ['python', 'satori_rtm_cli/__init__.py',
-                '--config', '/dev/null',
-                '--appkey', appkey,
-                '--endpoint', endpoint,
-                'record', channel],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-
-        filename = channel
-        with open(filename, 'w') as f:
-            f.write('\n'.join(map(json.dumps, msgs)))
-
-        replayer = subprocess.Popen(
-            ['python', 'satori_rtm_cli/__init__.py',
-                '--config', '/dev/null',
-                '--appkey', appkey,
-                '--endpoint', endpoint,
-                '--loop', '2'
-                '--input_file', filename,
-                'replay'],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-
-        # give recorder and replayer some time to connect
-        time.sleep(10)
-
-        replayer.communicate(timeout=20)
-
-        time.sleep(10)
-
-        self.assertTrue(rerecorder.returncode is None)
-
-        # double ctrl-c because we don't care about cleanup here
-        for _ in range(2):
-            rerecorder.send_signal(signal.SIGINT)
-
-        rec_out, rec_err = rerecorder.communicate(timeout=20)
-
-        got_messages = []
-
-        for line in rec_out.split(b'\n'):
-            line = line.strip()
-            if line:
-                pdu = json.loads(line.decode('utf8'))
-                got_messages += pdu['messages']
-
-        # some pdus could contain multiple messages
-        self.assertEqual(len(got_messages), 2 * len(msgs))
-
-        for i, m in enumerate(got_messages):
-            self.assertEqual(m, msgs[i % len(msgs)])
 
 
 if __name__ == '__main__':
