@@ -36,7 +36,7 @@ Usage:
   satori-rtm-cli [options] write [--disable_acks] <key> <value>
   satori-rtm-cli [options] delete [--disable_acks] <key>
   satori-rtm-cli [options] record [--output_file=<output_file>] [--size_limit_in_bytes=<size_limit>] [--time_limit_in_seconds=<time_limit>] [--message_count_limit=<message_limit>] [--position=<position>] [(--count=<count> | --age=<age>)] <channels>...
-  satori-rtm-cli [options] replay [--disable_acks] [--input_file=<input_file>] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
+  satori-rtm-cli [options] replay [--disable_acks] [--input_file=<input_file> [--loop=<N|inf>]] [--rate=<rate_or_unlimited>] [--override_channel=<override_channel>]
 
 Options:
     -v <verbosity> --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 1
@@ -55,6 +55,7 @@ Options:
     --position <position>  # subscribe from this position, makes sense only when subscribing to a single channel
     --count <count>  # include this many past messages in the subscription data
     --age <age>  # include this many past seconds worth of messages in the subscription data
+    -l <N|inf> --loop <N|inf>  # loop playback N times, `--loop inf` means loop forever, compatible only with --input_file option
 '''
 
 
@@ -225,9 +226,14 @@ def main():
                 extra_args=extra_args,
                 delivery=delivery)
         elif args['replay']:
+            if args['--loop'] == 'inf':
+                loop = float('inf')
+            else:
+                loop = int(args['--loop'] or 1)
             return replay(
                 client,
                 override_channel=args['--override_channel'], rate=rate,
+                loop=loop,
                 input_file=args['--input_file'], enable_acks=enable_acks)
         elif args['read']:
             return kv_read(
@@ -354,7 +360,7 @@ def publish(client, channel, enable_acks):
             logger.info('%s publishes remain unacked', counter.value())
 
 
-def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks=True):
+def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, enable_acks=True):
     try:
         counter = Counter()
 
@@ -367,53 +373,59 @@ def replay(client, override_channel=None, rate=1.0, input_file=None, enable_acks
         else:
             callback = None
 
-        first_message_send_date = None
-        first_message_recv_date = None
+        input_stream = sys.stdin
 
-        if input_file:
-            input_stream = open(input_file)
-        else:
-            input_stream = sys.stdin
+        while loop >= 1:
+            first_message_send_date = None
+            first_message_recv_date = None
 
-        while True:
-            line = input_stream.readline()
-            if not line:
-                break
-            line = line.rstrip()
-            try:
-                data = json.loads(line)
-                current_message_recv_date = data['timestamp']
-                channel = override_channel or data['subscription_id']
-                messages = data['messages']
-                now = time.time()
+            if input_file:
+                input_stream = open(input_file)
 
-                if first_message_send_date is not None:
-                    sleep_amount =\
-                        ((current_message_recv_date - first_message_recv_date) / rate)\
-                        - (now - first_message_send_date)
-                else:
-                    sleep_amount = 0
+            while True:
+                line = input_stream.readline()
+                if not line:
+                    if input_file:
+                        input_stream.close()
+                        loop -= 1
+                    else:
+                        loop = 0
+                    break
+                line = line.rstrip()
+                try:
+                    data = json.loads(line)
+                    current_message_recv_date = data['timestamp']
+                    channel = override_channel or data['subscription_id']
+                    messages = data['messages']
+                    now = time.time()
 
-                if sleep_amount > 0:
-                    time.sleep(sleep_amount)
+                    if first_message_send_date is not None:
+                        sleep_amount =\
+                            ((current_message_recv_date - first_message_recv_date) / rate)\
+                            - (now - first_message_send_date)
+                    else:
+                        sleep_amount = 0
 
-                if first_message_send_date is None:
-                    first_message_send_date = time.time()
-                    first_message_recv_date = current_message_recv_date
+                    if sleep_amount > 0:
+                        time.sleep(sleep_amount)
 
-                for message in messages:
-                    try:
-                        if enable_acks:
-                            counter.increment()
-                        client.publish(channel, message, callback=callback)
-                    except queue.Full as e:
-                        logger.error('Publish queue is full')
+                    if first_message_send_date is None:
+                        first_message_send_date = time.time()
+                        first_message_recv_date = current_message_recv_date
 
-            except ValueError:
-                logger.error('Bad line: %s', line)
-            except Exception as e:
-                logger.error('Exception: %s', e)
-                stop_main_thread()
+                    for message in messages:
+                        try:
+                            if enable_acks:
+                                counter.increment()
+                            client.publish(channel, message, callback=callback)
+                        except queue.Full as e:
+                            logger.error('Publish queue is full')
+
+                except ValueError:
+                    logger.error('Bad line: %s', line)
+                except Exception as e:
+                    logger.error('Exception: %s', e)
+                    stop_main_thread()
 
     except KeyboardInterrupt:
         pass

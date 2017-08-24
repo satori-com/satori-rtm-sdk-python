@@ -37,9 +37,9 @@ class TestCLI(unittest.TestCase):
 
         satori_rtm_cli = subprocess.Popen(
             ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
                 '--appkey', 'bogus',
                 '--endpoint', 'ws://localhost:8999/',
-
                 '--time_limit_in_seconds=8',
                 'record', 'bogus'],
             stdout=subprocess.PIPE,
@@ -50,8 +50,8 @@ class TestCLI(unittest.TestCase):
         satori_rtm_cli.poll()
         if satori_rtm_cli.returncode is not None:
             (out, err) = satori_rtm_cli.communicate(timeout=20)
-            print('out:', out)
-            print('err:', err)
+            print('out:', out.decode('utf8'))
+            print('err:', err.decode('utf8'))
             self.assertEqual(satori_rtm_cli.returncode, None)
 
         tcpkali2 = start_tcpkali()
@@ -59,7 +59,7 @@ class TestCLI(unittest.TestCase):
 
         (out, err) = satori_rtm_cli.communicate(timeout=20)
         if len(re.findall(b'Connected', err)) == 0:
-            print('out:', out)
+            print('out:', out.decode('utf8'))
             raise RuntimeError(
                 "Expected to find 'Connected' in {0}".format(err))
 
@@ -69,6 +69,7 @@ class TestCLI(unittest.TestCase):
 
         rerecorder = subprocess.Popen(
             ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
                 'record', channel],
@@ -77,6 +78,7 @@ class TestCLI(unittest.TestCase):
 
         cmd =\
             ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
                 '--appkey', appkey,
                 '--endpoint', endpoint,
                 'replay']
@@ -135,7 +137,7 @@ class TestCLI(unittest.TestCase):
         self.assertTrue(len(pdus) <= len(timestamps))
 
         if message_count != len(timestamps):
-            print('Rerecorder stderr:{0}'.format(rec_err))
+            print('Rerecorder stderr:', rec_err.decode('utf8'))
 
         # no messages are lost
         self.assertEqual(message_count, len(timestamps))
@@ -160,12 +162,14 @@ class TestCLI(unittest.TestCase):
     def test_replayer_timing(self):
         return self.generic_test_replayer_timing(rate=None)
 
-    def test_replayer_timing_2x(self):
+    def test_replayer_timing_1_41x(self):
         return self.generic_test_replayer_timing(rate=1.41)
 
     def test_kv(self):
         cmd_prefix =\
-            ['python', 'satori_rtm_cli/__init__.py', '--appkey', appkey,
+            ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
+                '--appkey', appkey,
                 '--endpoint', endpoint]
 
         channel = make_channel_name('test_kv')
@@ -210,6 +214,7 @@ def generic_test(self, should_authenticate=False):
 
     publisher = subprocess.Popen(
         ['python', 'satori_rtm_cli/__init__.py',
+            '--config', '/dev/null',
             '--appkey', appkey,
             '--endpoint', endpoint,
             'publish', channel] + auth_args,
@@ -219,6 +224,7 @@ def generic_test(self, should_authenticate=False):
 
     subscriber = subprocess.Popen(
         ['python', 'satori_rtm_cli/__init__.py',
+            '--config', '/dev/null',
             '--appkey', appkey,
             '--endpoint', endpoint,
             'subscribe', channel] + auth_args,
@@ -228,8 +234,8 @@ def generic_test(self, should_authenticate=False):
 
     if subscriber.returncode is not None:
         (sub_out, sub_err) = subscriber.communicate(timeout=20)
-        print(sub_out)
-        print(sub_err)
+        print(sub_out.decode('utf8'))
+        print(sub_err.decode('utf8'))
 
     self.assertEqual(subscriber.returncode, None)
 
@@ -284,6 +290,69 @@ def generic_test(self, should_authenticate=False):
         except Exception:
             pass
         raise Exception from e
+
+    def test_replay_twice(self):
+        channel = make_channel_name('replay_twice')
+
+        msgs = [
+            {"position": "0:1", "subscription_id": channel, "messages": [{"who": "zebra"}], "timestamp": 1.0},
+            {"position": "0:2", "subscription_id": channel, "messages": [{"who": "owl"}], "timestamp": 1.1},
+            {"position": "0:3", "subscription_id": channel, "messages": [{"who": "pangolin"}], "timestamp": 1.2}
+            ]
+
+        rerecorder = subprocess.Popen(
+            ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
+                '--appkey', appkey,
+                '--endpoint', endpoint,
+                'record', channel],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        filename = channel
+        with open(filename, 'w') as f:
+            f.write('\n'.join(map(json.dumps, msgs)))
+
+        replayer = subprocess.Popen(
+            ['python', 'satori_rtm_cli/__init__.py',
+                '--config', '/dev/null',
+                '--appkey', appkey,
+                '--endpoint', endpoint,
+                '--loop', '2'
+                '--input_file', filename,
+                'replay'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        # give recorder and replayer some time to connect
+        time.sleep(10)
+
+        replayer.communicate(timeout=20)
+
+        time.sleep(10)
+
+        self.assertTrue(rerecorder.returncode is None)
+
+        # double ctrl-c because we don't care about cleanup here
+        for _ in range(2):
+            rerecorder.send_signal(signal.SIGINT)
+
+        rec_out, rec_err = rerecorder.communicate(timeout=20)
+
+        got_messages = []
+
+        for line in rec_out.split(b'\n'):
+            line = line.strip()
+            if line:
+                pdu = json.loads(line.decode('utf8'))
+                got_messages += pdu['messages']
+
+        # some pdus could contain multiple messages
+        self.assertEqual(len(got_messages), 2 * len(msgs))
+
+        for i, m in enumerate(got_messages):
+            self.assertEqual(m, msgs[i % len(msgs)])
 
 
 if __name__ == '__main__':

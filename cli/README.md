@@ -110,6 +110,12 @@ satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --rate 3x -i b
 
 # replay big-rss recording to $MY_CHANNEL at as fast as possible
 satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --rate unlimited -i big-rss.recording --override_channel $MY_CHANNEL
+
+# replay big-rss recording to $MY_CHANNEL five times
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --loop 5 -i big-rss.recording --override_channel $MY_CHANNEL
+
+# replay big-rss recording to $MY_CHANNEL in a loop forever
+satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY replay --loop inf -i big-rss.recording --override_channel $MY_CHANNEL
 ```
 
 
