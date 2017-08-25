@@ -151,6 +151,61 @@ class TestTwoClients(unittest.TestCase):
                     print('Subscription log: {0}'.format(so.log))
                     raise
 
+    def test_two_clients_big_string_messages(self):
+        messages = ['a' * 600, 'b' * 6000, 'c' * 60000]
+        self.generic_test_two_clients_with_message_list(messages)
+
+    def test_two_clients_big_arrays(self):
+        messages = [['a'] * 100, ['b'] * 1000, ['c'] * 10000]
+        self.generic_test_two_clients_with_message_list(messages)
+
+    def test_two_clients_big_dictionaries(self):
+        def make_dict(n):
+            result = {}
+            alphabet = "qwfpgarstdzxcvbjluy;hneikm"
+            alphabet = alphabet + alphabet.upper()
+            i = 0
+            for a in alphabet:
+                for b in alphabet:
+                    for c in alphabet:
+                        result[a + b + c] = i
+                        i += 1
+                        if i >= n:
+                            return result
+            return result
+        messages = [make_dict(100), make_dict(1000), make_dict(5000)]
+        self.generic_test_two_clients_with_message_list(messages)
+
+    def generic_test_two_clients_with_message_list(self, message_list):
+
+        with make_client(
+                endpoint=endpoint, appkey=appkey,
+                reconnect_interval=0) as subscriber:
+            with make_client(endpoint=endpoint, appkey=appkey) as publisher:
+
+                co1 = ClientObserver()
+                subscriber.observer = co1
+                co2 = ClientObserver()
+                publisher.observer = co2
+
+                so = sync_subscribe(subscriber, channel)
+
+                for msg in message_list:
+                    publisher.publish(channel, msg)
+
+                sync_publish(publisher, channel, 'finalizer')
+
+                while 'finalizer' !=\
+                        so.last_received_channel_data['messages'][-1]:
+                    print(so.last_received_channel_data)
+                    last_data = so.wait_for_channel_data()
+                    if last_data['messages'][-1] == 'finalizer':
+                        break
+
+                got_messages = so.extract_received_messages()
+
+                self.assertEqual(got_messages, message_list + ['finalizer'])
+
 
 if __name__ == '__main__':
     unittest.main()
