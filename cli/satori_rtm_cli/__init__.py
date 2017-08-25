@@ -392,7 +392,9 @@ def replay(client, override_channel=None, rate=1.0, loop=1, input_file=None, ena
                         loop -= 1
                         logger.warning(
                             'Messages published: %d', publish_counter.value())
-                        if loop > 0:
+                        if loop == float('inf'):
+                            logger.warning('Playback cycle finished')
+                        elif loop > 0:
                             logger.warning(
                                 'Playback cycle finished, %d to go', loop)
                     else:
