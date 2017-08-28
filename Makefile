@@ -3,6 +3,9 @@ SMC_JAR ?= Smc.jar
 PUBLIC_SOURCES := satori/rtm/client.py satori/rtm/connection.py satori/rtm/auth.py satori/rtm/__init__.py satori/rtm/exceptions.py
 GENERATED_SOURCES := satori/rtm/generated/client_sm.py satori/rtm/generated/subscription_sm.py
 
+# TODO: stop ignoring these one by one
+PYDOCSTYLE_OPTS := --ignore D100,D101,D205,D300,D102,D103,D200,D202,D203,D207,D212,D400,D401,D402,D404,D407,D413
+
 .PHONY: lint
 lint: $(GENERATED_SOURCES)
 	python -mflake8 satori tutorials test --exclude generated --max-line-length=80
@@ -17,6 +20,10 @@ lint: $(GENERATED_SOURCES)
 lint-setup-py:
 	pyroma . | grep Mascarpone
 	pyroma cli | grep Mascarpone
+
+.PHONY:
+lint-docstrings:
+	python -mpydocstyle $(PYDOCSTYLE_OPTS) $(PUBLIC_SOURCES)
 
 .PHONY: clean
 clean:
