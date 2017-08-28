@@ -1,7 +1,7 @@
 1.5.2 (2017-08-26)
 ------------------
 
-* Fixed `--loop inf`
+* Fixed logging error in `replay --loop inf`
 
 1.5.1 (2017-08-24)
 ------------------
