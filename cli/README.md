@@ -145,7 +145,7 @@ satori-rtm-cli --endpoint $MY_ENDPOINT --appkey $MY_APPKEY -i hello.txt publish 
 jq -c . messages | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY publish $MY_CHANNEL
 
 # publish a message every 5 seconds to create some activity in the channel
-while true; do echo "mymessage" | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY $MY_CHANNEL mychan && sleep 5; done
+while true; do echo "mymessage" | satori-rtm-cli -e $MY_ENDPOINT -a $MY_APPKEY publish $MY_CHANNEL && sleep 5; done
 ```
 
 ### Key-value
