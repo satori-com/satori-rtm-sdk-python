@@ -190,10 +190,10 @@ Description
     advantage of changes to PDU specifications by Satori without requiring an
     updated SDK.
         """
-        # TODO: make cbor-compatible
-        self.action_with_preserialized_body(name, cbor2.dumps(body), callback)
+        self.action_with_preserialized_body(name, self.dumps(body), callback)
 
     def action_with_preserialized_body(self, name, body, callback=None):
+        # TODO: make json-compatible
         if callback:
             if len(self.ack_callbacks_by_id) >= high_ack_count_watermark:
                 self.logger.debug('Throttling %s request', name)
@@ -213,7 +213,7 @@ Description
         else:
             payload =\
                 b''.join([
-                    b'\xa3',
+                    b'\xa2',
                     cbor2.dumps(u'action'),
                     cbor2.dumps(name),
                     cbor2.dumps(u'body'),
@@ -254,7 +254,16 @@ Parameters
             callback)
 
     def publish_preserialized_message(self, channel, message, callback=None):
-        body = '{{"channel":"{0}","message": {1}}}'.format(channel, message)
+        if self.protocol == 'json':
+            body = '{{"channel":"{0}","message": {1}}}'.format(channel, message).encode('utf8')
+        elif self.protocol == 'cbor':
+            body =\
+                b''.join([
+                    b'\xa2',
+                    cbor2.dumps(u'channel'),
+                    cbor2.dumps(channel),
+                    cbor2.dumps(u'message'),
+                    message])
         self.action_with_preserialized_body(u'rtm/publish', body, callback)
 
     def read(self, channel, args=None, callback=None):
@@ -351,7 +360,16 @@ Parameters
             callback)
 
     def write_preserialized_value(self, channel, value, callback=None):
-        body = '{{"channel":"{0}","message":{1}}}'.format(channel, value)
+        if self.protocol == 'json':
+            body = '{{"channel":"{0}","message": {1}}}'.format(channel, value).encode('utf8')
+        elif self.protocol == 'cbor':
+            body =\
+                b''.join([
+                    b'\xa2',
+                    cbor2.dumps(u'channel'),
+                    cbor2.dumps(channel),
+                    cbor2.dumps(u'message'),
+                    value])
         self.action_with_preserialized_body(u'rtm/write', body, callback)
 
     def delete(self, key, callback=None):

@@ -93,7 +93,7 @@ class TestConnection(unittest.TestCase):
         conn.stop()
 
     def test_write_read(self):
-        conn = sc.Connection(endpoint, appkey, protocol='json')
+        conn = sc.Connection(endpoint, appkey)
         conn.start()
 
         k, v = make_channel_name('write_read'), 'value1'

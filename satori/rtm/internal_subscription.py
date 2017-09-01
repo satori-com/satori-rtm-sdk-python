@@ -26,7 +26,7 @@ def _lint_args(args):
         logger.error(
             'Setting "fast_forward" in "args" parameter '
             'is deprecated. Choose appropriate subscription mode instead.')
-    if args.get('channel') is not None:
+    if args.get(u'channel') is not None:
         logger.error(
             'Setting "channel" in "args" parameter is not supported')
 
