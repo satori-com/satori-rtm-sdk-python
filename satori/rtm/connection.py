@@ -255,7 +255,7 @@ Parameters
 
     def publish_preserialized_message(self, channel, message, callback=None):
         body = '{{"channel":"{0}","message": {1}}}'.format(channel, message)
-        self.action_with_preserialized_body('rtm/publish', body, callback)
+        self.action_with_preserialized_body(u'rtm/publish', body, callback)
 
     def read(self, channel, args=None, callback=None):
         """
@@ -352,7 +352,7 @@ Parameters
 
     def write_preserialized_value(self, channel, value, callback=None):
         body = '{{"channel":"{0}","message":{1}}}'.format(channel, value)
-        self.action_with_preserialized_body('rtm/write', body, callback)
+        self.action_with_preserialized_body(u'rtm/write', body, callback)
 
     def delete(self, key, callback=None):
         """
