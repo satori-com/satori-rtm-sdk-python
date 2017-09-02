@@ -84,7 +84,6 @@ Parameters
             print(warning, file=sys.stderr)
             endpoint = re_version.sub('', endpoint)
 
-        self.url = endpoint
         self.url = posixpath.join(endpoint, 'v2')
         self.url += '?appkey={0}'.format(appkey)
         self.delegate = delegate
@@ -104,7 +103,7 @@ Parameters
         if self.protocol == 'cbor':
             self.dumps = cbor2.dumps
         else:
-            self.dumps = lambda stuff: json.dumps(stuff)
+            self.dumps = json.dumps
 
     def start(self):
         """
@@ -274,7 +273,8 @@ Parameters
 
     def publish_preserialized_message(self, channel, message, callback=None):
         if self.protocol == 'json':
-            body = '{{"channel":"{0}","message": {1}}}'.format(channel, message).encode('utf8')
+            body = '{{"channel":"{0}","message": {1}}}'.format(
+                channel, message).encode('utf8')
         elif self.protocol == 'cbor':
             body =\
                 b''.join([
@@ -380,7 +380,8 @@ Parameters
 
     def write_preserialized_value(self, channel, value, callback=None):
         if self.protocol == 'json':
-            body = '{{"channel":"{0}","message": {1}}}'.format(channel, value).encode('utf8')
+            body = '{{"channel":"{0}","message": {1}}}'.format(
+                channel, value).encode('utf8')
         elif self.protocol == 'cbor':
             body =\
                 b''.join([
