@@ -41,15 +41,12 @@ class TestIdenticalSubscribers(unittest.TestCase):
 
                     self.assertEqual(msgs1, msgs2)
 
-    @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_one_message(self):
         self._run(1)
 
-    @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_few_messages(self):
         self._run(10)
 
-    @unittest.skip("json and cbor clients can't talk to each other yet")
     def test_single_publisher_lots_of_messages(self):
         self._run(1000)
 

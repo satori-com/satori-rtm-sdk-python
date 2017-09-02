@@ -241,7 +241,6 @@ class TestConnection(unittest.TestCase):
             conn.read_sync(channel, timeout=0)
         conn.stop()
 
-    @unittest.skip('filter')
     def test_filter(self):
         mailbox = []
 

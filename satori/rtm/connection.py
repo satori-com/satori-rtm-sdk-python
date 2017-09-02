@@ -104,7 +104,7 @@ Parameters
         if self.protocol == 'cbor':
             self.dumps = cbor2.dumps
         else:
-            self.dumps = json.dumps
+            self.dumps = lambda stuff: json.dumps(stuff)
 
     def start(self):
         """
@@ -193,31 +193,50 @@ Description
         self.action_with_preserialized_body(name, self.dumps(body), callback)
 
     def action_with_preserialized_body(self, name, body, callback=None):
-        # TODO: make json-compatible
         if callback:
             if len(self.ack_callbacks_by_id) >= high_ack_count_watermark:
                 self.logger.debug('Throttling %s request', name)
                 time.sleep(0.001)
 
             action_id = next(self.action_id_iterator)
-            payload =\
-                b''.join([
-                    b'\xa3',
-                    cbor2.dumps(u'action'),
-                    cbor2.dumps(name),
-                    cbor2.dumps(u'id'),
-                    cbor2.dumps(action_id),
-                    cbor2.dumps(u'body'),
-                    body])
+            if self.protocol == 'cbor':
+                payload =\
+                    b''.join([
+                        b'\xa3',
+                        cbor2.dumps(u'action'),
+                        cbor2.dumps(name),
+                        cbor2.dumps(u'id'),
+                        cbor2.dumps(action_id),
+                        cbor2.dumps(u'body'),
+                        body])
+            else:
+                payload =\
+                    u''.join([
+                        u'{"action":"',
+                        name,
+                        u'","id":',
+                        str(action_id),
+                        u',"body":',
+                        body,
+                        u'}']).encode('utf8')
             self.ack_callbacks_by_id[action_id] = callback
         else:
-            payload =\
-                b''.join([
-                    b'\xa2',
-                    cbor2.dumps(u'action'),
-                    cbor2.dumps(name),
-                    cbor2.dumps(u'body'),
-                    body])
+            if self.protocol == 'cbor':
+                payload =\
+                    b''.join([
+                        b'\xa2',
+                        cbor2.dumps(u'action'),
+                        cbor2.dumps(name),
+                        cbor2.dumps(u'body'),
+                        body])
+            else:
+                payload =\
+                    u''.join([
+                        u'{"action":"',
+                        name,
+                        u',"body":',
+                        body,
+                        u'}']).encode('utf8')
         self.send(payload)
 
     def publish(self, channel, message, callback=None):
