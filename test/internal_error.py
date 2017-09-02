@@ -31,7 +31,7 @@ class TestInternalError(unittest.TestCase):
                 SubscriptionMode.ADVANCED,
                 so)
 
-            old_received_message(b"not-a-json-object")
+            old_received_message("not-a-json-object")
 
             client._queue.join()
 
