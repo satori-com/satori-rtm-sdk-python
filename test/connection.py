@@ -263,12 +263,12 @@ class TestConnection(unittest.TestCase):
             event.set()
 
         query = 'select test from ' + ch
-        conn.subscribe(ch, args={'filter': query}, callback=callback)
+        conn.subscribe(ch, args={u'filter': query}, callback=callback)
         event.wait(5)
         self.assertEqual(mailbox[0]['action'], 'rtm/subscribe/ok')
 
         event.clear()
-        conn.publish(ch, {'test': 42, 'unused': 'whatever'})
+        conn.publish(ch, {u'test': 42, u'unused': u'whatever'})
 
         event.wait(5)
         self.assertEqual(mailbox[1]['messages'], [{'test': 42}])

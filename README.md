@@ -100,9 +100,12 @@ In order to work on satori-rtm-sdk development, you need:
     to convert state machines description into Python source code
  * [tox][5]
     to run tests using all supported Python interpreters in separate sandboxes.
+ * [pytest][6] (recommended)
+    the tests themselves are written only unittest module from stdlib, but using pytest as a runner is more convenient
 
 [4]: http://smc.sourceforge.net/
 [5]: https://tox.readthedocs.org/en/latest/
+[6]: https://docs.pytest.org/en/latest/
 
 ## Running Tests
 

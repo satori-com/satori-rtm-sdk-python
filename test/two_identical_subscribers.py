@@ -21,10 +21,10 @@ class TestIdenticalSubscribers(unittest.TestCase):
                     endpoint=endpoint, appkey=appkey, protocol='json') as sub1:
                 with make_client(endpoint=endpoint, appkey=appkey) as sub2:
 
-                    origin = sync_publish(pub, channel, 'prime')
+                    origin = sync_publish(pub, channel, u'prime')
 
-                    so1 = sync_subscribe(sub1, channel, {'position': origin})
-                    so2 = sync_subscribe(sub2, channel, {'position': origin})
+                    so1 = sync_subscribe(sub1, channel, {u'position': origin})
+                    so2 = sync_subscribe(sub2, channel, {u'position': origin})
 
                     for i in range(N):
                         pub.publish(channel, i)

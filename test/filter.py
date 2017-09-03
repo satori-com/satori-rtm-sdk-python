@@ -19,15 +19,15 @@ class TestFilter(unittest.TestCase):
             ch = make_channel_name('filter')
             so = SubscriptionObserver()
             mode = SubscriptionMode.RELIABLE
-            args = {'filter': 'select test from ' + ch}
+            args = {u'filter': 'select test from ' + ch}
             client.subscribe(ch, mode, so, args=args)
             so.wait_subscribed()
 
-            sync_publish(client, ch, {'test': 42, 'unused': 1})
+            sync_publish(client, ch, {u'test': 42, u'unused': 1})
             message = so.wait_for_channel_data()['messages'][0]
             self.assertEqual(message, {'test': 42})
 
-            sync_publish(client, ch, {'unused': 1})
+            sync_publish(client, ch, {u'unused': 1})
             message = so.wait_for_channel_data()['messages'][0]
             self.assertEqual(message, {'test': None})
 

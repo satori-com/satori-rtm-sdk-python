@@ -48,8 +48,12 @@ run-examples: $(GENERATED_SOURCES)
 
 .PHONY: test
 test: $(GENERATED_SOURCES)
-	PYTHONPATH=. python test/run_all_tests.py
+	DEBUG_SATORI_SDK=debug PYTHONPATH=. python -mpytest test/*.py
 	$(MAKE) -C cli test
+
+.PHONY: test3
+test3: $(GENERATED_SOURCES)
+	DEBUG_SATORI_SDK=debug PYTHONPATH=. python3 -mpytest test/*.py
 
 .PHONY: test-cli
 test-cli:

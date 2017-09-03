@@ -168,7 +168,13 @@ class TestTwoClients(unittest.TestCase):
             for a in alphabet:
                 for b in alphabet:
                     for c in alphabet:
-                        result[a + b + c] = i
+                        key = a + b + c
+                        try:
+                            # for Python 2
+                            key = key.decode('utf8')
+                        except Exception:
+                            pass
+                        result[key] = i
                         i += 1
                         if i >= n:
                             return result

@@ -111,7 +111,7 @@ class TestUnexpected(unittest.TestCase):
                 channel,
                 SubscriptionMode.ADVANCED,
                 SubscriptionObserver(),
-                args={'position': '123'})
+                args={u'position': '123'})
             so.wait_deleted()
             client.unsubscribe(channel)
             client._queue.join()
