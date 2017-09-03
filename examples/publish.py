@@ -29,8 +29,8 @@ def main():
                         'RTM replied with the error {0}: {1}'.format(
                             pdu['body']['error'], pdu['body']['reason']))
 
-            message = {"who": "zebra", "where": [34.134358, -118.321506]}
-            client.publish("animals", message, callback=on_publish_ack)
+            message = {u"who": u"zebra", u"where": [34.134358, -118.321506]}
+            client.publish(u"animals", message, callback=on_publish_ack)
 
             time.sleep(1)
 

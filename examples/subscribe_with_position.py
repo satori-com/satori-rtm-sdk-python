@@ -39,18 +39,18 @@ def main():
             got_publish_reply.set()
 
         client.publish(
-            'animals',
-            {'who': 'owl', 'coords': [54.321724, 48.396704]},
+            u'animals',
+            {u'who': 'owl', u'coords': [54.321724, 48.396704]},
             callback=publish_callback)
 
         got_publish_reply.wait()
 
         observer = SubscriptionObserver()
         client.subscribe(
-            'animals',
+            u'animals',
             SubscriptionMode.SIMPLE,
             observer,
-            args={'position': position_mailbox[0]})
+            args={u'position': position_mailbox[0]})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:

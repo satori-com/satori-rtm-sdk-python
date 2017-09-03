@@ -35,16 +35,16 @@ def main():
 
         observer = SubscriptionObserver()
         client.subscribe(
-            'animals',
+            u'animals',
             SubscriptionMode.SIMPLE,
             observer)
 
         client.unsubscribe('animals')
         client.subscribe(
-            'animals',
+            u'animals',
             SubscriptionMode.SIMPLE,
             observer,
-            args={'filter': "select * from animals where who like 'z%'"})
+            args={u'filter': u"select * from animals where who like 'z%'"})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:

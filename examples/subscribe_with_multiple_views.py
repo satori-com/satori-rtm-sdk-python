@@ -36,21 +36,21 @@ def main():
             endpoint=endpoint, appkey=appkey) as client:
         print('Connected to Satori RTM!')
 
-        zebra_view = "select * from `animals` where who = 'zebra'"
+        zebra_view = u"select * from `animals` where who = 'zebra'"
         zebra_observer = SubscriptionObserver('zebra')
-        count_view = 'select count(*) as count from `animals` group by who'
+        count_view = u'select count(*) as count from `animals` group by who'
         count_observer = SubscriptionObserver('count')
 
         client.subscribe(
-            'zebras',
+            u'zebras',
             SubscriptionMode.SIMPLE,
             zebra_observer,
-            args={'filter': zebra_view})
+            args={u'filter': zebra_view})
         client.subscribe(
-            'count',
+            u'count',
             SubscriptionMode.SIMPLE,
             count_observer,
-            args={'filter': count_view})
+            args={u'filter': count_view})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:

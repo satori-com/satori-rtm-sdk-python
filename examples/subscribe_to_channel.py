@@ -31,7 +31,7 @@ def main():
         print('Connected to Satori RTM!')
 
         observer = SubscriptionObserver()
-        client.subscribe('animals', SubscriptionMode.SIMPLE, observer)
+        client.subscribe(u'animals', SubscriptionMode.SIMPLE, observer)
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:

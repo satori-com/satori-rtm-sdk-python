@@ -9,7 +9,7 @@ from satori.rtm.client import make_client, SubscriptionMode
 
 endpoint = "wss://open-data.api.satori.com"
 appkey = "YOUR_APPKEY"
-channel = "OPEN_CHANNEL"
+channel = u"OPEN_CHANNEL"
 
 
 def main():

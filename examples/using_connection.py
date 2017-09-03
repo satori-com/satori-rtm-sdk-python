@@ -8,8 +8,8 @@ from satori.rtm.connection import Connection
 
 from test.utils import get_test_endpoint_and_appkey
 endpoint, appkey = get_test_endpoint_and_appkey()
-channel = 'test.channel'
-message = 'test_message'
+channel = u'test.channel'
+message = u'test_message'
 timeout = 20
 
 
@@ -36,7 +36,7 @@ def main():
     connection.start()
 
     position = connection.publish_sync(channel, message)
-    connection.subscribe_sync(channel, {'position': position})
+    connection.subscribe_sync(channel, {u'position': position})
 
     if not after_receive.wait(timeout):
         raise RuntimeError(

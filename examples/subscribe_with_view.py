@@ -32,10 +32,10 @@ def main():
 
         observer = SubscriptionObserver()
         client.subscribe(
-            'zebras',
+            u'zebras',
             SubscriptionMode.SIMPLE,
             observer,
-            args={'filter': "select * from `animals` where `who` = 'zebra'"})
+            args={u'filter': u"select * from `animals` where `who` = 'zebra'"})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:

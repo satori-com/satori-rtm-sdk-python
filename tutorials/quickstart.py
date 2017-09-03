@@ -20,7 +20,7 @@ appkey = 'YOUR_APPKEY'
 role = 'YOUR_ROLE'
 role_secret_key = 'YOUR_SECRET'
 
-channel = 'animals'
+channel = u'animals'
 
 
 def main():
@@ -87,7 +87,7 @@ def main():
                 coords = [
                     34.134358 + random.random(),
                     -118.321506 + random.random()]
-                animal = {'who': 'zebra', 'where': coords}
+                animal = {u'who': u'zebra', u'where': coords}
 
                 # In case of publishing, there's no observer object involved
                 # because the process is simpler: we're guaranteed to receive

@@ -31,10 +31,10 @@ def main():
         print('Connected to Satori RTM!')
 
         client.subscribe(
-            'animals',
+            u'animals',
             SubscriptionMode.SIMPLE,
             SubscriptionObserver(),
-            args={'history': {'count': 10}})
+            args={u'history': {u'count': 10}})
 
         print('Press CTRL-C to exit', file=sys.stderr)
         try:
