@@ -29,6 +29,7 @@ def main():
         p.terminate()
 
     out, err = p.communicate()
+    out = out.decode('utf8')
 
     assert 'Animal is published' in out, out
     assert 'Animal is received' in out, out

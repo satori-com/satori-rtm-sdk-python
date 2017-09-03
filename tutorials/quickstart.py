@@ -17,8 +17,8 @@ endpoint = 'YOUR_ENDPOINT'
 appkey = 'YOUR_APPKEY'
 
 # Role and secret are optional: replace only if you need to authenticate.
-role = 'YOUR_ROLE'
-role_secret_key = 'YOUR_SECRET'
+role = u'YOUR_ROLE'
+role_secret_key = u'YOUR_SECRET'
 
 channel = u'animals'
 
