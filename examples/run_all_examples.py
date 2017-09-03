@@ -41,8 +41,8 @@ def run_example(file, must_kill):
         '''import {} as m;'''
         '''m.endpoint = "{}";'''
         '''m.appkey = "{}";'''
-        '''m.role = "{}";'''
-        '''m.role_secret_key = "{}";'''
+        '''m.role = u"{}";'''
+        '''m.role_secret_key = u"{}";'''
         '''m.main()'''.format(mname, endpoint, appkey, role, secret)]
     p = subprocess.Popen(command)
 
