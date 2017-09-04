@@ -57,6 +57,25 @@ satori.rtm.connection.enable_wsaccel()
 
 [3]: https://pypi.python.org/pypi/wsaccel
 
+# String situation
+
+Python has two string types: binary (like `b'foo'`) and unicode (like `u'bar'`).
+Python 2 treats string literals like `'hello'` as binary while Python 3 considers
+these unicode.
+
+The SDK can talk to RTM using either JSON or CBOR protocol. JSON standard has
+only unicode strings while CBOR supports both unicode and binary.
+
+All this means that there are four kinds of clients: Py2+JSON, Py3+JSON, Py2+CBOR and Py3+CBOR.
+As the publisher and the subscriber are usually different clients, it
+means that there are 16 combinations of (publisher kind * subscriber kind).
+In order to keep it simple, use a rule of thumb: use binary data only if
+both publisher and subscriber are using CBOR protocol.
+
+It's also important point that binary strings are not supported as dictionary keys.
+Be sure to use unicode in both messages, like `{u"who": u"zebra"}` and API values, like
+`subscribe(u"animals", ... args={u"filter": u"select ..."})` and `{u"history": {u"age": 42}}`.
+
 # Documentation
 
 You can view the latest SDK documentation
