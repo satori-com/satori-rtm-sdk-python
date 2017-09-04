@@ -37,6 +37,8 @@ class RtmWsClient(WebSocketBaseClient):
         d = message.data
         if self.delegate:
             if self.protocols == ['cbor']:
+                assert message.is_binary
                 self.delegate.on_incoming_binary_frame(d)
             else:
+                assert message.is_text
                 self.delegate.on_incoming_text_frame(d.decode('utf8'))
