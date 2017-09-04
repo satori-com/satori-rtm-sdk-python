@@ -108,9 +108,9 @@ Parameters
 
         if protocol == 'cbor':
             import cbor2
-            self.dumps = cbor2.dumps
+            self._dumps = cbor2.dumps
         else:
-            self.dumps = json.dumps
+            self._dumps = json.dumps
 
     def last_connecting_error(self):
         """
@@ -203,7 +203,7 @@ Parameters
     * callback {function} [optional] - Callback function to execute on the PDU
       response returned by RTM to the publish request.
         """
-        self._enqueue(a.Publish(channel, self.dumps(message), callback))
+        self._enqueue(a.Publish(channel, self._dumps(message), callback))
 
     def read(self, channel, args=None, callback=None):
         """
@@ -238,7 +238,7 @@ Parameters
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
         """
-        self._enqueue(a.Write(channel, self.dumps(value), callback))
+        self._enqueue(a.Write(channel, self._dumps(value), callback))
 
     def delete(self, channel, callback=None):
         """

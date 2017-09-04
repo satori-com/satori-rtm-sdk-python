@@ -101,9 +101,9 @@ Parameters
         self._ws_thread = None
         self.protocol = protocol
         if self.protocol == 'cbor':
-            self.dumps = cbor2.dumps
+            self._dumps = cbor2.dumps
         else:
-            self.dumps = json.dumps
+            self._dumps = json.dumps
 
     def start(self):
         """
@@ -189,7 +189,7 @@ Description
     advantage of changes to PDU specifications by Satori without requiring an
     updated SDK.
         """
-        self.action_with_preserialized_body(name, self.dumps(body), callback)
+        self.action_with_preserialized_body(name, self._dumps(body), callback)
 
     def action_with_preserialized_body(self, name, body, callback=None):
         if callback:
@@ -616,7 +616,7 @@ Parameters
 
             if type(self._next_auth_action) == auth.Handshake:
                 action_id = next(self.action_id_iterator)
-                payload = self.dumps({
+                payload = self._dumps({
                     u'action': u'auth/handshake',
                     u'body': {
                         u'method': self._next_auth_action.method,
@@ -626,7 +626,7 @@ Parameters
                 return self.send(payload)
             elif type(self._next_auth_action) == auth.Authenticate:
                 action_id = next(self.action_id_iterator)
-                payload = self.dumps({
+                payload = self._dumps({
                     u'action': u'auth/authenticate',
                     u'body': {
                         u'method': self._next_auth_action.method,
