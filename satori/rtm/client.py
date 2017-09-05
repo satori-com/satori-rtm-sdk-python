@@ -44,7 +44,7 @@ class Client(object):
             fail_count_threshold=float('inf'),
             reconnect_interval=1, max_reconnect_interval=300,
             observer=None, restore_auth_on_reconnect=True,
-            max_queue_size=20000, https_proxy=None, protocol='cbor'):
+            max_queue_size=20000, https_proxy=None, protocol='json'):
         r"""
 
 Description
@@ -81,7 +81,7 @@ Parameters
       for the first one has not yet arrived, this 11th call to `client.publish`
       will throw the `satori.rtm.client.Full` exception.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
-    * protocol {string} [optional] - one of 'cbor' (default) or 'json'
+    * protocol {string} [optional] - one of 'cbor' or 'json' (default)
         """
 
         assert endpoint

@@ -43,7 +43,7 @@ resubscribe to all channels, and perform authentication again, if necessary.
 
     def __init__(
             self, endpoint, appkey,
-            delegate=None, https_proxy=None, protocol='cbor'):
+            delegate=None, https_proxy=None, protocol='json'):
         """
 Description
     Constructor for the Connection class. Creates and returns an instance of the
@@ -67,7 +67,7 @@ Parameters
     * delegate {object} [optional] - Delegate object to handle received
       messages, channel errors, internal errors, and closed connections.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
-    * protocol {string} [optional] - one of 'cbor' (default) or 'json'
+    * protocol {string} [optional] - one of 'cbor' or 'json' (default)
         """
 
         validate_endpoint(endpoint, appkey, protocol)
