@@ -233,7 +233,7 @@ Description
                     u''.join([
                         u'{"action":"',
                         name,
-                        u',"body":',
+                        u'","body":',
                         body,
                         u'}']).encode('utf8')
         self.send(payload)
@@ -273,8 +273,8 @@ Parameters
 
     def publish_preserialized_message(self, channel, message, callback=None):
         if self.protocol == 'json':
-            body = '{{"channel":"{0}","message": {1}}}'.format(
-                channel, message).encode('utf8')
+            body = u'{{"channel":"{0}","message": {1}}}'.format(
+                channel, message)
         elif self.protocol == 'cbor':
             body =\
                 b''.join([
@@ -380,8 +380,7 @@ Parameters
 
     def write_preserialized_value(self, channel, value, callback=None):
         if self.protocol == 'json':
-            body = '{{"channel":"{0}","message": {1}}}'.format(
-                channel, value).encode('utf8')
+            body = u'{{"channel":"{0}","message": {1}}}'.format(channel, value)
         elif self.protocol == 'cbor':
             body =\
                 b''.join([

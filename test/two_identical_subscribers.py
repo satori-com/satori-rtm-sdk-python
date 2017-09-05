@@ -18,7 +18,7 @@ class TestIdenticalSubscribers(unittest.TestCase):
         channel = make_channel_name('two_identical_subscribers')
         with make_client(endpoint=endpoint, appkey=appkey) as pub:
             with make_client(
-                    endpoint=endpoint, appkey=appkey, protocol='json') as sub1:
+                    endpoint=endpoint, appkey=appkey, protocol='cbor') as sub1:
                 with make_client(endpoint=endpoint, appkey=appkey) as sub2:
 
                     origin = sync_publish(pub, channel, u'prime')
