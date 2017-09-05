@@ -1,3 +1,9 @@
+Unreleased
+-------------------
+
+* Added support for binary RTM protocol.
+  Enable by passing protocol='cbor' to make_client, Client or Connection constructors
+
 v1.4.0 (2017-08-21)
 -------------------
 
