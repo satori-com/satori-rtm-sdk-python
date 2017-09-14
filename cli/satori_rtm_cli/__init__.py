@@ -43,7 +43,7 @@ Options:
     -e <endpoint> --endpoint=<endpoint>  # default is Open Data endpoint
     -a <appkey> --appkey=<appkey>
     -i <input_file> --input_file=<input_file>
-    -o <input_file> --output_file=<input_file>
+    -o <output_file> --output_file=<output_file>
     -n <role-name> --role_name=<role-name>
     -s <role-secret> --role_secret=<role-secret>
     -j --prettify_json
