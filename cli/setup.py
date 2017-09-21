@@ -32,7 +32,7 @@ setup(
         'console_scripts': ['satori-rtm-cli=satori_rtm_cli:main']
     },
     packages=['satori_rtm_cli'],
-    install_requires=['satori-rtm-sdk >=1.4.0', 'docopt', 'toml', 'xdg', 'cbor2'],
+    install_requires=['satori-rtm-sdk >=1.5.0', 'docopt', 'toml', 'xdg', 'cbor2'],
     classifiers=classifiers,
     keywords='satori',
     license='Proprietary',

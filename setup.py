@@ -31,7 +31,7 @@ from `Python programming language <https://www.python.org>`_.
 
 setup(
     name='satori-rtm-sdk',
-    version='1.4.0',
+    version='1.5.0',
     description='Python SDK for Satori RTM',
     long_description=long_description,
     author='Satori Worldwide, Inc.',

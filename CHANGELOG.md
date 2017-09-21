@@ -1,4 +1,4 @@
-Unreleased
+v1.5.0 (2017-09-21)
 -------------------
 
 * Added support for binary RTM protocol.
