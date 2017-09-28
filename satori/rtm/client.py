@@ -51,6 +51,7 @@ Description
     Constructor for the Client.
 
 Parameters
+
     * endpoint {string} [required] - RTM endpoint as a string. Example:
       "wss://rtm:8443/foo/bar". If port number is omitted, it defaults to 80 for
       ws:// and 443 for wss://. Available from the Dev Portal.
@@ -81,7 +82,19 @@ Parameters
       for the first one has not yet arrived, this 11th call to `client.publish`
       will throw the `satori.rtm.client.Full` exception.
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
-    * protocol {string} [optional] - one of 'cbor' or 'json' (default)
+    * protocol {string} [optional] - one of 'cbor' or 'json' (default).
+
+      The SDK automatically converts messages to the protocol you choose. For example, if you
+      specify ``cbor`` and then publish a JSON object, the SDK converts it to CBOR. If you choose CBOR and you publish
+      messages, keys in the message must be text, but values can be text or binary.
+
+      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
+      the Python standard `JSON` module. Because you can't predict which version of Python subscribers are using or
+      which protocol they're using:
+
+      * Always use Unicode string types and literals in ``message``
+      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+
         """
 
         assert endpoint
@@ -181,7 +194,8 @@ Description
     Publishes a message to the specified channel.
 
     The channel and message parameters are required. The `message` parameter can
-    be any JSON-supported value. For more information, see www.json.org.
+    be any Python-supported type. The SDK automatically converts the value to JSON or CBOR,
+    depending on the protocol you choose when you create your client.
 
     By default, this method does not acknowledge the completion of the publish
     operation. Optionally, you can specify a callback function to process the
@@ -196,8 +210,17 @@ Reference.
     the callback function.
 
 Parameters
-    * message {string} [required] - JSON value to publish as message. It must be
-      serializable using `json.dumps` from the Python standard `JSON` module.
+    * message {object} [required] - Python entity to publish as message.
+
+      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
+      the Python standard `JSON` module.
+
+      If you choose CBOR, keys in the entity must be text, but values can be text or binary.
+      Because you can't predict which version of Python subscribers are using or which protocol they're using:
+
+      * Always use Unicode string types and literals in ``message``
+      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+
     * channel {string} [required] - Name of the channel to which you want to
       publish.
     * callback {function} [optional] - Callback function to execute on the PDU
@@ -218,7 +241,7 @@ Description
 
 Parameters
     * channel {string} [required] - Name of the channel to read from.
-    * args {object} [optional] - Any JSON key-value pairs to send in the
+    * args {object} [optional] - Any key-value pairs to send in the
       read request. To create a filter, use the desired fSQL query as a string
       value for `filter` key.
     * callback {function} [optional] - Callback function to execute on the PDU
@@ -233,8 +256,18 @@ Description
 
 Parameters
     * channel {string} [required] - Channel name.
-    * value {json value} [required] - JSON that represents the message payload
-      to publish.
+    * value {object} [required] - Python entity to publish as message.
+
+      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
+      the Python standard `JSON` module.
+
+      If you choose CBOR, keys in the entity must be text, but values can be text or binary.
+
+      Because you can't predict which version of Python subscribers are using or which protocol they're using:
+
+      * Always use Unicode string types and literals in ``message``
+      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
         """
@@ -481,7 +514,7 @@ a subscription observer for the subscription_observer parameter.
 
 .. note:: Depending on your application, these callbacks are optional, except
           `on_subscription_data`. To process received messages, you must
-          implement `on_subscription_data(data)` callback.
+          implement `on_subscription_data(self, data)` callback.
 
 The following table lists a subscription observer subscription states and
 callback functions:
@@ -505,6 +538,11 @@ Event               Callback
 Created             on_created()
 Message(s) Received on_subscription_data()
 =================== ======================
+
+.. note:: RTM automatically provides the value of the 'data' parameter of on_subscription_data in the same format as
+          the protocol you choose when you create your client. For example, if you specify 'protocol=cbor', RTM
+          returns messages in CBOR format, regardless of the format the publisher used.
+
 
 The following figure shows an example subscription observer with an implemented
 callback function::

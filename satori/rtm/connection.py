@@ -329,7 +329,7 @@ Parameters
     * timeout {int} [optional] - Amount of time, in seconds, to allow RTM
       to complete the read operation before it generates an error.
       Default is 60.
-    ...
+      ...
 
         """
         mailbox = []
