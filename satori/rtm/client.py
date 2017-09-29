@@ -1,5 +1,5 @@
 
-'''
+"""
 
 satori.rtm.client
 =================
@@ -12,7 +12,7 @@ This class routes messages to respective subscription observers
 and automatically reconnects and restores the authentication and subscription
 state if the connection to RTM drops.
 
-'''
+"""
 
 
 from __future__ import print_function
@@ -85,7 +85,7 @@ Parameters
     * protocol {string} [optional] - one of 'cbor' or 'json' (default).
 
       The SDK automatically converts messages to the protocol you choose. For example, if you
-      specify ``cbor`` and then publish a JSON object, the SDK converts it to CBOR. If you choose CBOR and you publish
+      specify ``cbor`` and then publish a dictionary, the SDK converts it to CBOR. If you choose CBOR and you publish
       messages, keys in the message must be text, but values can be text or binary.
 
       If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
@@ -193,9 +193,9 @@ Parameters
 Description
     Publishes a message to the specified channel.
 
-    The channel and message parameters are required. The `message` parameter can
-    be any Python-supported type. The SDK automatically converts the value to JSON or CBOR,
-    depending on the protocol you choose when you create your client.
+    The channel and message parameters are required. The `message` parameter must contain data that the SDK can
+    serialize into the format specified by the protocol you choose when you create your client. The SDK automatically
+    converts the value to the required format.
 
     By default, this method does not acknowledge the completion of the publish
     operation. Optionally, you can specify a callback function to process the
@@ -210,12 +210,19 @@ Reference.
     the callback function.
 
 Parameters
-    * message {object} [required] - Python entity to publish as message.
+    * message {object} [required] - Python entity to publish as message. Only use binary data in ``message`` if you
+      know all subscribers are using CBOR protocol.
+
+      Requirements:
+
+      * The message in serialized form must not exceed 64kB.
+      * Integers can't be greater than or equal to 2^64.
+      * The keys in a Python dictionary must be text.
 
       If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
       the Python standard `JSON` module.
 
-      If you choose CBOR, keys in the entity must be text, but values can be text or binary.
+      If you choose CBOR, dictionary keys must be text, but values can be text or binary.
       Because you can't predict which version of Python subscribers are using or which protocol they're using:
 
       * Always use Unicode string types and literals in ``message``
@@ -539,9 +546,8 @@ Created             on_created()
 Message(s) Received on_subscription_data()
 =================== ======================
 
-.. note:: RTM automatically provides the value of the 'data' parameter of on_subscription_data in the same format as
-          the protocol you choose when you create your client. For example, if you specify 'protocol=cbor', RTM
-          returns messages in CBOR format, regardless of the format the publisher used.
+.. note:: Regardless of the protocol you choose when you create your client, the ``data`` parameter contains
+   Python objects.
 
 
 The following figure shows an example subscription observer with an implemented
