@@ -84,16 +84,19 @@ Parameters
     * https_proxy (string, int) [optional] - (host, port) tuple for https proxy
     * protocol {string} [optional] - one of 'cbor' or 'json' (default).
 
-      The SDK automatically converts messages to the protocol you choose. For example, if you
-      specify ``cbor`` and then publish a dictionary, the SDK converts it to CBOR. If you choose CBOR and you publish
-      messages, keys in the message must be text, but values can be text or binary.
+      The SDK automatically converts messages to the protocol you choose. For
+      example, if you specify ``cbor`` and then publish a dictionary, the SDK
+      converts it to CBOR. If you choose CBOR and you publish messages, keys in
+      the message must be text, but values can be text or binary.
 
-      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
-      the Python standard `JSON` module. Because you can't predict which version of Python subscribers are using or
+      If you choose JSON protocol when you create your client, the entity must
+      be serializable using `json.dumps` from the Python standard `JSON` module.
+      Because you can't predict which version of Python subscribers are using or
       which protocol they're using:
 
       * Always use Unicode string types and literals in ``message``
-      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+      * Only use binary data in ``message`` if you know all subscribers are
+        using CBOR protocol
 
         """
 
@@ -193,8 +196,9 @@ Parameters
 Description
     Publishes a message to the specified channel.
 
-    The channel and message parameters are required. The `message` parameter must contain data that the SDK can
-    serialize into the format specified by the protocol you choose when you create your client. The SDK automatically
+    The channel and message parameters are required. The `message` parameter
+    must contain data that the SDK can serialize into the format specified by
+    the protocol you choose when you create your client. The SDK automatically
     converts the value to the required format.
 
     By default, this method does not acknowledge the completion of the publish
@@ -210,8 +214,9 @@ Reference.
     the callback function.
 
 Parameters
-    * message {object} [required] - Python entity to publish as message. Only use binary data in ``message`` if you
-      know all subscribers are using CBOR protocol.
+    * message {object} [required] - Python entity to publish as message. Only
+      use binary data in ``message`` if you know all subscribers are using CBOR
+      protocol.
 
       Requirements:
 
@@ -219,14 +224,18 @@ Parameters
       * Integers can't be greater than or equal to 2^64.
       * The keys in a Python dictionary must be text.
 
-      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
-      the Python standard `JSON` module.
+      If you choose JSON protocol when you create your client, the entity must
+      be serializable using `json.dumps` from the Python standard `JSON` module.
 
-      If you choose CBOR, dictionary keys must be text, but values can be text or binary.
-      Because you can't predict which version of Python subscribers are using or which protocol they're using:
+      If you choose CBOR, dictionary keys must be text, but values can be text
+      or binary.
+
+      Because you can't predict which version of Python subscribers are using or
+      which protocol they're using:
 
       * Always use Unicode string types and literals in ``message``
-      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+      * Only use binary data in ``message`` if you know all subscribers are
+        using CBOR protocol
 
     * channel {string} [required] - Name of the channel to which you want to
       publish.
@@ -265,15 +274,18 @@ Parameters
     * channel {string} [required] - Channel name.
     * value {object} [required] - Python entity to publish as message.
 
-      If you choose JSON protocol when you create your client, the entity must be serializable using `json.dumps` from
-      the Python standard `JSON` module.
+      If you choose JSON protocol when you create your client, the entity must
+      be serializable using `json.dumps` from the Python standard `JSON` module.
 
-      If you choose CBOR, keys in the entity must be text, but values can be text or binary.
+      If you choose CBOR, keys in the entity must be text, but values can be
+      text or binary.
 
-      Because you can't predict which version of Python subscribers are using or which protocol they're using:
+      Because you can't predict which version of Python subscribers are using or
+      which protocol they're using:
 
       * Always use Unicode string types and literals in ``message``
-      * Only use binary data in ``message`` if you know all subscribers are using CBOR protocol
+      * Only use binary data in ``message`` if you know all subscribers are
+        using CBOR protocol
 
     * callback {function} [optional] - Callback passed the response PDU from
       RTM.
@@ -546,9 +558,8 @@ Created             on_created()
 Message(s) Received on_subscription_data()
 =================== ======================
 
-.. note:: Regardless of the protocol you choose when you create your client, the ``data`` parameter contains
-   Python objects.
-
+.. note:: Regardless of the protocol you choose when you create your client, the
+          ``data`` parameter contains Python objects.
 
 The following figure shows an example subscription observer with an implemented
 callback function::
