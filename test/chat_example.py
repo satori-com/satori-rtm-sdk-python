@@ -57,12 +57,12 @@ class TestChat(unittest.TestCase):
                 expect([bob], b'bob> oh well')
 
                 say(bob, b'/quit')
-            except:
+            except Exception:
                 bob_out, bob_err = bob.communicate()
                 print('Bob out: {0}'.format(bob_out))
                 print('Bob err: {0}'.format(bob_err))
                 raise
-        except:
+        except Exception:
             alice_out, alice_err = alice.communicate()
             print('Alice out: {0}'.format(alice_out))
             print('Alice err: {0}'.format(alice_err))

@@ -121,10 +121,13 @@ In order to work on satori-rtm-sdk development, you need:
     to run tests using all supported Python interpreters in separate sandboxes.
  * [pytest][6] (recommended)
     the tests themselves are written only unittest module from stdlib, but using pytest as a runner is more convenient
+ * [hypothesis][7]
+    used in property tests
 
 [4]: http://smc.sourceforge.net/
 [5]: https://tox.readthedocs.org/en/latest/
 [6]: https://docs.pytest.org/en/latest/
+[7]: https://hypothesis.readthedocs.io/en/latest/
 
 ## Running Tests
 

@@ -35,7 +35,7 @@ class TestMessageTypes(unittest.TestCase):
             for x in so.log:
                 try:
                     got_messages += x[1]['messages']
-                except:
+                except Exception:
                     pass
 
             self.assertEqual(messages, got_messages)

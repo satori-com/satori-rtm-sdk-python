@@ -87,7 +87,7 @@ def main():
                     if m['status'] == 'leaving':
                         try:
                             del chat_state.users[m['name']]
-                        except:
+                        except Exception:
                             pass
                         chat_state.history.append(
                             u'{0} has left #{1}'.format(

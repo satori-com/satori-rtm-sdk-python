@@ -51,7 +51,7 @@ class TestTwoClients(unittest.TestCase):
                     got_messages = so.extract_received_messages()
 
                     self.assertEqual(got_messages, expected_messages)
-                except:
+                except Exception:
                     print('Subscriber log: {0}'.format(co1.log))
                     print('Publisher log: {0}'.format(co2.log))
                     print('Subscription log: {0}'.format(so.log))
@@ -99,7 +99,7 @@ class TestTwoClients(unittest.TestCase):
                             got_messages += log_entry[1]['messages']
 
                     self.assertEqual(got_messages, expected_messages)
-                except:
+                except Exception:
                     print('Subscriber log: {0}'.format(co1.log))
                     print('Publisher log: {0}'.format(co2.log))
                     print('Subscription log: {0}'.format(so.log))
@@ -145,7 +145,7 @@ class TestTwoClients(unittest.TestCase):
                             got_messages += log_entry[1]['messages']
 
                     self.assertEqual(got_messages, expected_messages)
-                except:
+                except Exception:
                     print('Subscriber log: {0}'.format(co1.log))
                     print('Publisher log: {0}'.format(co2.log))
                     print('Subscription log: {0}'.format(so.log))

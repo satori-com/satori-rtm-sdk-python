@@ -62,7 +62,7 @@ class TestStateCallbacks(unittest.TestCase):
 
         try:
             self.assertEqual(client.observer.log, expected_log_1)
-        except:
+        except Exception:
             self.assertEqual(client.observer.log, expected_log_2)
 
     def test_stop_already_stopped(self):
