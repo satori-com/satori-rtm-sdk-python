@@ -540,7 +540,7 @@ def record(client, *args, **kwargs):
         data['timestamp'] = time.time()
         output = json.dumps(data)
         print(output, file=output_stream)
-        sys.stdout.flush()
+        output_stream.flush()
 
         if count_limit['count_limit'] is not None:
             count_limit['count_limit'] -= len(data['messages'])
