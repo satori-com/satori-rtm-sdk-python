@@ -211,11 +211,14 @@ class TestTwoClients(unittest.TestCase):
                 got_messages = so.extract_received_messages()
 
                 self.assertEqual(got_messages, message_list + ['finalizer'])
-    
+
     def test_two_clients_with_deduplication(self):
         with make_client(endpoint=endpoint, appkey=appkey) as pub:
             with make_client(endpoint=endpoint, appkey=appkey) as sub:
-                so = sync_subscribe(sub, channel, args={'only': 'value_changes'})
+                so = sync_subscribe(
+                    sub,
+                    channel,
+                    args={'only': 'value_changes'})
                 pub.publish(channel, "first")
                 so.wait_for_channel_data()
                 for _ in range(10):
