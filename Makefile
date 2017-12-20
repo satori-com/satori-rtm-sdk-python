@@ -11,7 +11,7 @@ lint: $(GENERATED_SOURCES)
 	python -mflake8 satori tutorials test --exclude generated --max-line-length=80
 	python -mflake8 --max-line-length=80 --ignore=F841 examples
 	python3 -mflake8 cli --max-line-length=255
-	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error satori/**/*.py
+	python -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error,c-extension-no-member satori/**/*.py
 	python -mpylint --reports=no --disable=R,C,broad-except,no-member,relative-import miniws4py/**/*.py
 	python3 -mpylint --reports=no --disable=R,C,broad-except,no-member,fixme,import-error,redefined-builtin cli/*.py
 	@echo 'Linters are happy'

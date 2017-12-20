@@ -124,7 +124,7 @@ class WebSocketBaseClient(WebSocket):
         if parsed.hostname:
             self.host = parsed.hostname
         else:
-            raise ValueError("Invalid hostname from: %s", self.url)
+            raise ValueError("Invalid hostname from: %s" % self.url)
 
         if parsed.port:
             self.port = parsed.port
