@@ -21,12 +21,14 @@ class TestRestKV(unittest.TestCase):
     def setUp(self):
         self.kv = KV(endpoint, appkey)
 
+    @unittest.skip("not implemented yet")
     @given(gen_text(min_size=1), gen_text(min_size=1))
     def test_write_read(self, k, v):
         self.kv.write(k, v)
         v_ = self.kv.read(k)
         self.assertEqual(v, v_)
 
+    @unittest.skip("not implemented yet")
     @given(gen_text(min_size=1), gen_text(min_size=1), gen_text(min_size=1))
     def test_write_write_read(self, k, v1, v2):
         self.kv.write(k, v1)
@@ -34,6 +36,7 @@ class TestRestKV(unittest.TestCase):
         v_ = self.kv.read(k)
         self.assertEqual(v2, v_)
 
+    @unittest.skip("not implemented yet")
     @given(gen_text(min_size=1), gen_text(min_size=1))
     def test_write_delete_read(self, k, v):
         self.kv.write(k, v)
@@ -41,6 +44,7 @@ class TestRestKV(unittest.TestCase):
         v_ = self.kv.read(k)
         self.assertIsNone(v_)
 
+    @unittest.skip("not implemented yet")
     @given(gen_text(min_size=1), gen_text(min_size=1))
     def test_write_read_with_position(self, k, v):
         pw = self.kv.write(k, v)
@@ -48,6 +52,7 @@ class TestRestKV(unittest.TestCase):
         self.assertEqual(v, rbody['message'])
         self.assertEqual(pw, rbody['position'])
 
+    @unittest.skip("not implemented yet")
     @given(gen_text(min_size=1), gen_text(min_size=1))
     def test_write_read_read_with_position(self, k, v):
         self.kv.write(k, v)
