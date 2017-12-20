@@ -25,9 +25,10 @@ def main():
     logging.basicConfig(level=logging.WARNING)
 
     subprocess.check_call(['touch', 'examples/__init__.py'])
+    excludes = [os.path.basename(__file__), '__init__.py', 'rest_api.py']
     for file in os.listdir('examples'):
         if file.endswith('.py') and\
-                file not in [os.path.basename(__file__), '__init__.py']:
+                file not in excludes:
             run_example(
                 os.path.join('examples', file),
                 file in examples_that_must_be_stopped_externally)
