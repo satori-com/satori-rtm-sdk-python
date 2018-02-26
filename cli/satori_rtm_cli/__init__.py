@@ -40,7 +40,7 @@ Usage:
 
 Options:
     -v <verbosity> --verbosity=<verbosity>  # one of 0, 1, 2 or 3, default is 1
-    -e <endpoint> --endpoint=<endpoint>  # default is Open Data endpoint
+    -e <endpoint> --endpoint=<endpoint>  # default is live data endpoint
     -a <appkey> --appkey=<appkey>
     -i <input_file> --input_file=<input_file>
     -o <output_file> --output_file=<output_file>
@@ -59,7 +59,7 @@ Options:
 '''
 
 
-default_endpoint = 'wss://open-data.api.satori.com'
+default_endpoint = 'wss://live-data.api.satori.com'
 
 
 logger = logging.getLogger('satori-rtm-cli')
